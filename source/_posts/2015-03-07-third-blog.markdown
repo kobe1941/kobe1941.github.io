@@ -5,9 +5,8 @@ date: 2015-03-07 15:12:54 +0800
 comments: true
 categories: 
 ---
-##引子
-
-我是一个兵，来自老百姓
+##for example
+i an a soldier,come from LA.
 <!-- more -->
-#什么是博客？
-###我也不知道啊
+#what is blog?
+###i don’t know
