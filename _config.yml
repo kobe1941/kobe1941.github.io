@@ -92,3 +92,7 @@ disqus_show_comment_count: false
 
 # Google Analytics
 google_analytics_tracking_id:
+
+# 多说评论部分
+duoshuo_comments: true
+duoshuo_short_name: kobe1941
