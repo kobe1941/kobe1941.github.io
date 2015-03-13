@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Octopress+github Pages搭建博客"
+title: "基于Octopress搭建博客"
 date: 2015-03-09 14:52:24 +0800
 comments: true
 keywords: Octopress github 搭建博客
@@ -180,10 +180,10 @@ git pull origin master
 
 
 
-###6.在多台电脑上同步写博客
+##6.在多台电脑上同步写博客
 需要注意的是，另一台电脑也要安装git和ruby等环境，但octorepress就不用了，因为会从github上克隆下来。具体请参考[这里](http://boboshone.com/blog/2013/06/05/write-octopress-blog-on-multiple-machines/)。
 
-###7.配置博客
+##7.配置博客
 
 ####7.1 添加Google统计
 
