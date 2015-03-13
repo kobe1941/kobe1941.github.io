@@ -51,7 +51,7 @@ titlecase: true       # Converts page and post titles to titlecase
 
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in /source/_includes/custom/asides/ and add them to the list like 'custom/asides/custom_aside_name.html'
-default_asides: [asides/recent_posts.html, asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]
+default_asides: [asides/recent_posts.html, asides/weibo.html , asides/github.html, asides/delicious.html, asides/pinboard.html, asides/googleplus.html]
 
 # Each layout uses the default asides, but they can have their own asides instead. Simply uncomment the lines below
 # and add an array with the asides you want to use.
@@ -99,3 +99,12 @@ bshare: true
 # 多说评论部分
 duoshuo_comments: true
 duoshuo_short_name: kobe1941
+
+
+# weibo秀
+weibo_uid: 1247589445     # 填入uid  
+weibo_verifier: 42c93d86  # 填入verifier  
+weibo_fansline: 0         # 粉丝显示多少行  
+weibo_show: true          # 是否显示最近微博内容  
+weibo_pic: true          # 是否显示微博中的图片  
+weibo_skin: 4          # 使用哪种配色风格，数字为从1开始的微博秀风格序号 
