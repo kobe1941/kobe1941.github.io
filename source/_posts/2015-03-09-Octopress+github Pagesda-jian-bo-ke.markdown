@@ -137,7 +137,7 @@ git push origin source
 cd octopress
 rake new_post["your title"]
 ```
-这条指令可以新建一条博文。为了使用顺利，新手请暂时不要用中文命名，等流程全部跑通后再解决中文编码的问题。
+这条指令可以新建一条博文。为了使用顺利，新手请暂时不要用中文命名，等流程全部跑通后再解决中文编码的问题(不过我倒是没遇到中文编码的问题，也许是ruby版本比较高的原因罢)。
 以上命令执行后，会再`octopress/source/_posts`目录下生成一个`yyyy-mm-dd-your title.markdown`的文件，用文件编辑器可以编辑，但是不能预览效果。可以使用专用的markdown编辑器来编辑，比如Mou。
 编辑完之后保存，使用指令：
 
@@ -187,7 +187,7 @@ git pull origin master
 
 ####7.1 添加Google统计
 
-①去[这里](http://www.google.com/analytics/)注册Google Analytics账号，如果已有Gmail可以直接该账号登陆。
+①去[这里](http://www.google.com/analytics/)注册Google Analytics账号，如果已有Gmail可以直接使用Gmail账号登陆。
 
 ②按照Google的提示，可以获取一个google_analytics_tracking_id，复制，然后打开本地的_config.yml文件(终端下nano命令可直接打开)，找到google_analytics_tracking_id，在冒号后填入刚刚复制的内容(冒号后记得隔一个空格再填写)。
 
@@ -245,7 +245,7 @@ duoshuo_short_name: yourname
   </section>
 ｛% endif %｝
 ```
-最后创建`source/_includes/post/duoshuo.html`,并填入如下内容:
+最后新建`source/_includes/post/duoshuo.html`文件,并填入如下内容:
 
 	<!-- Duoshuo Comment BEGIN -->
 	<div class="ds-thread"></div>
@@ -277,8 +277,7 @@ bshare: true
 	
 	<div class="bshare-custom"><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
 	
-
-简直爽哭了。个社交网站的分享位置是可以调整的，直接调整上述代码顺序即可。
+而且社交网站的分享位置是可以调整的，比如把微博分享的符号放在qq空间前面，直接调整上述代码顺序即可。简直爽哭了有没有！
 
 ###Good Luck!
 
