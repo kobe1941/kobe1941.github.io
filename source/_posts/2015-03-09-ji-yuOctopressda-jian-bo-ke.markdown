@@ -17,7 +17,7 @@ git version
 ```
 可以查看当前git的版本号，一般说来确定本机安装了git就可以了。
 
-然后安装ruby，因为Octopress是用ruby写的，所该该框架是必须的。
+然后安装ruby，因为Octopress是用ruby语言写的，所该该框架是必须的。
 具体过程为：
 
 ```
@@ -47,8 +47,8 @@ rvm install 2.0.0
 rvm 2.0.0
 rvm rubygems latest
 ```
-2.0.0表示安装的ruby的版本，Octopress需要1.9.3以上，你也可以试着用其他的版本，只要大于等于1.9.3即可
-安装好之后可以执行
+2.0.0表示安装的ruby的版本，Octopress需要1.9.3以上，你也可以试着用其他的版本，只要大于等于1.9.3即可。安装好之后可以执行：
+
 ```
 ruby --version
 ```
@@ -95,7 +95,7 @@ ssh-keygen
 ```
 然后在隐藏的.ssh/目录下会生成两个文件：`id_rsa和id_rsa.pub`。
 
-.pub的文件是公钥，另一个是私钥，加密用的。用文本编辑打开，可复制里边的内容，然后去github上的设置栏/SSH添加一个公钥(请把.pub文件里的内容复制到内容的栏目，切勿复制到title栏目上)，以后你的同步和上传博客操作就不需要输入github的密码啦。
+.pub的文件是公钥，另一个是私钥，加密用的。用文本编辑打开公钥，可复制里边的内容，然后去github上的设置栏/SSH添加一个公钥(请把.pub文件里的内容复制到内容的栏目，切勿复制到title栏目上)，以后你的同步和上传博客操作就不需要输入github的密码啦。
 
 另Mac下显示隐藏文件的命令为：
 
@@ -128,7 +128,7 @@ git add .
 git commit -m"你的提交内容"
 git push origin source
 ```
-请注意，搭建该博客系统的过程中，github的仓库会有两个branch分支，一个是master，一个是source，我们写博客发博文的操作都再source分支下即可。source分支是存放博客源文件用的，master是存放部署好的静态页面给其他用户用浏览器访问用的。
+请注意，搭建该博客系统的过程中，github的仓库会有两个分支，一个是master，一个是source，我们写博客发博文的操作都在source分支下即可。source分支是存放博客源文件用的，master是存放部署好的静态页面给其他用户用浏览器访问用的。
 
 ##5.发布新的博文
 打开终端，输入：
@@ -138,7 +138,7 @@ cd octopress
 rake new_post["your title"]
 ```
 这条指令可以新建一条博文。为了使用顺利，新手请暂时不要用中文命名，等流程全部跑通后再解决中文编码的问题(不过我倒是没遇到中文编码的问题，也许是ruby版本比较高的原因罢)。
-以上命令执行后，会再`octopress/source/_posts`目录下生成一个`yyyy-mm-dd-your title.markdown`的文件，用文件编辑器可以编辑，但是不能预览效果。可以使用专用的markdown编辑器来编辑，比如Mou。
+以上命令执行后，会再`octopress/source/_posts`目录下生成一个`yyyy-mm-dd-your title.markdown`的文件，用文件编辑器可以编辑，但是不能预览效果。可以使用专用的markdown编辑器来编辑，比如[Mou](http://25.io/mou/)。
 编辑完之后保存，使用指令：
 
 ```
@@ -181,7 +181,7 @@ git pull origin master
 
 
 ##6.在多台电脑上同步写博客
-需要注意的是，另一台电脑也要安装git和ruby等环境，但octorepress就不用了，因为会从github上克隆下来。具体请参考[这里](http://boboshone.com/blog/2013/06/05/write-octopress-blog-on-multiple-machines/)。
+需要注意的是，另一台电脑也要安装git和ruby等环境，但Octorepress就不用了，因为会从github上克隆下来。具体请参考[这里](http://boboshone.com/blog/2013/06/05/write-octopress-blog-on-multiple-machines/)。
 
 ##7.配置博客
 
@@ -189,7 +189,7 @@ git pull origin master
 
 ①去[这里](http://www.google.com/analytics/)注册Google Analytics账号，如果已有Gmail可以直接使用Gmail账号登陆。
 
-②按照Google的提示，可以获取一个google_analytics_tracking_id，复制，然后打开本地的_config.yml文件(终端下nano命令可直接打开)，找到google_analytics_tracking_id，在冒号后填入刚刚复制的内容(冒号后记得隔一个空格再填写)。
+②按照Google的提示，可以获取一个google_analytics_tracking_id，复制此id，然后打开本地的_config.yml文件(终端下nano命令可直接打开)，找到google_analytics_tracking_id，在冒号后填入刚刚复制的内容(冒号后记得隔一个空格再填写)。
 
 ③按照Google的提示，对该博客网站进行验证。只需要将Google提供的用于验证的代码添加到`source/_includes/head.html`文件的一对`<head></head>`之间即可。部署之后一段时间就能通过验证。
 之后在[这里](https://www.google.com/analytics/web/?hl=zh-CN&pli=1#report/visitors-overview/a60680038w95181548p99221362/%3Foverview-graphOptions.primaryConcept%3Danalytics.pageviews/)即可看到你博客的访问信息了，统计还蛮全面的，除了访问量这个数字其他也暂时不知道有啥用。
@@ -218,7 +218,7 @@ git pull origin master
 
 
 ####7.3 导航栏添加栏目并制定跳转链接
-默认的导航栏直接Blog和Archives两个选项，本博客就添加了一个我的豆瓣栏目，具体可以编辑文件`source/_includes/custom/navigation.html`，仿照加一段代码即可:
+默认的导航栏只有Blog和Archives两个选项，本博客就添加了一个我的豆瓣栏目，具体可以编辑文件`source/_includes/custom/navigation.html`，仿照加一段代码即可:
 
 ```
   <li><a href="http://www.douban.com/people/你的豆瓣id/">我的豆瓣</a></li>
@@ -262,12 +262,12 @@ duoshuo_short_name: yourname
 	</script>
 	<!-- Duoshuo Comment END -->
 
-将上述内容总的`your_name`用你的short_name替换。
+将上述内容中的`your_name`用你的short_name替换。
 
 
 
 ####7.5 添加社会化分享 
-采用bshare,在`_config.yml`中增加
+本博客采用bshare,在`_config.yml`中增加
 
 ```
 bshare: true
