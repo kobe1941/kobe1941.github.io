@@ -4,7 +4,7 @@ title: "git使用总结"
 date: 2015-03-21 11:19:25 +0800
 comments: true
 keywords: git 总结
-categories:
+categories: iOS开发
 ---
 ##本文只是一些个人使用上的总结,命令操作平台为Mac的终端.
 

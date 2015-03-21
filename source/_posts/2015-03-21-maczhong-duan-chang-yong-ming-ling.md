@@ -4,7 +4,7 @@ title: "Mac终端常用命令"
 date: 2015-03-21 13:04:34 +0800
 comments: true
 keywords: Mac 终端 命令
-categories: 
+categories: iOS开发
 ---
 本文介绍Mac下终端的常用命令操作.
 <!-- more -->

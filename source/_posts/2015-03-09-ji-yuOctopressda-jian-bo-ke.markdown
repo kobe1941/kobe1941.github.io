@@ -4,7 +4,7 @@ title: "基于Octopress搭建博客"
 date: 2015-03-09 14:52:24 +0800
 comments: true
 keywords: Octopress github 搭建博客
-categories: 
+categories: iOS开发
 ---
 ##本文介绍在Mac下利用Octopress和Github Pages搭建个人博客的流程
 
