@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "iOS开发中小技巧汇总"
+title: "iOS开发小技巧汇总"
 date: 2015-03-22 18:12:04 +0800
 comments: true
 keywords: iOS开发 技巧 汇总
