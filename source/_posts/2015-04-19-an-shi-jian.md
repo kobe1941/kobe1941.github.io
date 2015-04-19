@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "《暗时间》"
+title: "暗时间"
 date: 2015-04-19 16:45:10 +0800
 comments: true
 categories: 非技术类读书笔记
