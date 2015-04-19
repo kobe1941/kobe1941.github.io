@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "进化心理学"
+title: "《进化心理学》"
 date: 2015-04-19 22:33:31 +0800
 comments: true
 categories: 非技术类读书笔记
