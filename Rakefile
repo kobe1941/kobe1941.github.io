@@ -269,9 +269,8 @@ multitask :push do
     puts "\n## Pushing generated #{deploy_dir} website"
     Bundler.with_clean_env { system "git push origin #{deploy_branch}" }
     puts "\n## Github Pages deploy complete"
-    puts "\n## Pushing generated #{deploy_dir} website" # 此行为新增代码
-    Bundler.with_clean_env { system "git push gitcafe #{deploy_branch}:gitcafe-pages" } # 此行为新增代码
-    puts "\n## GitCafe Pages deploy complete" # 此行为新增代码
+    system "git remote add gitcafe git@gitcafe.com:tangqiaoboy/tangqiaoboy.git >> /dev/null 2>&1"
+    system "git push -u gitcafe master:gitcafe-pages"
   end
 end
 
