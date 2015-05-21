@@ -47,6 +47,13 @@ git remote add origin git://github.com/someone/another_project.git
 
 合并分支:`git merge name`将名称为`name`的分支与当前分支合并，是合并到当前分支，而不是合并到`name`分支。要注意的合并前先使用`git branch`查看下当前所处的分支。
 
+可以在后面加参数，比如我要把`issue340`分支合并到`dev`分支，可以先`checkout`到`dev`分支并使用以下命令：
+
+```
+git merge issue340 -n --ff
+
+```
+
 创建远程分支(本地分支push到远程):`git push origin name`
 
 删除远程分支:`git push origin :heads/name` 或 `git push origin : name`。
