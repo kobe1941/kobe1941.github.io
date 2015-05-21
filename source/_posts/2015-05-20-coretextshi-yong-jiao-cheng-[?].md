@@ -16,6 +16,16 @@ description:
 
 学习CoreText需要有一些基础知识储备，关于字符和字形的知识请点击[这里](http://geeklu.com/2013/03/core-text/)以及[这里](http://www.brighttj.com/ios/use-coretext-make-typesetting-picture-and-text.html)。另外还需要对NSAttributedString有一些了解，CoreText对文本和图片的绘制就是依赖于NSAttributedString`属性字符串`的。
 
+说下CoreText的绘制过程，先上一张图片：
+
+![](/images/2015/05/20/CoreText_2.png)
+
+整个流程大概是：获取上下文-》翻转坐标系-》创建绘制区域CGPathRef-》创建NSAttributedString-》根据NSAttributedString创建CTFramesetterRef-》根据CTFramesetterRef和CGPathRef创建CTFrame-》CTFrameDraw绘制。
+
+上图大概显示了后半部分的结构。
+CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行，CTRun则是每一段具有一样属性的字符串。比如某段字体大小、颜色都一致的字符串为一个CTRun，CTRun可以跨行，只要属性一致即可。
+
+
 本次纯文本实现的效果图如下：
 
 ![](/images/2015/05/20/CoreText_1.png)
@@ -101,6 +111,7 @@ description:
     CTFrameDraw(ctFrame, contextRef);
 
 
+	// 7.内存管理，ARC不能管理CF开头的对象，需要我们自己手动释放内存
 	CFRelease(path);
     CFRelease(framesetter);
     CFRelease(ctFrame);
