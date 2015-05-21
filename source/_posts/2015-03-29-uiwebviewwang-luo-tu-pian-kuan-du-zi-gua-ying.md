@@ -13,9 +13,12 @@ keywords: UIWebView 图片 宽度自适应
 该方案适用于纯图片介绍商品详情，让图片自适应屏幕宽度。
 
 ###1.首先设置网页宽度自适应屏幕，并避免其滚动：
-```
+
+``` Objective-c
+
    _webView.scalesPageToFit = YES; // 宽度自适应
    _webView.scrollView.scrollEnabled = NO; // 禁止滚动
+   
 ```
 
 ###2.其次，拿到html字符串之后，拼接一串处理的html代码即可：

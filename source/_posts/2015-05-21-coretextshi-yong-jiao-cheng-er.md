@@ -33,7 +33,8 @@ CoreText从绘制纯文本到绘制图片，依然是使用NSAttributedString，
 
 图片的代理方法：
 
-```
+``` Objective-C
+
 #pragma mark 图片代理
 void RunDelegateDeallocCallback(void *refCon)
 {

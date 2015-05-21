@@ -32,7 +32,7 @@ CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行�
 
 控制器的代码处理很简单，UIView子控件的drawRect的代码如下：
 
-```
+``` Objective-C
 
 - (void)drawRect:(CGRect)rect
 {
