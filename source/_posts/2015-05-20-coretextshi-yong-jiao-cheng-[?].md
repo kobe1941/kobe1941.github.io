@@ -121,3 +121,10 @@ CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行�
 ```
 
 在整个绘制过程中，NSMutableAttributedString是最重要的，给字符串设定不同的字体大小，颜色，乃至行距都是靠它，包括后面用空白占位符来给图片占位，也依然是依赖该字符串。
+
+
+参考链接：
+
+1.[Core Text 入门](http://geeklu.com/2013/03/core-text/)
+
+2.[使用CoreText实现图文混排](http://www.brighttj.com/ios/use-coretext-make-typesetting-picture-and-text.html)
