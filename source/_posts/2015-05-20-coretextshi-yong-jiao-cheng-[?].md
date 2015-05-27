@@ -8,9 +8,21 @@ keywords: CoreText
 description: 
 ---
 
-本次CoreText教程为一个系列，涵盖的内容从最初的纯文本绘制，到图文混排，监听点击，识别特定文字点击和图片点击。
+本次CoreText教程为一个系列，大概总共分4-5篇博文来叙述，内容分布为：
 
-本篇教程为第一步，仅实现在一个UIView的子控件上绘制纯文本。
+第一篇介绍CoreText的一些基础知识和绘制流程，仅绘制纯文本内容，且不去讲究排版的细节，先画出来为主。
+
+第二篇进行图文混排，有本地图片和网络图片两种形式，文本部分保持跟第一篇博文一致。
+
+第三篇仔细探究纯文本的排版，包括中文，英文，数字和表情。对齐与不对齐的文本排版区别。
+
+第四篇讨论文本字符行数超过可以显示的行数时，在最后加省略号的问题。
+
+第五篇介绍使用正则表达式识别人名、电话，对用户点击人名、电话做出响应。
+
+对图片点击的识别，其实原理差不多，《iOS开发进阶》里边讲的更清楚。
+
+本篇教程为第一篇，仅实现在一个UIView的子控件上绘制纯文本。
 
 <!--more-->
 
@@ -20,7 +32,7 @@ description:
 
 ![](/images/2015/05/20/CoreText_2.png)
 
-整个流程大概是：获取上下文-》翻转坐标系-》创建绘制区域CGPathRef-》创建NSAttributedString-》根据NSAttributedString创建CTFramesetterRef-》根据CTFramesetterRef和CGPathRef创建CTFrame-》CTFrameDraw绘制。
+整个流程大概是：获取上下文-》翻转坐标系-》创建NSAttributedString-》根据NSAttributedString创建CTFramesetterRef-》创建绘制区域CGPathRef-》根据CTFramesetterRef和CGPathRef创建CTFrame-》CTFrameDraw绘制。
 
 上图大概显示了后半部分的结构。
 CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行，CTRun则是每一段具有一样属性的字符串。比如某段字体大小、颜色都一致的字符串为一个CTRun，CTRun可以跨行，只要属性一致即可。
