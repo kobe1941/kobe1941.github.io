@@ -41,6 +41,9 @@ git remote add origin git://github.com/someone/another_project.git
 
 切换分支:`git checkout name`
 
+这里需要注意的一点就是，如果是要同步远程的分支（比如同事建立了新的分支，以保证针对某个版本的修改在该分支下），请不要在本地新建一个跟远端同名的分支，也就是说不要使用`git branch name`这个命令，而是直接使用`git checkout name`命令把远端的分支拉下来即可。以避免把新的代码合并到旧的分支里。
+
+
 创建新分支并立即切换到新分支:`git checkout -b name`
 
 删除分支:`git branch -d name`,`-d`选项只能删除已经参与了合并的分支，对于未有合并的分支是无法删除的。如果想强制删除一个分支，可以使用`-D`选项
