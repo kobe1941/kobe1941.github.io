@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "CoreText使用教程四"
+title: "CoreText使用教程(四)"
 date: 2015-05-30 21:37:21 +0800
 comments: true
 categories: iOS开发
