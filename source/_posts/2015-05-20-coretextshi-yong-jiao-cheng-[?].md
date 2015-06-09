@@ -35,7 +35,7 @@ description:
 整个流程大概是：获取上下文-》翻转坐标系-》创建NSAttributedString-》根据NSAttributedString创建CTFramesetterRef-》创建绘制区域CGPathRef-》根据CTFramesetterRef和CGPathRef创建CTFrame-》CTFrameDraw绘制。
 
 上图大概显示了后半部分的结构。
-CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行，CTRun则是每一段具有一样属性的字符串。比如某段字体大小、颜色都一致的字符串为一个CTRun，CTRun可以跨行，只要属性一致即可。
+CTFrame是指整个该UIView子控件的绘制区域，CTLine则是指每一行，CTRun则是每一段具有一样属性的字符串。比如某段字体大小、颜色都一致的字符串为一个CTRun，CTRun不可以跨行，不管属性一致或不一致。通常的结构是每一个CTFrame有多个CTLine，每一个CTLine有多个CTRun。
 
 
 本次纯文本实现的效果图如下：
