@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "活出最乐观的自己"
+title: "《活出最乐观的自己》"
 date: 2015-06-15 19:53:17 +0800
 comments: true
 categories: 
