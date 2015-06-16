@@ -3,8 +3,8 @@ layout: post
 title: "《活出最乐观的自己》"
 date: 2015-06-15 19:53:17 +0800
 comments: true
-categories: 
-keywords:   
+categories: 非技术类读书笔记
+keywords: 积极心理学 心理学  
 description: 
 ---
 
