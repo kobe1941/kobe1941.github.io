@@ -57,6 +57,8 @@ git merge issue340 -n --ff
 
 ```
 
+后面的参数`-n --ff`据说是为了分支合并时更快速直接？具体还有待研究。
+
 创建远程分支(本地分支push到远程):`git push origin name`
 
 删除远程分支:`git push origin :heads/name` 或 `git push origin : name`。
@@ -122,15 +124,18 @@ git log
 这里要注意的是，git会回滚到你最近一次提交的`commit_id`之后的版本，而不是`commit_id`之前的版本。在本次操作中，由于队友都没有更新，只需要找到当前提交的上一次的`commit_id`即可。比如今天是3月21日，你提交了错误的代码到服务器，服务端在之前3月20日有一次更新，那你找到3月20日的`commit_id`即可。
 
 第二种情况是，如果你提交了错误代码后队友也有新的提交，直接版本回退会把队友新提交的代码也搞没了，这时候如果你改动的文件不多的话，可以使用单个文件回滚的方式：
+
 1)执行`git log test.h`查看该文件的提交记录，找到需要回滚的commit版本，复制版本号。
-2)执行`git reset “commit版本号” test.h`
+
+2)执行`git reset “commit版本号” test.h`。
+
 3)继续执行`git checkout test.h`，文件回滚成功。
 
 需要注意的是，如果文件在比较深的目录下，上述操作室需要输入目录结构的，比如`git log aaa/bbb/test.h`。
 
 ##其他
 
-1.提交代码的通常步骤`git status`查看当前状态，有改动则使用`git add.`把所有改动添加到本地仓库or暂存区？然后`git commit -m"your commit message"`后，先`it pull`拉下服务器的最新代码，确认没有问题后可以`git push`提交代码。
+1.提交代码的通常步骤`git status`查看当前状态，有改动则使用`git add.`把所有改动添加到本地仓库or暂存区(有待研究)？然后`git commit -m"your commit message"`后，先`git pull`拉下服务器的最新代码，确认没有问题后可以`git push`提交代码。
 
 2.`git pull`之后，或者进入其他界面，都可使用`:wq`退回到git的操作界面
 
