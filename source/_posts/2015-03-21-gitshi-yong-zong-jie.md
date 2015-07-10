@@ -30,7 +30,7 @@ git remote add origin git://github.com/someone/another_project.git
 上面的命令就会增加该URL地址且名称为`origin`的远程服务器。以后提交的代码只需要使用`origin`这个别名即可。
 
 
-##2.分支操作
+##2.1分支操作
 查看本地分支:`git branch`
 
 查看远程分支:`git branch -r`
@@ -59,11 +59,66 @@ git merge issue340 -n --ff
 
 后面的参数`-n --ff`据说是为了分支合并时更快速直接？具体还有待研究。
 
+重命名分支：
+
+`git branch –m oldname newname`
+
+`-m`不会覆盖已有分支名称，即如果名为newname的分支已经存在，则会提示已经存在了。
+
+如果改成`-M`就可以覆盖已有分支名称了，即会强制覆盖名为newname的分支，这种操作要谨慎。
+
 创建远程分支(本地分支push到远程):`git push origin name`
 
 删除远程分支:`git push origin :heads/name` 或 `git push origin : name`。
 
 ####这里需要注意的是，在开发新功能、测试或者重构部分代码时，最好是新建一条分支来操作，测试新功能OK后再合并回主分支，以避免干扰到主分支。
+
+##2.2合并分支
+
+注意没参数的情况下merge是fast-forward的，即Git将master分支的指针直接移到dev的最前方。
+换句话说，如果顺着一个分支走下去可以到达另一个分支的话，那么Git在合并两者时，只会简单移动指针，所以这种合并成为快进式(Fast-forward)。
+
+介绍两个合并分支时常用的指令
+
+1.`--squash`
+
+将一条分支上的若干个提交条目压合成一个提交条目，提交到另一条分支的末梢。此时，dev上的所有提交已经合并到当前工作区并暂存，但还没有作为一个提交，可以像其他提交一样，把这个改动提交到版本库中：
+
+`git commit –m “something from dev”`
+
+
+`--squash`指令含义是：本地文件内容与不使用该选项的合并结果相同，但是不提交、不移动HEAD，因此需要一条额外的commit命令。其效果相当于将another分支上的多个commit合并成一个，放在当前分支上，原来的commit历史则没有拿过来。
+
+
+判断是否使用`--squash`选项最根本的标准是，待合并分支上的历史是否有意义。
+
+如果在开发分支上提交非常随意，甚至写成微博体，那么一定要使用`--squash`选项。版本历史记录的应该是代码的发展，而不是开发者在编码时的活动。
+
+
+2.`—no-ff`
+
+`--no-ff`指的是强行关闭fast-forward方式。
+
+fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit.
+
+`git merge --squash branch` 是用来把一些不必要commit进行压缩，比如说，你的feature在开发的时候写的commit很乱，那么我们合并的时候不希望把这些历史commit带过来，于是使用--squash进行合并，此时文件已经同合并后一样了，但不移动HEAD，不提交。需要进行一次额外的commit来“总结”一下，然后完成最终的合并。
+
+
+总结：
+
+`--no-ff`：不使用fast-forward方式合并，保留分支的commit历史
+`--squash`：使用squash方式合并，把多次分支commit历史压缩为一次
+
+
+合并分支时，加上`--no-ff`参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。示意图如下：
+
+
+![](/images/2015/other/branch_1.png)   
+
+![](/images/2015/other/branch_2.png)
+
+
+
 
 
 
