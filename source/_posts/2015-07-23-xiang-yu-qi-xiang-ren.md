@@ -3,7 +3,7 @@ layout: post
 title: "《象与骑象人》"
 date: 2015-07-23 22:51:41 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 心理学 积极心理学 象与骑象人  
 description: 
 ---

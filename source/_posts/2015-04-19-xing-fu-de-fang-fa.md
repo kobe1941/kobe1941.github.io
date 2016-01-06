@@ -3,8 +3,8 @@ layout: post
 title: "《幸福的方法》"
 date: 2015-04-19 23:13:17 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords: 
+categories: 读书笔记
+keywords: 幸福 哈佛幸福课 泰勒沙哈尔
 ---
 本书为[哈佛积极心理学](http://v.163.com/special/positivepsychology/)课程讲师的著作。
 

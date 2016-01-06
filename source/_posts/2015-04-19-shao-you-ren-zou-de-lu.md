@@ -3,7 +3,7 @@ layout: post
 title: "《少有人走的路》"
 date: 2015-04-19 23:04:29 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 少有人走的路 心理学 自愈
 ---
 ###我们长期以来的想法和感受，有一天，将会被某个陌生人一语道破。

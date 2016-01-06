@@ -3,7 +3,7 @@ layout: post
 title: "《你的生命有什么可能》"
 date: 2015-09-13 10:14:11 +0800
 comments: true
-categories: 非技术类读书笔记 
+categories: 读书笔记 
 keywords: 职业规划 生涯规划 古典 你的生命有什么可能
 description: 
 ---

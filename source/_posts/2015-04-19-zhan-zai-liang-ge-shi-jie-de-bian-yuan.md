@@ -3,8 +3,8 @@ layout: post
 title: "《站在两个世界的边缘》"
 date: 2015-04-19 23:01:43 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords: 
+categories: 读书笔记
+keywords: 程浩 伯爵在城堡
 ---
 
 生命之残酷，在于其短暂。生命之可贵，亦在于其短暂。

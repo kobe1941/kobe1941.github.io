@@ -3,9 +3,8 @@ layout: post
 title: "《自私的基因》"
 date: 2015-05-17 16:24:32 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 心理学 自私的基因
-description: 
 ---
 
 本书的主要观点基于达尔文的进化论和自然选择，作者提出在进化中被自然选择的基本单位不是个体，而是基因。

@@ -3,8 +3,8 @@ layout: post
 title: "《爱的艺术》"
 date: 2015-04-19 23:08:36 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords: 
+categories: 读书笔记
+keywords: 爱的艺术 弗洛姆
 ---
 爱是一种能力，爱是一种艺术，爱是....
 

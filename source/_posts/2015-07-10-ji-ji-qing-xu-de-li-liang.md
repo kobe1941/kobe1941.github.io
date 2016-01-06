@@ -3,7 +3,7 @@ layout: post
 title: "《积极情绪的力量》"
 date: 2015-07-10 23:23:09 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 积极心理学 心理学 芭芭拉*弗雷德里克森
 description: 
 ---

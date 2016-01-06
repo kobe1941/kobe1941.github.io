@@ -3,7 +3,7 @@ layout: post
 title: "《人性的弱点》"
 date: 2015-04-19 18:29:16 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 读书笔记 人性的弱点 卡耐基   
 ---
 

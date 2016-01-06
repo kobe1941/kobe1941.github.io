@@ -3,8 +3,8 @@ layout: post
 title: "《浪潮之巅》"
 date: 2015-04-19 22:20:37 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords:  
+categories: 读书笔记
+keywords: 吴军 IT 浪潮之巅 
 ---
 
 [《浪潮之巅》](http://book.douban.com/subject/24738302/)是[吴军](http://www.weibo.com/u/2887339314?topnav=1&wvr=6&topsug=1)老师的一本神书，对IT企业的发展历史和未来发展趋势有独到的见解，给人一种醍醐灌顶的感觉。强烈推荐！

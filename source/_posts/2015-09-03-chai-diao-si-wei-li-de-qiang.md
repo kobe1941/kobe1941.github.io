@@ -3,7 +3,7 @@ layout: post
 title: "《拆掉思维里的墙》"
 date: 2015-09-03 17:41:07 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 拆掉思维里的墙 古典 职业规划 职业生涯
 description: 
 ---

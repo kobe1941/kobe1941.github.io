@@ -3,7 +3,7 @@ layout: post
 title: "《幸福超越完美》"
 date: 2015-07-04 14:21:37 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 积极心理学 心理学 幸福   
 description: 
 ---

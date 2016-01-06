@@ -4,7 +4,7 @@ title: "写在切入互联网一周年"
 date: 2015-04-30 22:23:11 +0800
 comments: true
 categories: 个人总结 
-keywords: 
+keywords: 互联网 转行 程序员
 ---
 
 

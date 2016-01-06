@@ -3,7 +3,7 @@ layout: post
 title: "《人生定位》"
 date: 2015-08-28 20:52:14 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 人生定位 特劳特 职业规划
 description: 
 ---

@@ -3,8 +3,8 @@ layout: post
 title: "《真实的幸福》"
 date: 2015-04-19 22:55:42 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords: 
+categories: 读书笔记
+keywords: 积极心理学 马丁塞利格曼 哈佛幸福课
 ---
 本书是积极心理学之父马丁塞利格曼非常有名的一本著作，对于“幸福”的探究较为深入。
 

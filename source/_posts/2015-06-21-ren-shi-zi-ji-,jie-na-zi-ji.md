@@ -3,7 +3,7 @@ layout: post
 title: "《认识自己，接纳自己》"
 date: 2015-06-21 09:34:06 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 心理学 马丁塞利格曼 积极心理学
 description: 
 ---

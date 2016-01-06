@@ -3,7 +3,7 @@ layout: post
 title: "《暗时间》"
 date: 2015-04-19 16:45:10 +0800
 comments: true
-categories: 非技术类读书笔记
+categories: 读书笔记
 keywords: 读书笔记 暗时间 学习 效率
 ---
 

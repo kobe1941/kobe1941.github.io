@@ -3,8 +3,8 @@ layout: post
 title: "《持续的幸福》"
 date: 2015-06-12 07:37:57 +0800
 comments: true
-categories: 非技术类读书笔记
-keywords: 积极心理学 幸福 持续的幸福   
+categories: 读书笔记
+keywords: 积极心理学 幸福 持续的幸福 马丁塞利格曼 
 description: 
 ---
 
