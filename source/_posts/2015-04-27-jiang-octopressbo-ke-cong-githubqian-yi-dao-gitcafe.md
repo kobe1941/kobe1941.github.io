@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "将Octopress博客从Github迁移到Gitcafe"
+title: "将Octopress博客从Github迁移到Gitcafe或coding"
 date: 2015-04-27 21:31:02 +0800
 comments: true
 categories: iOS开发
-keywords: Octopress github gitcafe   
+keywords: Octopress github gitcafe coding
 ---
 
 本文记录了将基于octopress 和github pages搭建的博客迁移到国内代码托管服务商gitcafe的过程。
@@ -13,6 +13,8 @@ keywords: Octopress github gitcafe
 将博客放在github上虽然很方便，也很有Geek的格调，但是很不爽的就是，github这个网站访问很慢，导致我们的博客访问也很慢，我测试的时候发现开机后第一次加载的话花个30秒是正常的，第二次以后访问会好一些，但相比国内的网站还是很慢。故有了这次博客迁移之旅。
 
 本博客迁移的过程并不轻松，经过跟gitcafe工程师十几封邮件后的沟通后才算完全搞掂。
+
+补充：由于gitcafe即将关闭服务，所以又把博客迁移到了coding.net。具体迁移方式跟迁移到gitcafe大致一致，下文有标注。
 
 <!--more-->
 
@@ -41,6 +43,8 @@ git remote add gitcafe git@gitcafe.com:username/username.git
 
 将上述的username用你的gitcafe用户名替换掉。
 
+补充：迁移到coding也是类似的方式，不过之前的remote指向gitcafe，删掉再重新添加remote到coding即可，具体coding的pages功能页有教程。添加公钥什么的也是类似。
+
 5.修改Rakefile，以实现发布到github的时候，也顺便备份一次到gitcafe的服务器。
 只需要在第269行增加如下代码：
 
@@ -49,6 +53,15 @@ system "git remote add gitcafe git@gitcafe.com:username/username.git >> /dev/nul
 system "git push -u gitcafe master:gitcafe-pages"
 ```
 将上述的username用你的用户名替换掉。
+
+补充：如果是博客迁移到coding的，就按照下面的方式来更改，其实是一样的。需要注意的一点是，按照coding上的教程，新建了一个coding-pages 的分支用来做为博客的备份分支。注意该分支也是在_deploy目录下的git仓库建立的啊，不要傻傻的跑去octopress目录下的那个仓库。
+
+```
+system "git remote add git@git.coding.net:username/username.git >> /dev/nul$
+system "git push -u origin coding-pages"
+```
+
+
 
 具体添加的位置请看[这里](http://blog.devtang.com/blog/2014/06/02/use-gitcafe-to-host-blog/);
 
@@ -61,7 +74,11 @@ puts "\n## add your message"
 
 到这里，配置博客部分就完成了，`rake gen_deploy`操作可以推送博客内容到gitcafe和github两个地方了。
 
+补充：以上改好以后，`rake gen_deploy` 就可以推送博客内容到coding和github两个地方了。
+
 6.修改域名指向。
+
+补充：coding的pages服务，也是要先去pages服务的栏目添加域名绑定，然后去godaddy将域名指向为`pages.coding.me` 即可。
 
 如果你之前只是使用`username.github.io`这样的域名来访问博客的话，这一步可以跳过，直接去测试`username.gitcafe.io`即可。
 

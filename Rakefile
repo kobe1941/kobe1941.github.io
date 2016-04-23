@@ -271,7 +271,7 @@ multitask :push do
     puts "\n## Github Pages deploy complete"
     puts "\n## Push to Coding..."
     system "git remote add git@git.coding.net:fenng_hu/fenng_hu.git >> /dev/null 2>&1"
-    system "git push -u origin master"
+    system "git push -u origin coding-pages"
     puts "\n## Push to Coding pages complete"
   end
 end
