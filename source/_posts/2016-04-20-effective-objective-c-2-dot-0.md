@@ -3,7 +3,7 @@ layout: post
 title: "《Effective Objective-C 2.0》"
 date: 2016-04-20 23:14:27 +0800
 comments: true
-categories: 读书笔记
+categories: 读书笔记 iOS开发
 keywords: Objective-C iOS开发 Effective Objective-C 2.0 
 description: 
 ---
