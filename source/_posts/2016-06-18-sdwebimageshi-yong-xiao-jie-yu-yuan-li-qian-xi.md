@@ -167,6 +167,71 @@ SD的源码中主要是有以下几个影响：
 
 ![](/images/2016/06/27.png)
 
+另SD的对图片的回调有UIImage和NSData两个参数，也就是说，UIImage是解码之后的图片，但是格式为NSData的imageData却是下载下来的图片原始数据。但是由于作者对方法封装的原因，使用`SDWebImageManager`的回调确实没有imageData的:
+
+```
+typedef void(^SDWebImageCompletionWithFinishedBlock)(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL);
+```
+
+而使用`SDWebImageDownloader`的回调block是有NSData的参数回调的：
+
+```
+typedef void(^SDWebImageDownloaderCompletedBlock)(UIImage *image, NSData *data, NSError *error, BOOL finished);
+```
+
+SD存磁盘其实是拿图片的NSData的数据去存储的，并没有直接把解码的UIImage图片拿去存盘，所以在读磁盘文件时才需要先解码再返回了，代码见下方：
+
+```
+if (downloadedImage && finished) {
+	[self.imageCache storeImage:downloadedImage recalculateFromImage:NO imageData:data forKey:key toDisk:cacheOnDisk];
+}
+```
+
+注意此处的参数，中间的BOOL值是NO，所以在缓存的类`SDImageCache`里是这么处理的：
+
+```
+    if (toDisk) {
+        dispatch_async(self.ioQueue, ^{
+            NSData *data = imageData;
+
+            if (image && (recalculate || !data)) {
+#if TARGET_OS_IPHONE
+                // We need to determine if the image is a PNG or a JPEG
+                // PNGs are easier to detect because they have a unique signature (http://www.w3.org/TR/PNG-Structure.html)
+                // The first eight bytes of a PNG file always contain the following (decimal) values:
+                // 137 80 78 71 13 10 26 10
+
+                // If the imageData is nil (i.e. if trying to save a UIImage directly or the image was transformed on download)
+                // and the image has an alpha channel, we will consider it PNG to avoid losing the transparency
+                int alphaInfo = CGImageGetAlphaInfo(image.CGImage);
+                BOOL hasAlpha = !(alphaInfo == kCGImageAlphaNone ||
+                                  alphaInfo == kCGImageAlphaNoneSkipFirst ||
+                                  alphaInfo == kCGImageAlphaNoneSkipLast);
+                BOOL imageIsPng = hasAlpha;
+
+                // But if we have an image data, we will look at the preffix
+                if ([imageData length] >= [kPNGSignatureData length]) {
+                    imageIsPng = ImageDataHasPNGPreffix(imageData);
+                }
+
+                if (imageIsPng) {
+                    data = UIImagePNGRepresentation(image);
+                }
+                else {
+                    data = UIImageJPEGRepresentation(image, (CGFloat)1.0);
+                }
+#else
+                data = [NSBitmapImageRep representationOfImageRepsInArray:image.representations usingType: NSJPEGFileType properties:nil];
+#endif
+            }
+
+            [self storeImageDataToDisk:data forKey:key];
+        });
+    }
+```
+此处的代码由于recalculate这个值为NO，故会直接跳过中间的if语句，把data拿去执行写磁盘的操作，否则的话写磁盘的图片文件就也是解码过后的了，那么磁盘文件的大小也就不再可靠了。
+
+
 后记：
 
 关于SD的缓存方式，AFNetworking的作者曾经吐槽过。
