@@ -39,7 +39,7 @@ description:
 
 本书有助于第③和第④阶段的过渡和生活。
 
-在阅读本书之前，先看看知乎的这个回答，https://www.zhihu.com/question/20886467/answer/33824906，对于理解本书也许会有所帮助。
+在阅读本书之前，先看看知乎的[这个回答](https://www.zhihu.com/question/20886467/answer/33824906)，对于理解本书也许会有所帮助。
 
 <!--more-->
 
