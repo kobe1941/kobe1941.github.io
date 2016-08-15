@@ -186,16 +186,16 @@ git pull origin master
 主要就是，新的电脑需要重新安装一遍ruby，尽管Mac 自带ruby，但是Mac做了权限限制，所以需要重新安装一个ruby。具体步骤可参考上方。
 
 ```
- # 1. 安装Rvm：
-    $ curl -L https://get.rvm.io | bash -s stable —ruby
-    # 2. 安装Ruby：
-    $ rvm install ruby-2.0.0-p353  && rvm use ruby-2.0.0-p353
-    $ rvm rubygems latest
+ 1.安装Rvm：
+ curl -L https://get.rvm.io | bash -s stable —ruby
+ 2.安装Ruby：
+  rvm install ruby-2.0.0-p353  && rvm use ruby-2.0.0-p353
+  rvm rubygems latest
 ```
 
 上述命令如果执行出错，就多执行一次，实在不行退出终端重新进入再执行。
 
-之后可以把工程clone在octopress目录，然后继续clone一遍到_deploy目录下，需要注意区别，octopress目录下需要在source分之，而_deploy目录下需要在master分之。两者clone的是同一个仓库。
+之后可以把github上的工程clone在octopress目录，然后继续把在coding上的工程clone一遍到_deploy目录下，需要注意区别，octopress目录下需要在source分之，而_deploy目录下需要在coding-pages分支。两者clone的是不同的仓库。
 
 然后需要跟上方一样的这两步：
 
