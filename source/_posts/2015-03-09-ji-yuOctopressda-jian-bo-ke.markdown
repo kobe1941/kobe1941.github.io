@@ -38,7 +38,7 @@ Your system is ready to brew.
 执行以下命令：
 
 ```
-curl -L https://get.rvm.io | bash -s stable --ruby
+curl -L https://get.rvm.io | bash -s stable -ruby
 ```
 然后执行以下命令：
 
@@ -181,7 +181,30 @@ git pull origin master
 
 
 ##6.在多台电脑上同步写博客
-需要注意的是，另一台电脑也要安装git和ruby等环境，但Octorepress就不用了，因为会从github上克隆下来。具体请参考[这里](http://boboshone.com/blog/2013/06/05/write-octopress-blog-on-multiple-machines/)。
+需要注意的是，另一台电脑也要安装git和ruby等环境，但Octorepress就不用了，因为会从github上克隆下来。具体请参考[这里](http://blog.lessfun.com/blog/2014/05/20/clone-exists-octopress-blog-to-new-mac/)。
+
+主要就是，新的电脑需要重新安装一遍ruby，尽管Mac 自带ruby，但是Mac做了权限限制，所以需要重新安装一个ruby。具体步骤可参考上方。
+
+```
+ # 1. 安装Rvm：
+    $ curl -L https://get.rvm.io | bash -s stable —ruby
+    # 2. 安装Ruby：
+    $ rvm install ruby-2.0.0-p353  && rvm use ruby-2.0.0-p353
+    $ rvm rubygems latest
+```
+
+上述命令如果执行出错，就多执行一次，实在不行退出终端重新进入再执行。
+
+之后可以把工程clone在octopress目录，然后继续clone一遍到_deploy目录下，需要注意区别，octopress目录下需要在source分之，而_deploy目录下需要在master分之。两者clone的是同一个仓库。
+
+然后需要跟上方一样的这两步：
+
+```
+gem install bundler
+bundle install
+```
+
+之后就可以使用rake命令了。比如`rake preview`等。
 
 ##7.配置博客
 
