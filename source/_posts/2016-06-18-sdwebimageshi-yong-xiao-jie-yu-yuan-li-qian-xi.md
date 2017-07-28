@@ -47,6 +47,16 @@ UIImageView+WebCache
 
 SD中有一个UIView的类别`UIView+WebCacheOperation`，给每个UIView用关联对象的方式添加了一个字典属性，用来记住此UIView的图片下载的Operation，UIView每次进行下载前先取消上一次的下载Operation，从而避免同一个UIView的并行下载。
 `conformsToProtocol:`这个方法是用来判断消息接收者是否实现了某个协议。
+
+
+这里要注意的是，一个UIImageView在加载网络图片的过程分两步，首先先去内存和磁盘中根据key查找看是否已经下载缓存，如果没有则发起网络请求下载图片资源。这两步都会返回一个NSOperation，也就是说这两个步骤都是可以取消的，当列表快速滑动时，很有可能同一个UIImageView第一次的图片还未加载完就又开始去加载其他的图片了，此时就有了上面提到的第一步取消下载的操作。而能够取消的基础是因为下载图片所使用的NSOperation被保存了下来。另外需要注意的是，NSOperation的cancel方法只是把isCancelled这个标记置位而已，并不是真的取消了网络请求，一个网络请求发出去之后是不能再取消掉的，网络回调的block里要开发者自己去判断该请求是否已经被cancel标记了，如果已经cancel则不需要回调block了，直接丢弃就好：
+
+![](/images/2016/06/final_1.png)
+![](/images/2016/06/final_2.png)
+![](/images/2016/06/final_3.png)
+![](/images/2016/06/final_4.png)
+![](/images/2016/06/final_5.png)
+
 第二步给当前要下载的图片URL设置一个key:
 
 ```
