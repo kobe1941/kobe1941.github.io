@@ -7,7 +7,10 @@ single: true
 <article class="hentry" role="article">
   {% include article.html %}
   <footer>
-    <p class="meta">
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  
+    <p class="meta"> 
+
       {% include post/author.html %}
       {% include post/date.html %}{{ time }}{% if updated %} {{ updated }}{% endif %}
       {% include post/categories.html %}
