@@ -102,7 +102,7 @@ bshare: true
 # duoshuo_short_name: kobe1941
 
 #友言评论组件
-uyan_id: 2146552
+#uyan_id: 2146552
 
 # weibo秀
 weibo_uid: 1247589445     # 填入uid  
