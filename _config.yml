@@ -94,6 +94,9 @@ disqus_show_comment_count: false
 # Google Analytics
 google_analytics_tracking_id: UA-60680038-1
 
+google:
+    ad-client: "ca-pub-7430330121158143"
+    
 # 一键分享功能
 bshare: true
 
