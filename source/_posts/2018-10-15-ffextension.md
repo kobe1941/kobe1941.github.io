@@ -10,7 +10,7 @@ description:
 
 
 
-写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。
+写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的[GitHub地址](https://github.com/kobe1941/FFExtension)，使用过程中遇到任何问题欢迎issue。
 
 
 
