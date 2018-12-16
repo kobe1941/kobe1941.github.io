@@ -415,7 +415,7 @@ ObjC的+load越多，启动越慢。
 
 
 
-我们使用cocoapodbs并没有设置user_frameworks，所以pod管理的有源码的第三方库都是静态库的形式，而framework形式的静态库基本都是第三方公司提供的服务，上图可以看到，size占比最大的还是阿里和腾讯两家的SDK，比如阿里的推送和腾讯的直播和IM。 
+我们使用cocoapodbs并没有设置use_frameworks，所以pod管理的有源码的第三方库都是静态库的形式，而framework形式的静态库基本都是第三方公司提供的服务，上图可以看到，size占比最大的还是阿里和腾讯两家的SDK，比如阿里的推送和腾讯的直播和IM。 
 
 上图在统计中，AliCloudHttpDNS的可执行文件在Mac的Finder下的大小大概是10M，AlicloudUtils是3.4M，UTMini是16M，而UTDID只有1.6M。依赖关系上，AliCloudHttpDNS依赖AlicloudUtils，而AlicloudUtils依赖UTMini和UTDID，UTMini依赖UTDID。 
 
