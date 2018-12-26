@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "《iOS安装包瘦身指南》"
+title: "iOS安装包瘦身指南"
 date: 2016-10-12 07:52:41 +0800
 comments: true
 categories: iOS开发

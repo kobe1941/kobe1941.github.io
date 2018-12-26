@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "《写在阿里一周年》"
+title: "写在阿里一周年"
 date: 2016-12-01 21:22:00 +0800
 comments: true
 categories: 个人总结
