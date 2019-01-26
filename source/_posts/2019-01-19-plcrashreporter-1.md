@@ -107,7 +107,7 @@ C++的函数在内部创建好后，对该指针进行赋值：
 
 ④之后是初始化结构体里的另外一个变量writer。
 
-这个是当崩溃时收集到线程堆栈信息后用来写文件用的，当然还要传入另一个符号化策略的参数PLCrashReporterSymbolicationStrategy，有三个值，None，Table或者Objc，或者Table和Objc，一般选None比较合适，因为你崩溃的时候去做符号化，一来耗时比较长，二来有些APP在Xcode的编译选项里设置了strip symbol的话（见另一篇安装包size优化的文章），这里是拿不到符号的，另外就是网上有人反应，这里的符号化不够准备，没有代码行数，另外也没有系统动态库比如UIKit的符号。所以直接选None就好了，崩溃日志收集到之后，再用符号表统一进行符号化就可以。
+这个是当崩溃时收集到线程堆栈信息后用来写文件用的，当然还要传入另一个符号化策略的参数PLCrashReporterSymbolicationStrategy，有三个值，None，Table或者Objc，或者Table和Objc，一般选None比较合适，因为你崩溃的时候去做符号化，一来耗时比较长，二来有些APP在Xcode的编译选项里设置了strip symbol的话（见另一篇安装包size优化的文章），这里是拿不到符号的，另外就是网上有人反应，这里的符号化不够准确，没有代码行数，另外也没有系统动态库比如UIKit的符号。所以直接选None就好了，崩溃日志收集到之后，再用符号表统一进行符号化即可。
 
 这个初始化writer的操作跟之前的差不太多，都是传入指针，构造函数new一个对象出来后，对指针进行赋值。多的一点就是writer是一个结构体，内部很多基本类型变量的初始化，也是在这个函数里做的，同时因为类的封装问题，内部还有一个plcrash_async_symbol_strategy_t的枚举跟PLCrashReporterSymbolicationStrategy一一对应，这里也一起做了转换： 
 
@@ -215,7 +215,7 @@ shared_handler_context则是另一个静态的结构体，也可以认为是个�
 
 ![](/images/2019/01/19/26.png) 
 
-注册的时候，sa_sigaction是取了plcrash_signal_handler这个函数的地址，也就是说，如果有异常信号过来，回回调plcrash_signal_handler这个函数。 
+注册的时候，sa_sigaction是取了plcrash_signal_handler这个函数的地址，也就是说，如果有异常信号过来，会回调plcrash_signal_handler这个函数。 
 
 看一下这个函数的实现
 
@@ -225,7 +225,7 @@ shared_handler_context则是另一个静态的结构体，也可以认为是个�
 
 同时看注释可以知道，如果崩溃发生时，callbacks的List里，没有任何人来处理这个收到的信号，则会重新把该信号抛出来。 
 
-问题：如果处理了，是否信号就不会被再次抛出来了？那么如果APP内有多个SDK都有类似PLC的崩溃收集服务，如何兼容呢？ ——PLC内部做了兼容，sigaction函数会把之前的handler一起保存到callbacks里，崩溃发生时会统一进行回调。但是据说实际工作有问题，需要测试才知道。 
+问题：如果处理了，是否信号就不会被再次抛出来了？那么如果APP内有多个SDK都有类似PLC的崩溃收集服务，如何兼容呢？ ——PLC内部做了兼容，sigaction函数会把之前的信号处理handler函数一起保存到callbacks里，崩溃发生时会统一进行回调。但是据说实际工作可能有问题，需要测试才知道。 
 
 
 
@@ -241,7 +241,7 @@ shared_handler_context则是另一个静态的结构体，也可以认为是个�
 
 上方提到了previous_action_callback这个函数，作为callback加入到shared_handler_context.callbacks的List的尾部。
 
-所以当崩溃发生时遍历callbacks的List时，，除了回调之前外部传入的callback函数，也会回调previous_action_callback这个函数。 
+所以当崩溃发生时遍历callbacks的List时，除了回调之前外部传入的callback函数，也会回调previous_action_callback这个函数。 
 
 我们来看下previous_action_callback这个函数的实现：
 
@@ -267,7 +267,7 @@ if-else的逻辑进行了区分处理。但是不管怎样，只要找到一个h
 
 
 
-下图这个函数的第一步更像是一个清理信号的操作？——崩溃信号过来时，清理到所有信号的注册handler。正常流程也是收集完崩溃日志后就让APP崩溃，留着这些信号handler也没用。
+下图这个函数的第一步更像是一个清理信号的操作？——崩溃信号过来时，清理掉所有信号的注册handler。正常流程也是收集完崩溃日志后就让APP崩溃，留着这些信号handler也没用。
 
 ![](/images/2019/01/19/32.png) 
 
@@ -339,7 +339,7 @@ Mach层不太能看得懂里边的具体实现细节，比如上图中的server�
 
 
 
-中间的这一部分，看注释也能明白，就是写线程堆栈信息的，然后Mach层读取线程状态和写文件不是走的C函数，而是一个汇编语言实现函数plcrash_async_thread_state_current 。
+中间的这一部分，看注释也能明白，就是写线程堆栈信息的，然后Mach层读取线程状态和写文件不是走的C函数，而是一个汇编语言实现的函数plcrash_async_thread_state_current 。
 
 ![](/images/2019/01/19/46.png) 
 
@@ -381,7 +381,7 @@ Mach层不太能看得懂里边的具体实现细节，比如上图中的server�
 
 
 
-需要注意的是，这里做了个判断，如果传入的线程表示crash的线程，如果传入的是当前执行代码的线程，则走的是汇编的函数实现，否则才去走跟BSD层一样的C函数实现逻辑。
+需要注意的是，生成自定义日志的接口需要传入一个thread对象，这个thread表示crash的线程。函数里边做了个判断，如果传入的thread是当前正在执行代码的线程，则走的是汇编的函数实现，否则才去走跟BSD层一样的C函数实现逻辑。PLC的单元测试里都是新建一个thread传入这个接口。
 
 ![](/images/2019/01/19/52.png) 
 
