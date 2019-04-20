@@ -39,14 +39,16 @@ description:
 如果是胖二进制文件，寻找合适当前CPU架构的部分
 加载所有依赖的Mach-O文件（递归调用Mach-O加载的方法）
 定位内部、外部指针引用，例如字符串、函数等
-执行声明为__attribute__((constructor))的C函数
 加载类扩展（Category）中的方法
 C++静态对象加载、调用ObjC的 +load 函数
+执行声明为__attribute__((constructor))的C函数
 ③程序执行 
 调用main()
 调用UIApplicationMain()
 调用applicationWillFinishLaunching
 ```
+
+注意：在上述过程中，__attribute__((constructor))的函数调用会在+load函数调用之后，亲测正确。也可以自己建个工程测试一下。
 
 
 
