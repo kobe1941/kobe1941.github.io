@@ -52,7 +52,7 @@ UITableView卡顿及其解决方法
 
 OC对象模型，isa与super指向图（可以增加函数和isa混写的基础） 
 
-KVC/KVO实现原理，ARC，weak的实现原理，关联对象的原理，自动释放池的实现原理，（可变）数组和字典的实现原理 
+KVC/KVO实现原理，ARC（[http://blog.sunnyxx.com/2015/01/17/self-in-arc/](http://blog.sunnyxx.com/2015/01/17/self-in-arc/)），weak的实现原理，关联对象的原理，自动释放池的实现原理，（可变）数组和字典的实现原理 
 
 method swizzle和 isa swizzle  
 
@@ -60,9 +60,9 @@ Block的实现原理与破解参数（方法签名），循环引用与解决方
 
 runtime的应用 
 
-runloop的原理与应用（对应安卓的looper以及前端的event loop），与线程的关系，子线程如何保活与销毁 
+[runloop的原理与应用](https://blog.ibireme.com/2015/05/18/runloop/)（对应安卓的looper以及前端的event loop），与线程的关系，子线程如何保活与销毁 
 
-GCD原理（线程池实现原理） 
+GCD原理（线程池实现原理） ——类似UITableViewCell的缓存池
 
 消息转发的流程，如何避免不能识别的方法崩溃 
 
@@ -158,6 +158,26 @@ CPU使用率
 
 
 
+iOS相关的推荐书籍 
+
+[Objective-C 基础教程](https://book.douban.com/subject/24284008/ ) 
+
+[Objective-C 高级编程](https://book.douban.com/subject/24720270/) 
+
+[Effective Objective-C 2.0](https://book.douban.com/subject/25829244/) 
+
+[iOS编程实战](https://book.douban.com/subject/25976913/) 
+
+
+
+
+
+逆向的书主要就以下两本，建议先看第一本再看第二本 
+
+[iOS应用逆向工程 第2版](https://book.douban.com/subject/26363333/)
+
+[iOS应用逆向与安全](https://book.douban.com/subject/30239776/)
+
 
 
 
@@ -188,6 +208,20 @@ HTTP短连接和长连接的区别和联系
 
 
 
+网络相关推荐书籍 
+
+[图解HTTP](https://book.douban.com/subject/25863515/)
+
+[图解TCP/IP](https://book.douban.com/subject/24737674/)
+
+[HTTP权威指南](https://book.douban.com/subject/10746113/)
+
+[计算机网络 [谢希仁] ](https://book.douban.com/subject/26960678/)
+
+
+
+
+
 ### 2.数据结构和算法 
 
 数组，链表，哈希表的实现原理 
@@ -203,6 +237,14 @@ HTTP短连接和长连接的区别和联系
 排序和查找算法，不同排序算法的适用场景，如何选择 
 
 递归与分治，动态规划和贪心算法 
+
+
+
+[大话数据结构](https://book.douban.com/subject/6424904/)
+
+[剑指offer](https://book.douban.com/subject/27008702/)
+
+如果是准备面试的话去LeetCode刷题目吧 
 
 
 
@@ -226,6 +268,12 @@ BSD层和Mach层
 
 
 
+[现代操作系统](https://book.douban.com/subject/3852290/)
+
+[深入解析Mac OS X 与 iOS操作系统](https://book.douban.com/subject/25870206/)
+
+[深入理解计算机系统](https://book.douban.com/subject/5333562/)
+
 
 
 ### 4.设计模式和面向对象设计原则 
@@ -241,6 +289,8 @@ MVC，MVVM，单例，代理，观察者，中介者，组合模式
  时序图，流程图，UML类图，框架图 
 
 
+
+[大话设计模式](https://book.douban.com/subject/2334288/)
 
 
 
@@ -291,3 +341,4 @@ MVC，MVVM，单例，代理，观察者，中介者，组合模式
 技术能力的提升不是一个线性增长的过程，当你各方面的基础知识基本过关了之后，如果之后不知道如何深入可以尝试去做一些技术专项，最好是跟自己公司的项目有关联的技术专项，既能提升自己在某一块的技术水平，也能对公司有帮助，这是一个互惠互利的过程。 
 
 抛开音/视频，AR/VR这种特定领域的技术来说，在通用的技术栈上，如果不知道怎么继续深入了，那就去学习操作系统吧，深挖操作系统的原理和实现，会有很大的好处。目前本菜鸡也在往这个方向深入学习，希望跟大家共勉~ 
+
