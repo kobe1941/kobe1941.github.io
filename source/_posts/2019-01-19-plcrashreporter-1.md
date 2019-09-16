@@ -299,7 +299,7 @@ plcrash_write_report是核心，暂停线程，抓线程堆栈信息，写文件
 
 ![](/images/2019/01/19/extra_1.png) 
 
-这个函数回去读取thread当前的寄存器状态值，把当前函数调用的堆栈，全部保存到一个链表式的结构体里（其实就是栈的数据结构）。
+这个函数会去读取thread当前的寄存器状态值，把当前函数调用的堆栈，全部保存到一个链表式的结构体里（其实就是栈的数据结构）。
 
 其内部实现如下图：
 
@@ -307,6 +307,7 @@ plcrash_write_report是核心，暂停线程，抓线程堆栈信息，写文件
 
 说到底还是调用了thread_get_state()这个函数。
 thread_get_state()函数用于读取每个线程当前的寄存器状态，拿到这些寄存器的值了之后，就可以获取到该线程当时的代码执行堆栈地址。只要对地址进行符号化后，就是我们熟悉的崩溃日志里某个线程的堆栈了。
+
 PLC在这一块的处理比较绕，可以看看[BSBackTraceLogger](https://github.com/bestswifter/BSBacktraceLogger) 这个库，在调用thread_get_state()获取到一个线程的状态后，是如何遍历获取堆栈的指针值的（当然BSBackTraceLogger里对堆栈地址进行符号化的操作没啥必要）。
 
 ![](/images/2019/01/19/extra_3.png)
