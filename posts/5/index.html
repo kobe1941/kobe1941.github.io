@@ -1,0 +1,574 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="博客描述信息写在这里">
+  <meta name="keywords" content="ios Octopress github">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.zoomfeng.com/posts/5/index.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="www.zoomfeng.com">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/coretext-4.html">CoreText使用教程(四)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-30T21:37:21+08:00'><span class='date'>2015 年5 月30 日</span> <span class='time'>9:37 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文章为CoreText系列的第四篇，接着上一篇，讨论在纯文本排版时，当控件高度不够需要显示省略号的问题。</p>
+
+<p>本文介绍了将省略号放在可以显示的最后一个字符或者最后一行的任何位置的实现过程。</p>
+
+<p>实现代码在github的<a href="https://github.com/kobe1941/HFCoreTextDemo">仓库</a></p>
+
+<p>实现效果见下图：</p>
+
+<p>省略号放到最后一个字符</p>
+
+<p><img src="/images/2015/05/30/CoreText_1.png" alt="" /></p>
+
+<p>省略号放置在最后一行约1/3行处</p>
+
+<p><img src="/images/2015/05/30/CoreText_2.png" alt="" /></p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/coretext-4.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/coretext-3.html">CoreText使用教程(三)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-27T17:34:26+08:00'><span class='date'>2015 年5 月27 日</span> <span class='time'>5:34 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文章为CoreText系列的第三篇，讨论下纯文本排版的一些细节，会有中文，英文，数字以及emoji表情。主要涉及到使用CTLineDraw来一行一行的绘制，而非之前CTFrameDraw一气呵成，因为CTFrameDraw会因为行高不一致导致排版不美观，CTLineDraw尽管依然存在行高不一致的问题，但却可指定每行的行高保持一致以使得排版相对美观，毕竟，英文和中文字符的ascent，descent本来就不一样。</p>
+
+<p>使用CTLineDraw来一行一行的绘制时，最重要的就是在绘制前设置CoreText的坐标的Y值，这也是本文的重点所在。</p>
+
+<p>本文的代码放在了github的<a href="https://github.com/kobe1941/HFCoreTextDemo">仓库</a>。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/coretext-3.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/coretext-2.html">CoreText使用教程(二)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-21T11:54:00+08:00'><span class='date'>2015 年5 月21 日</span> <span class='time'>11:54 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文章为CoreText系列的第二篇，在一个UIView的子控件上实现图文混排显示，支持本地图片和网络图片的显示，暂时不支持图片的点击监听功能。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/coretext-2.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/coretext-1.html">CoreText使用教程(一)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-20T15:13:28+08:00'><span class='date'>2015 年5 月20 日</span> <span class='time'>3:13 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本次CoreText教程为一个系列，大概总共分4-5篇博文来叙述，内容分布为：</p>
+
+<p>第一篇介绍CoreText的一些基础知识和绘制流程，仅绘制纯文本内容，且不去讲究排版的细节，先画出来为主。</p>
+
+<p>第二篇进行图文混排，有本地图片和网络图片两种形式，文本部分保持跟第一篇博文一致。</p>
+
+<p>第三篇仔细探究纯文本的排版，包括中文，英文，数字和表情。对齐与不对齐的文本排版区别。</p>
+
+<p>第四篇讨论文本字符行数超过可以显示的行数时，在最后加省略号的问题。</p>
+
+<p>第五篇介绍使用正则表达式识别人名、电话，对用户点击人名、电话做出响应。</p>
+
+<p>对图片点击的识别，其实原理差不多，《iOS开发进阶》里边讲的更清楚。</p>
+
+<p>本篇教程为第一篇，仅实现在一个UIView的子控件上绘制纯文本。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/coretext-1.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/zi-si-de-ji-yin.html">《自私的基因》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-17T16:24:32+08:00'><span class='date'>2015 年5 月17 日</span> <span class='time'>4:24 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本书的主要观点基于达尔文的进化论和自然选择，作者提出在进化中被自然选择的基本单位不是个体，而是基因。</p>
+
+<p>本书的结构大体上分为三个部分，先提出基因是自然选择单位的观点，然后解释和论证基因是自私的且其自私性来自自然选择，最后提出人类的文化也可作为自然选择的一个基本单位，即好人有好报作为圆满的结束。</p>
+
+<p>本书偏学术型，学术用语用了不少，比如双螺旋，核糖核苷酸，等位基因，隐性基因等等，还用了大量生物学的例子，不是那么通俗易懂。</p>
+
+<p>本书的题目是很合适的，但是不知是不是翻译的原因，目录中每一章节的题目和内容介绍则较为凌乱，很多时候都不是对该章节的内容简介或者成为该章节的引子，这一点算是这本书的一个缺点。</p>
+
+<p>生存和繁殖是人类的终极命题，哦不，是基因的终极命题。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/zi-si-de-ji-yin.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/internet-one-year.html">写在切入互联网一周年</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-30T22:23:11+08:00'><span class='date'>2015 年4 月30 日</span> <span class='time'>10:23 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://36kr.com/p/208222.html">这是一个最好的时代，也是一个最坏的时代</a>。但归根结底还是你的时代。尽管前方雾霾重重，心中总会有光将你迎向光明的地方。</p>
+
+<p>很幸运来到互联网这个行业，再见，嵌入式。你好，互联网。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/internet-one-year.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/jiang-octopressbo-ke-cong-githubqian-yi-dao-gitcafe.html">将Octopress博客从Github迁移到Gitcafe或coding</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-27T21:31:02+08:00'><span class='date'>2015 年4 月27 日</span> <span class='time'>9:31 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文记录了将基于octopress 和github pages搭建的博客迁移到国内代码托管服务商gitcafe的过程。
+搭建博客的过程在<a href="http://www.zoomfeng.com/blog/ji-yuOctopressda-jian-bo-ke.html">前文</a>有介绍。</p>
+
+<p>将博客放在github上虽然很方便，也很有Geek的格调，但是很不爽的就是，github这个网站访问很慢，导致我们的博客访问也很慢，我测试的时候发现开机后第一次加载的话花个30秒是正常的，第二次以后访问会好一些，但相比国内的网站还是很慢。故有了这次博客迁移之旅。</p>
+
+<p>本博客迁移的过程并不轻松，经过跟gitcafe工程师十几封邮件后的沟通后才算完全搞掂。</p>
+
+<p>补充：由于gitcafe即将关闭服务，所以又把博客迁移到了coding.net。具体迁移方式跟迁移到gitcafe大致一致，下文有标注。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/jiang-octopressbo-ke-cong-githubqian-yi-dao-gitcafe.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/xing-fu-de-fang-fa.html">《幸福的方法》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-19T23:13:17+08:00'><span class='date'>2015 年4 月19 日</span> <span class='time'>11:13 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本书为<a href="http://v.163.com/special/positivepsychology/">哈佛积极心理学</a>课程讲师的著作。</p>
+
+<p>本书分为三篇。第一篇介绍了什么是幸福以及幸福生活的重要组成部分；第二篇讨论了如何把这些观点应用到教育工作以及家庭生活中；最后一篇包括了七个关于幸福的思考。
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/xing-fu-de-fang-fa.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/ai-de-yi-shu.html">《爱的艺术》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-19T23:08:36+08:00'><span class='date'>2015 年4 月19 日</span> <span class='time'>11:08 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>爱是一种能力，爱是一种艺术，爱是….</p>
+
+<p>复旦陈果老师那个讲爱情的视频可以跟这本书配合一起学习。</p>
+
+<p>本书分三大块。
+首先通过指出人们对爱情的种种误解并加以解释来阐明作者的观点：爱是一种艺术。</p>
+
+<p>然后介绍学会这门艺术的两个必要步骤：掌握理论和掌握实践。后两部分分别讲理论和实践。
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/ai-de-yi-shu.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/shao-you-ren-zou-de-lu.html">《少有人走的路》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-19T23:04:29+08:00'><span class='date'>2015 年4 月19 日</span> <span class='time'>11:04 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3 id="section">我们长期以来的想法和感受，有一天，将会被某个陌生人一语道破。</h3>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/shao-you-ren-zou-de-lu.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+      <a class="prev" href="/posts/6">&larr; Older</a>
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+    <a class="next" href="/posts/4">Newer &rarr;</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (1)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (32)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/the-instant-economist.html">《斯坦福极简经济学》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/computer-system-deep.html">《深入理解计算机系统》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/launch-optimize-from-wwdc2019.html">WWDC2019之启动时间与Dyld3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/memory.html">iOS APP内存优化记录</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/ios-level-up.html">iOS知识结构</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

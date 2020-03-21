@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CoreText使用教程(四) - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本篇文章为CoreText系列的第四篇，接着上一篇，讨论在纯文本排版时，当控件高度不够需要显示省略号的问题。 本文介绍了将省略号放在可以显示的最后一个字符或者最后一行的任何位置的实现过程。 实现代码在github的仓库 实现效果见下图： 省略号放到最后一个字符 省略号放置在最后一行约1/3行处 &hellip;">
+  <meta name="keywords" content="CoreText 省略号">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.zoomfeng.com/blog/coretext-4.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="www.zoomfeng.com">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CoreText使用教程(四)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-30T21:37:21+08:00'><span class='date'>2015 年5 月30 日</span> <span class='time'>9:37 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文章为CoreText系列的第四篇，接着上一篇，讨论在纯文本排版时，当控件高度不够需要显示省略号的问题。</p>
+
+<p>本文介绍了将省略号放在可以显示的最后一个字符或者最后一行的任何位置的实现过程。</p>
+
+<p>实现代码在github的<a href="https://github.com/kobe1941/HFCoreTextDemo">仓库</a></p>
+
+<p>实现效果见下图：</p>
+
+<p>省略号放到最后一个字符</p>
+
+<p><img src="/images/2015/05/30/CoreText_1.png" alt="" /></p>
+
+<p>省略号放置在最后一行约1/3行处</p>
+
+<p><img src="/images/2015/05/30/CoreText_2.png" alt="" /></p>
+
+<!--more-->
+
+<p>上篇博文已经实现了一行一行的绘制文本，但有些产品的需求是暂时显示一些简要的信息，用户点击后再进入到详情页显示完全。这时候则需要在文本的显示末端添加一个省略号。</p>
+
+<p>这种需求在微博和朋友圈都有，一条微博或者朋友圈信息较长时，为方便其他用户阅读，往往需要截断，只显示部分信息。</p>
+
+<p>本次实现基本参照了<a href="https://github.com/jverkoey/nimbus/blob/master/src/attributedlabel/src/NIAttributedLabel.m">Nimbus</a>的实现，我按照自己的理解在代码中加入了一些注释，如果有不对的地方还请指出。</p>
+
+<p>大部分代码跟之前类似，以下是绘制部分的代码，代码中注释有说明怎么实现改变省略号的位置：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+<span class="line-number">111</span>
+<span class="line-number">112</span>
+<span class="line-number">113</span>
+<span class="line-number">114</span>
+<span class="line-number">115</span>
+<span class="line-number">116</span>
+<span class="line-number">117</span>
+<span class="line-number">118</span>
+<span class="line-number">119</span>
+<span class="line-number">120</span>
+<span class="line-number">121</span>
+<span class="line-number">122</span>
+<span class="line-number">123</span>
+<span class="line-number">124</span>
+<span class="line-number">125</span>
+<span class="line-number">126</span>
+<span class="line-number">127</span>
+<span class="line-number">128</span>
+<span class="line-number">129</span>
+<span class="line-number">130</span>
+<span class="line-number">131</span>
+<span class="line-number">132</span>
+<span class="line-number">133</span>
+<span class="line-number">134</span>
+<span class="line-number">135</span>
+<span class="line-number">136</span>
+<span class="line-number">137</span>
+<span class="line-number">138</span>
+<span class="line-number">139</span>
+<span class="line-number">140</span>
+<span class="line-number">141</span>
+<span class="line-number">142</span>
+<span class="line-number">143</span>
+<span class="line-number">144</span>
+<span class="line-number">145</span>
+<span class="line-number">146</span>
+<span class="line-number">147</span>
+<span class="line-number">148</span>
+<span class="line-number">149</span>
+<span class="line-number">150</span>
+<span class="line-number">151</span>
+<span class="line-number">152</span>
+<span class="line-number">153</span>
+<span class="line-number">154</span>
+<span class="line-number">155</span>
+<span class="line-number">156</span>
+<span class="line-number">157</span>
+<span class="line-number">158</span>
+<span class="line-number">159</span>
+<span class="line-number">160</span>
+<span class="line-number">161</span>
+<span class="line-number">162</span>
+<span class="line-number">163</span>
+<span class="line-number">164</span>
+<span class="line-number">165</span>
+<span class="line-number">166</span>
+<span class="line-number">167</span>
+<span class="line-number">168</span>
+<span class="line-number">169</span>
+<span class="line-number">170</span>
+<span class="line-number">171</span>
+<span class="line-number">172</span>
+<span class="line-number">173</span>
+<span class="line-number">174</span>
+<span class="line-number">175</span>
+<span class="line-number">176</span>
+<span class="line-number">177</span>
+<span class="line-number">178</span>
+<span class="line-number">179</span>
+<span class="line-number">180</span>
+<span class="line-number">181</span>
+<span class="line-number">182</span>
+<span class="line-number">183</span>
+<span class="line-number">184</span>
+<span class="line-number">185</span>
+<span class="line-number">186</span>
+<span class="line-number">187</span>
+<span class="line-number">188</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="cp">#pragma mark - 一行一行绘制，行高确定，高度不够时加上省略号</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">drawRectWithLineByLineAlignmentAndEllipses</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 1.创建需要绘制的文字</span>
+</span><span class="line">    <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">attributed</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 2.设置行距等样式</span>
+</span><span class="line">    <span class="p">[[</span><span class="nb">self</span> <span class="k">class</span><span class="p">]</span> <span class="nl">addGlobalAttributeWithContent</span><span class="p">:</span><span class="n">attributed</span> <span class="nl">font</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">textHeight</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">self</span> <span class="k">class</span><span class="p">]</span> <span class="nl">textHeightWithText</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="nl">width</span><span class="p">:</span><span class="n">CGRectGetWidth</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">)</span> <span class="nl">font</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">font</span> <span class="nl">type</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">drawType</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 3.创建绘制区域，path的高度对绘制有直接影响，如果高度不够，则计算出来的CTLine的数量会少一行或者少多行</span>
+</span><span class="line">    <span class="n">CGMutablePathRef</span> <span class="n">path</span> <span class="o">=</span> <span class="n">CGPathCreateMutable</span><span class="p">();</span>
+</span><span class="line">    <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">),</span> <span class="nb">self</span><span class="p">.</span><span class="n">textHeight</span><span class="o">*</span><span class="mi">2</span><span class="p">));</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 4.根据NSAttributedString生成CTFramesetterRef</span>
+</span><span class="line">    <span class="n">CTFramesetterRef</span> <span class="n">framesetter</span> <span class="o">=</span> <span class="n">CTFramesetterCreateWithAttributedString</span><span class="p">((</span><span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">attributed</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">CTFrameRef</span> <span class="n">ctFrame</span> <span class="o">=</span> <span class="n">CTFramesetterCreateFrame</span><span class="p">(</span><span class="n">framesetter</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">attributed</span><span class="p">.</span><span class="n">length</span><span class="p">),</span> <span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 重置高度</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">realHeight</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">textHeight</span><span class="p">;</span>
+</span><span class="line">    <span class="c1">// 绘制全部文本需要的高度大于实际高度则调整，并加上省略号</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">realHeight</span> <span class="o">&gt;</span> <span class="n">CGRectGetHeight</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">frame</span><span class="p">))</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">realHeight</span> <span class="o">=</span> <span class="n">CGRectGetHeight</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">frame</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;realHeight = %f&quot;</span><span class="p">,</span><span class="n">realHeight</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 获取上下文</span>
+</span><span class="line">    <span class="n">CGContextRef</span> <span class="n">contextRef</span> <span class="o">=</span> <span class="n">UIGraphicsGetCurrentContext</span><span class="p">();</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 转换坐标系</span>
+</span><span class="line">    <span class="n">CGContextSetTextMatrix</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="n">CGAffineTransformIdentity</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CGContextTranslateCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">realHeight</span><span class="p">);</span> <span class="c1">// 这里跟着调整</span>
+</span><span class="line">    <span class="n">CGContextScaleCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 这里可调整可不调整</span>
+</span><span class="line">    <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">CGRectGetWidth</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">),</span> <span class="n">realHeight</span><span class="p">));</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 一行一行绘制</span>
+</span><span class="line">    <span class="n">CFArrayRef</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">CTFrameGetLines</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFIndex</span> <span class="n">lineCount</span> <span class="o">=</span> <span class="n">CFArrayGetCount</span><span class="p">(</span><span class="n">lines</span><span class="p">);</span>
+</span><span class="line">    <span class="bp">CGPoint</span> <span class="n">lineOrigins</span><span class="p">[</span><span class="n">lineCount</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 把ctFrame里每一行的初始坐标写到数组里，注意CoreText的坐标是左下角为原点</span>
+</span><span class="line">    <span class="n">CTFrameGetLineOrigins</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">lineOrigins</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">frameY</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="n">CFIndex</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">lineCount</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="c1">// 遍历每一行CTLine</span>
+</span><span class="line">        <span class="n">CTLineRef</span> <span class="n">line</span> <span class="o">=</span> <span class="n">CFArrayGetValueAtIndex</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineAscent</span><span class="p">;</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineDescent</span><span class="p">;</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineLeading</span><span class="p">;</span> <span class="c1">// 行距</span>
+</span><span class="line">        <span class="c1">// 该函数除了会设置好ascent,descent,leading之外，还会返回这行的宽度</span>
+</span><span class="line">        <span class="n">CTLineGetTypographicBounds</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineAscent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineDescent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineLeading</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="bp">CGPoint</span> <span class="n">lineOrigin</span> <span class="o">=</span> <span class="n">lineOrigins</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 微调Y值，需要注意的是CoreText的origin的Y值是在baseLine处，而不是下方的descent。</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineHeight</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">pointSize</span> <span class="o">*</span> <span class="n">kPerLineRatio</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 调节self.font.descender该值可改变文字排版的上下间距，此处下间距为0</span>
+</span><span class="line">        <span class="n">frameY</span> <span class="o">=</span> <span class="n">realHeight</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">lineHeight</span> <span class="o">-</span> <span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">descender</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;frameY = %f&quot;</span><span class="p">,</span><span class="n">frameY</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">lineOrigin</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">frameY</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 调整坐标</span>
+</span><span class="line">        <span class="n">CGContextSetTextPosition</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="n">lineOrigin</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="n">lineOrigin</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 反转坐标系</span>
+</span><span class="line">        <span class="n">frameY</span> <span class="o">=</span> <span class="n">realHeight</span> <span class="o">-</span> <span class="n">frameY</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;realHeight = %f,font.descender = %f&quot;</span><span class="p">,</span><span class="n">realHeight</span><span class="p">,</span><span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">descender</span><span class="p">);</span>
+</span><span class="line">        <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;反转后的坐标 y = %f&quot;</span><span class="p">,</span><span class="n">frameY</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 行高</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">heightPerLine</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">pointSize</span> <span class="o">*</span> <span class="n">kPerLineRatio</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">realHeight</span> <span class="o">-</span> <span class="n">frameY</span> <span class="o">&gt;</span> <span class="n">heightPerLine</span><span class="p">)</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="n">CTLineDraw</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">contextRef</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;一行一行的画 i = %ld&quot;</span><span class="p">,</span><span class="n">i</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">}</span> <span class="k">else</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;最后一行&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// 最后一行，加上省略号</span>
+</span><span class="line">            <span class="k">static</span> <span class="bp">NSString</span><span class="o">*</span> <span class="k">const</span> <span class="n">kEllipsesCharacter</span> <span class="o">=</span> <span class="s">@&quot;</span><span class="se">\u2026</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">CFRange</span> <span class="n">lastLineRange</span> <span class="o">=</span> <span class="n">CTLineGetStringRange</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// 一个emoji表情占用两个长度单位</span>
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;range.location = %ld,range.length = %ld,总长度 = %ld&quot;</span><span class="p">,</span><span class="n">lastLineRange</span><span class="p">.</span><span class="n">location</span><span class="p">,</span><span class="n">lastLineRange</span><span class="p">.</span><span class="n">length</span><span class="p">,</span><span class="n">attributed</span><span class="p">.</span><span class="n">length</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="k">if</span> <span class="p">(</span><span class="n">lastLineRange</span><span class="p">.</span><span class="n">location</span> <span class="o">+</span> <span class="n">lastLineRange</span><span class="p">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">CFIndex</span><span class="p">)</span><span class="n">attributed</span><span class="p">.</span><span class="n">length</span><span class="p">)</span>
+</span><span class="line">            <span class="p">{</span>
+</span><span class="line">                <span class="c1">// 这一行放不下所有的字符（下一行还有字符），则把此行后面的回车、空格符去掉后，再把最后一个字符替换成省略号</span>
+</span><span class="line">
+</span><span class="line">                <span class="n">CTLineTruncationType</span> <span class="n">truncationType</span> <span class="o">=</span> <span class="n">kCTLineTruncationEnd</span><span class="p">;</span>
+</span><span class="line">                <span class="bp">NSUInteger</span> <span class="n">truncationAttributePosition</span> <span class="o">=</span> <span class="n">lastLineRange</span><span class="p">.</span><span class="n">location</span> <span class="o">+</span> <span class="n">lastLineRange</span><span class="p">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 拿到最后一个字符的属性字典</span>
+</span><span class="line">                <span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">tokenAttributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">attributed</span> <span class="nl">attributesAtIndex</span><span class="p">:</span><span class="n">truncationAttributePosition</span>
+</span><span class="line">                                                                     <span class="nl">effectiveRange</span><span class="p">:</span><span class="nb">NULL</span><span class="p">];</span>
+</span><span class="line">                <span class="c1">// 给省略号字符设置字体大小、颜色等属性</span>
+</span><span class="line">                <span class="bp">NSAttributedString</span> <span class="o">*</span><span class="n">tokenString</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="n">kEllipsesCharacter</span>
+</span><span class="line">                                                                                  <span class="nl">attributes</span><span class="p">:</span><span class="n">tokenAttributes</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 用省略号单独创建一个CTLine，下面在截断重新生成CTLine的时候会用到</span>
+</span><span class="line">                <span class="n">CTLineRef</span> <span class="n">truncationToken</span> <span class="o">=</span> <span class="n">CTLineCreateWithAttributedString</span><span class="p">((</span><span class="k">__bridge</span> <span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">tokenString</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 把这一行的属性字符串复制一份，如果要把省略号放到中间或其他位置，只需指定复制的长度即可</span>
+</span><span class="line">                <span class="bp">NSUInteger</span> <span class="n">copyLength</span> <span class="o">=</span> <span class="n">lastLineRange</span><span class="p">.</span><span class="n">length</span><span class="o">/</span><span class="mi">3</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">                <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">truncationString</span> <span class="o">=</span> <span class="p">[[</span><span class="n">attributed</span> <span class="nl">attributedSubstringFromRange</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="n">lastLineRange</span><span class="p">.</span><span class="n">location</span><span class="p">,</span> <span class="n">copyLength</span><span class="p">)]</span> <span class="n">mutableCopy</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="n">lastLineRange</span><span class="p">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="c1">// Remove any whitespace at the end of the line.</span>
+</span><span class="line">                    <span class="kt">unichar</span> <span class="n">lastCharacter</span> <span class="o">=</span> <span class="p">[[</span><span class="n">truncationString</span> <span class="n">string</span><span class="p">]</span> <span class="nl">characterAtIndex</span><span class="p">:</span><span class="n">copyLength</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                    <span class="c1">// 如果复制字符串的最后一个字符是换行、空格符，则删掉</span>
+</span><span class="line">                    <span class="k">if</span> <span class="p">([[</span><span class="bp">NSCharacterSet</span> <span class="n">whitespaceAndNewlineCharacterSet</span><span class="p">]</span> <span class="nl">characterIsMember</span><span class="p">:</span><span class="n">lastCharacter</span><span class="p">])</span>
+</span><span class="line">                    <span class="p">{</span>
+</span><span class="line">                        <span class="p">[</span><span class="n">truncationString</span> <span class="nl">deleteCharactersInRange</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="n">copyLength</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)];</span>
+</span><span class="line">                    <span class="p">}</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 拼接省略号到复制字符串的最后</span>
+</span><span class="line">                <span class="p">[</span><span class="n">truncationString</span> <span class="nl">appendAttributedString</span><span class="p">:</span><span class="n">tokenString</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 把新的字符串创建成CTLine</span>
+</span><span class="line">                <span class="n">CTLineRef</span> <span class="n">truncationLine</span> <span class="o">=</span> <span class="n">CTLineCreateWithAttributedString</span><span class="p">((</span><span class="k">__bridge</span> <span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">truncationString</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 创建一个截断的CTLine，该方法不能少，具体作用还有待研究</span>
+</span><span class="line">                <span class="n">CTLineRef</span> <span class="n">truncatedLine</span> <span class="o">=</span> <span class="n">CTLineCreateTruncatedLine</span><span class="p">(</span><span class="n">truncationLine</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">frame</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">truncationType</span><span class="p">,</span> <span class="n">truncationToken</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">truncatedLine</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="c1">// If the line is not as wide as the truncationToken, truncatedLine is NULL</span>
+</span><span class="line">                    <span class="n">truncatedLine</span> <span class="o">=</span> <span class="n">CFRetain</span><span class="p">(</span><span class="n">truncationToken</span><span class="p">);</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">                <span class="n">CFRelease</span><span class="p">(</span><span class="n">truncationLine</span><span class="p">);</span>
+</span><span class="line">                <span class="n">CFRelease</span><span class="p">(</span><span class="n">truncationToken</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">                <span class="n">CTLineDraw</span><span class="p">(</span><span class="n">truncatedLine</span><span class="p">,</span> <span class="n">contextRef</span><span class="p">);</span>
+</span><span class="line">                <span class="n">CFRelease</span><span class="p">(</span><span class="n">truncatedLine</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="p">}</span> <span class="k">else</span>
+</span><span class="line">            <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 这一行刚好是最后一行，且最后一行的字符可以完全绘制出来</span>
+</span><span class="line">                <span class="n">CTLineDraw</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">contextRef</span><span class="p">);</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// 跳出循环，避免绘制剩下的多余的CTLine</span>
+</span><span class="line">            <span class="k">break</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">framesetter</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>同时为了兼容这次的代码实现，控制器部分进行了重构：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">viewDidLoad</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="p">[</span><span class="nb">super</span> <span class="n">viewDidLoad</span><span class="p">];</span>
+</span><span class="line">    <span class="c1">// Do any additional setup after loading the view, typically from a nib.</span>
+</span><span class="line">
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">content</span> <span class="o">=</span> <span class="s">@&quot;我自横刀向天笑，去留肝胆两昆仑。--谭嗣同同学你好啊。This is my first CoreText demo,how are you ?I love three things,the sun,the moon,and you.the sun for the day,the moon for the night,and you forever.😳😊😳😊😳😊😳去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。😳😊😳😊😳😊😳少年不知愁滋味，爱上层楼，爱上层楼，为赋新词强说愁。56321363464.而今识尽愁滋味，欲说还休，欲说还休，却道天凉好个秋。123456，7890，56321267895434。缺月挂疏桐，漏断人初静。谁见幽人独往来，缥缈孤鸿影。惊起却回头，有恨无人省。捡尽寒枝不肯栖，寂寞沙洲冷。&quot;</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">backgroundColor</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIColor</span> <span class="n">grayColor</span><span class="p">];</span>
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">font</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIFont</span> <span class="nl">systemFontOfSize</span><span class="p">:</span><span class="mi">15</span><span class="p">];</span>
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">content</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">drawType</span> <span class="o">=</span> <span class="n">HFDrawTextWithEllipses</span><span class="p">;</span> <span class="c1">// 设置该值即可切换</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 此时self.coreTextView的宽度为320，为了在iPhone6上计算准确，使用屏幕宽度</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">realWidth</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIScreen</span> <span class="n">mainScreen</span><span class="p">].</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="n">HFCoreTextView</span> <span class="nl">textHeightWithText</span><span class="p">:</span><span class="n">content</span> <span class="nl">width</span><span class="p">:</span><span class="n">realWidth</span> <span class="nl">font</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">font</span> <span class="nl">type</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">drawType</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 在这里控制显示的行数</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">maxHeight</span> <span class="o">=</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">pointSize</span><span class="o">*</span><span class="n">kPerLineRatio</span><span class="p">)</span><span class="o">*</span><span class="mi">6</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">height</span> <span class="o">&gt;</span> <span class="n">maxHeight</span> <span class="o">&amp;&amp;</span> <span class="nb">self</span><span class="p">.</span><span class="n">coreTextView</span><span class="p">.</span><span class="n">drawType</span> <span class="o">==</span> <span class="n">HFDrawTextWithEllipses</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="n">height</span> <span class="o">=</span> <span class="n">maxHeight</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;height = %f&quot;</span><span class="p">,</span><span class="n">height</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="nb">self</span><span class="p">.</span><span class="n">contentViewHeightConstraint</span><span class="p">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">height</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>参考链接：</p>
+
+<p>1.<a href="http://blog.devtang.com/blog/2013/10/21/the-tech-detail-of-ape-client-3/">猿题库iOS客户端的技术细节（三）：基于CoreText的排版引擎</a></p>
+
+<p>2.<a href="https://github.com/jverkoey/nimbus/blob/master/src/attributedlabel/src/NIAttributedLabel.m">Nimbus的NIAttributedLabel实现</a></p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-30T21:37:21+08:00'><span class='date'>2015 年5 月30 日</span> <span class='time'>9:37 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/coretext-3.html" title="Previous Post: CoreText使用教程(三)">&laquo; CoreText使用教程(三)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/coretext-5.html" title="Next Post: CoreText使用教程(五)">CoreText使用教程(五) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (1)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (32)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/the-instant-economist.html">《斯坦福极简经济学》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/computer-system-deep.html">《深入理解计算机系统》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/launch-optimize-from-wwdc2019.html">WWDC2019之启动时间与Dyld3</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/memory.html">iOS APP内存优化记录</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/ios-level-up.html">iOS知识结构</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-05-30 21:37:21 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>
