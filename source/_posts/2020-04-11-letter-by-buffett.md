@@ -3,7 +3,7 @@ layout: post
 title: "巴菲特致股东的信"
 date: 2020-04-11 20:41:32 +0800
 comments: true
-categories: 读书笔记
+categories: 其他
 keywords: 巴菲特 美股 A股 投资 证券
 description: 
 ---
