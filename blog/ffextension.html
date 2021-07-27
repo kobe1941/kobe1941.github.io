@@ -1,0 +1,512 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>FFExtension - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的GitHub地址， &hellip;">
+  <meta name="keywords" content="crash iOS开发 iPhone">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/ffextension.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">FFExtension</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-10-15T22:20:23+08:00'><span class='date'>2018 年10 月15 日</span> <span class='time'>10:20 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的<a href="https://github.com/kobe1941/FFExtension">GitHub地址</a>，使用过程中遇到任何问题欢迎issue。</p>
+
+<p>主要原理就是用Method Swizzle去hook系统类包括私有类的函数， 对常见的容器类，数组字典字符串这些有做保护，顺带新增了 NSSet，NSCache，NSUserDefaults，NSData ，NSAttributedString等几个类的保护，支持拦截 <code>unrecognized selector sent to instance</code> 异常，设置好要拦截的类即可。</p>
+
+<p>一些使用代码规范就能解决的崩溃，比如 NSTimer，通知和 KVO 等等，本项目并未做额外处理，这种低级的失误，还是用代码规范来限制比较好。</p>
+
+<p>已经在自己的项目用上了，目前工作稳定，iOS8.x 到 iOS12 都测试通过。</p>
+
+<!--more-->
+
+<h2 id="section">接入方式</h2>
+
+<p>使用cocoapod接入</p>
+
+<p><code>$ pod 'FFExtension'</code></p>
+
+<p>导入<code>FFManager.h</code>头文件，如果你需要拦截部分类的<code>unrecogzied selector sent to instance</code> 崩溃，你可以传入一个包含类前缀的数组，比如下面的SSZ，那么所有以SSZ开头的类，都不会再有这个类型的崩溃。</p>
+
+<p>初始化：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="k">__weak</span> <span class="k">typeof</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span> <span class="n">weakSelf</span> <span class="o">=</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class="line"><span class="p">[[</span><span class="n">FFManager</span> <span class="n">sharedInstance</span><span class="p">]</span> <span class="nl">startWorkWithOption</span><span class="p">:</span><span class="n">FFHookOptionAll</span> <span class="nl">unrecogziedSelectorClassPrefixs</span><span class="p">:</span><span class="l">@[</span><span class="s">@&quot;SSZ&quot;</span><span class="l">]</span> <span class="nl">callBackBlock</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">exceptionDic</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="p">[</span><span class="n">weakSelf</span> <span class="nl">reportExecptionToBugly</span><span class="p">:</span><span class="n">exceptionDic</span><span class="p">];</span>
+</span><span class="line"><span class="p">}];</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上传错误日志到bugly：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="cp">#pragma mark - Report Exception To Bugly</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">reportExecptionToBugly:</span><span class="p">(</span><span class="bp">NSDictionary</span> <span class="o">*</span><span class="p">)</span><span class="nv">exceptionDic</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">exceptionDic</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="bp">NSString</span> <span class="o">*</span><span class="n">name</span> <span class="o">=</span> <span class="p">[</span><span class="n">exceptionDic</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="n">FF_Name</span><span class="p">];</span>
+</span><span class="line">        <span class="bp">NSString</span> <span class="o">*</span><span class="n">reason</span> <span class="o">=</span> <span class="p">[</span><span class="n">exceptionDic</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="n">FF_Reason</span><span class="p">];</span>
+</span><span class="line">        <span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">extraDic</span> <span class="o">=</span> <span class="p">[</span><span class="n">exceptionDic</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="n">FF_ExtraDic</span><span class="p">];</span>
+</span><span class="line">        <span class="bp">NSArray</span> <span class="o">*</span><span class="n">callStack</span> <span class="o">=</span> <span class="p">[</span><span class="n">exceptionDic</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="n">FF_CallStackSymbols</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">[</span><span class="n">Bugly</span> <span class="nl">reportExceptionWithCategory</span><span class="p">:</span><span class="mi">3</span> <span class="nl">name</span><span class="p">:</span><span class="n">name</span> <span class="nl">reason</span><span class="p">:</span><span class="n">reason</span> <span class="nl">callStack</span><span class="p">:</span><span class="n">callStack</span>                        <span class="nl">extraInfo</span><span class="p">:</span><span class="n">extraDic</span> <span class="nl">terminateApp</span><span class="p">:</span><span class="nb">NO</span><span class="p">];</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="hook">设计原理和hook函数的原则</h2>
+
+<p>method swizzle的正确姿势 ，一定要理解method swizzle的原理 ：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="p">+</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">ff_instancenSwizzleWithClass:</span><span class="p">(</span><span class="kt">Class</span><span class="p">)</span><span class="nv">class</span> <span class="nf">originSelector:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="nv">originSelector</span> <span class="nf">swizzleSelector:</span><span class="p">(</span><span class="kt">SEL</span><span class="p">)</span><span class="nv">swizzleSelector</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">Method</span> <span class="n">originMethod</span> <span class="o">=</span> <span class="n">class_getInstanceMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span> <span class="n">originSelector</span><span class="p">);</span>
+</span><span class="line">    <span class="n">Method</span> <span class="n">swizzleMethod</span> <span class="o">=</span> <span class="n">class_getInstanceMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span> <span class="n">swizzleSelector</span><span class="p">);</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">originMethod</span> <span class="o">||</span> <span class="o">!</span><span class="n">swizzleMethod</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="k">return</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">class_addMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span>
+</span><span class="line">                    <span class="n">originSelector</span><span class="p">,</span>
+</span><span class="line">                    <span class="n">method_getImplementation</span><span class="p">(</span><span class="n">originMethod</span><span class="p">),</span>
+</span><span class="line">                    <span class="n">method_getTypeEncoding</span><span class="p">(</span><span class="n">originMethod</span><span class="p">));</span>
+</span><span class="line">    <span class="n">class_addMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span>
+</span><span class="line">                    <span class="n">swizzleSelector</span><span class="p">,</span>
+</span><span class="line">                    <span class="n">method_getImplementation</span><span class="p">(</span><span class="n">swizzleMethod</span><span class="p">),</span>
+</span><span class="line">                    <span class="n">method_getTypeEncoding</span><span class="p">(</span><span class="n">swizzleMethod</span><span class="p">));</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">///&lt; 添加完了之后要重新赋值，因为原来的两个method都是父类的。参考自见https://github.com/rentzsch/jrswizzle/blob/semver-1.x/JRSwizzle.m</span>
+</span><span class="line">    <span class="n">Method</span> <span class="n">originMethod2</span> <span class="o">=</span> <span class="n">class_getInstanceMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span> <span class="n">originSelector</span><span class="p">);</span>
+</span><span class="line">    <span class="n">Method</span> <span class="n">swizzleMethod2</span> <span class="o">=</span> <span class="n">class_getInstanceMethod</span><span class="p">(</span><span class="k">class</span><span class="p">,</span> <span class="n">swizzleSelector</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">method_exchangeImplementations</span><span class="p">(</span><span class="n">originMethod2</span><span class="p">,</span> <span class="n">swizzleMethod2</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上图中，这两步是很重要的，第一步判空保护自然不用说，如果你都没有实现这个函数，交换必然也是无效的。</p>
+
+<p>第二步则是重点，在分别调用了两次class_addMethod之后，做method_exchange时，是不能直接传递最初的Method指针的，因为可能class并没有去实现originSelector，而是其父类实现的，此时originMethod获取到的就是父类的实现指针。当class_addMethod函数调用以后，class这个类本身也有了originSelector的实现，所以后面交换的时候需要重新取一下值。而且，如果你不做这一步操作的话，就很有可能把父类的实现指针拿去交换了，这是后面如果其他的派生子类去hook同一个函数时是会出问题的，可以看源码里关于NSArray的本类和其的多个派生类对同一个函数的hook实现对比：</p>
+
+<p><img src="/images/2018/10/1.png" alt="" /></p>
+
+<p>更详细原因和推理过程可以看<a href="https://juejin.im/entry/5a1fceddf265da43310d9985">这里</a>。</p>
+
+<p>有一点想吐槽AvoidCrash的就是，虽然这个项目star数量比较多，但是它的实现中，类之间的循环依赖到处都是。。。</p>
+
+<h2 id="section-1">踩过的坑</h2>
+
+<p>我发现在你hook系统的函数之前，系统是可以给你正确识别异常并报错的，hook之后，很多正常的数组越界，字符串超长问题，就会给你包BAD_ACCESS，SIGBRT之类的错误了。而且除了自己写的native代码会有问题，react native从js转换过来的RCT开头的那一堆类，也有不少各种各样的问题，用上这个库后，react native的崩溃也能有一部分下降。</p>
+
+<p>1.SIGABRT</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">Assertion</span> <span class="n">failure</span> <span class="k">in</span> <span class="o">-</span><span class="p">[</span><span class="n">_UITraitBasedAppearance</span> <span class="nl">_beginListeningForAppearanceEventsForSetter</span><span class="p">:],</span> <span class="o">/</span><span class="n">BuildRoot</span><span class="o">/</span><span class="n">Library</span><span class="o">/</span><span class="n">Caches</span><span class="o">/</span><span class="n">com</span><span class="p">.</span><span class="n">apple</span><span class="p">.</span><span class="n">xbs</span><span class="o">/</span><span class="n">Sources</span><span class="o">/</span><span class="n">UIKit</span><span class="o">/</span><span class="n">UIKit</span><span class="o">-</span><span class="mf">3600.9.1</span><span class="o">/</span><span class="bp">UIAppearance</span><span class="p">.</span><span class="nl">m</span><span class="p">:</span><span class="mi">1575</span>
+</span><span class="line"><span class="n">Terminating</span> <span class="n">app</span> <span class="n">due</span> <span class="n">to</span> <span class="n">uncaught</span> <span class="n">exception</span> <span class="err">&#39;</span><span class="n">NSInternalInconsistencyException</span><span class="err">&#39;</span><span class="p">,</span> <span class="nl">reason</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">Bad</span> <span class="n">selector</span> <span class="n">setup</span> <span class="k">for</span> <span class="o">-</span><span class="p">[</span><span class="bp">UIPickerView</span> <span class="nl">_setTextColor</span><span class="p">:]</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>原因是手抖导致的代码错误，<code>rangeOfReceiverToSearch.location + rangeOfReceiverToSearch.length &lt;= self.length</code>少了个<code>=</code>号导致崩溃</p>
+
+<p>2.不要使用这种初始化函数:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="p">[</span><span class="bp">NSDictionary</span> <span class="nl">dictionaryWithObjects</span><span class="p">:</span><span class="n">objects</span> <span class="nl">forKeys</span><span class="p">:</span><span class="n">keys</span> <span class="nl">count</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+</span><span class="line"><span class="p">[[</span><span class="bp">NSArray</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithObjects</span><span class="p">:(</span><span class="k">const</span> <span class="kt">id</span> <span class="n">_Nonnull</span> <span class="p">[</span><span class="n">_Nullable</span><span class="p">])</span><span class="n">objects</span> <span class="nl">count</span><span class="p">:(</span><span class="bp">NSUInteger</span><span class="p">)</span><span class="n">cnt</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>count和前面的指针不见得是一一对应的；</p>
+
+<p>3.跟bugly的冲突:</p>
+
+<p><code>EXC_BAD_ACCESS</code> 、<code> SIGABRT</code> 或者<code> EXC_BAD_INSTRUCTION</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">Terminating</span> <span class="n">app</span> <span class="n">due</span> <span class="n">to</span> <span class="n">uncaught</span> <span class="n">exception</span> <span class="err">&#39;</span><span class="n">JCEBaseObjectException</span><span class="err">&#39;</span><span class="p">,</span> <span class="nl">reason</span><span class="p">:</span> <span class="err">&#39;</span><span class="n">Invalid</span> <span class="n">JCE</span> <span class="n">ext</span> <span class="nl">string</span><span class="p">:</span> <span class="n">__b0x9i_M09ONSStringONSString</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><img src="/images/2018/10/2.png" alt="" /></p>
+
+<p>这是hook NSString时边界条件处理不好导致的问题。</p>
+
+<p>4.字典空值：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"> <span class="o">+</span><span class="p">[</span><span class="n">__NSDictionaryM</span> <span class="nl">setObject</span><span class="p">:</span><span class="nl">forKeyedSubscript</span><span class="p">:],</span> <span class="n">key</span> <span class="nl">https</span><span class="p">:</span><span class="c1">//ios.bugly.qq.com/rqd/sync?aid=688DD054-8A1A-4076-897A-EEC89B4D8923 or object (null) can not be nil</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>5.字符串hook函数边界条件不对导致的<code>unrecognized selector sent to instance</code>：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">Terminating</span> <span class="n">app</span> <span class="n">due</span> <span class="n">to</span> <span class="n">uncaught</span> <span class="n">exception</span> <span class="err">&#39;</span><span class="n">NSInvalidArgumentException</span><span class="err">&#39;</span><span class="p">,</span> <span class="nl">reason</span><span class="p">:</span> <span class="err">&#39;</span><span class="o">-</span><span class="p">[</span><span class="n">RCTImageView</span> <span class="nl">setMAGESOURCESmageSources</span><span class="p">:]</span><span class="o">:</span> <span class="n">unrecognized</span> <span class="n">selector</span> <span class="n">sent</span> <span class="n">to</span> <span class="n">instance</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>以上几个问题，除了部分手抖写错函数调用之外，全靠以下几次提交解决：</p>
+
+<p><img src="/images/2018/10/3.png" alt="" /></p>
+
+<p><img src="/images/2018/10/4.png" alt="" /></p>
+
+<p>6.<code>NSUserdefaults</code> 的<code>setobject:forKey:</code>函数和<code>NSDictionaryM</code>的<code>setObject:forkeysubscript:</code>函数，object都是可以为nil的，会调用<code>removeObjectForKey</code>移除该key。所以在进行hook的时候，要注意不要对object做判空保护。</p>
+
+<p>7.<code>NSData</code>的 <code>appendBytes: length:</code>函数，length为0时，bytes是可以为nil的:</p>
+
+<p><img src="/images/2018/10/5.png" alt="" /></p>
+
+<p>8.进入直播间崩溃，<code>NSString</code> 的 <code>substringFromIndex</code>这个函数，index是可以==self.length的。同时如果越界了，尽量不要直接返回nil，而是取安全区间的字符串返回：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="o">+</span><span class="p">[</span><span class="n">__NSCFString</span> <span class="nl">substringFromIndex</span><span class="p">:],</span> <span class="n">index</span> <span class="mi">24</span> <span class="n">is</span> <span class="k">out</span> <span class="n">of</span> <span class="n">bounds</span> <span class="mf">0.</span><span class="p">.</span><span class="mf">.23</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><img src="/images/2018/10/6.png" alt="" /></p>
+
+<p>9.<code>[NSThread callBackSymbols]</code>线程回溯返回了空的数组</p>
+
+<p>见<a href="http://www.gnustep.org/resources/documentation/Developer/Base/Reference/NSThread.html">链接1</a>和下图</p>
+
+<p><img src="/images/2018/10/7.png" alt="" /></p>
+
+<p>以及<a href="http://landonf.bikemonkey.org/code/objc/Reliable_Crash_Reporting.20110912.html">链接2</a>和下图</p>
+
+<p><img src="/images/2018/10/8.png" alt="" /></p>
+
+<p>10.<code>NSAttributedString</code>相关的崩溃</p>
+
+<p><img src="/images/2018/10/9.png" alt="" /></p>
+
+<p>同时，在hook系统的两个函数时发现</p>
+
+<p>①<code>NSAttributedString</code>的<code>attribute:atIndex:longestEffectiveRange:inRange:</code>函数，如果<code>attrName为</code>空或<code>range</code>的值越界了，Xcode10会直接停住不往下执行，但是不会显示任何的异常或断点，就相当于APP卡住了;</p>
+
+<p>②<code>attributesAtIndex:effectiveRange:</code>这个函数如果hook了，在UILabel初始化的时候，可能会导致<code>EXC_BAD_ACCESS</code>错误，如下图所示，原因不明：</p>
+
+<p><img src="/images/2018/10/10.png" alt="" /></p>
+
+<p>最终把相关获取属性的函数（见源码）全部注释了（正常使用很少会手动去调用这几个函数），问题没有再出现。当然治本的方法还是要靠苹果大爷。如果你有什么好方法，麻烦评论区告诉一下我~</p>
+
+<p>11.由于出于好意，<code>FFExtension</code>最初的设计里，保留了对部分系统类的<code>unrecogzied selector sent to instance</code> 崩溃拦截，但是实践发现一个案例：</p>
+
+<p>对<code>NSNull</code>对象的<code>unrecognized selector sent to instance</code>做了拦截，目的是防止服务器接口返回一些空的对象时引起的崩溃，比如字符串这种。但是这里没崩溃，后面字符串复制的时候还是崩了，copy函数不能简单通过增加一个函数来解决。而且后面的崩溃会打乱你的堆栈，破坏Xcode对异常的捕获：</p>
+
+<p><img src="/images/2018/10/11.png" alt="" /></p>
+
+<p><code>FFExtension</code>在最新的版本中去掉了上述默认的对系统类的拦截，但依然保留接口，使用者可以设置自定义类的拦截。</p>
+
+<p>其他：</p>
+
+<p>1.KVC和storyboard、xib可能会遇到的<code>setUndefinedValueForKey</code>这种崩溃，因为我们项目里用纯代码来实现，所以暂时也还没有遇到过，相关问题可以参考<a href="https://tbd.ink/2018/04/04/iOS/18040401.TPreventKVC%E7%9A%84%E4%BD%BF%E7%94%A8%E5%92%8C%E5%AE%9E%E7%8E%B0/index/">这里</a>。</p>
+
+<p>参考链接：</p>
+
+<ol>
+  <li>
+    <p><a href="https://juejin.im/entry/5a1fceddf265da43310d9985">iOS 界的毒瘤：Method Swizzle</a>;</p>
+  </li>
+  <li>
+    <p><a href="http://yulingtianxia.com/blog/2017/04/17/Objective-C-Method-Swizzling">Objective-C Method Swizzling</a>.</p>
+  </li>
+</ol>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-10-15T22:20:23+08:00'><span class='date'>2018 年10 月15 日</span> <span class='time'>10:20 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/launch-time.html" title="Previous Post: iOS启动时间优化">&laquo; iOS启动时间优化</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/tencent-sports.html" title="Next Post: 腾讯体育iOS客户端逆向实践">腾讯体育iOS客户端逆向实践 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2018-10-15 22:20:23 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

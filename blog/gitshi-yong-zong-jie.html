@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Git使用总结 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文只是一些个人使用上的总结,命令操作平台为Mac的终端. 1.初始化
+通常有两种方式来进行初始化： 1）git clone是一种较为简单的初始化方式，当你已经有一个远程的git版本库时，只需要在本地克隆一份即可。
+例如在终端中输入: 1
+git clone git://github.com/ &hellip;">
+  <meta name="keywords" content="git 总结">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/gitshi-yong-zong-jie.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Git使用总结</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-03-21T11:19:25+08:00'><span class='date'>2015 年3 月21 日</span> <span class='time'>11:19 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2 id="mac">本文只是一些个人使用上的总结,命令操作平台为Mac的终端.</h2>
+
+<!-- more -->
+
+<h2 id="section">1.初始化</h2>
+<p>通常有两种方式来进行初始化：</p>
+
+<p>1）<code>git clone</code>是一种较为简单的初始化方式，当你已经有一个远程的git版本库时，只需要在本地克隆一份即可。
+例如在终端中输入:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git clone git://github.com/someone/some_project.git   some_project</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>上面的命令就是将远程版本库克隆到本地电脑的<code>some_project</code>目录下。</p>
+
+<p>2）<code>git init</code>和<code>git remote</code>。这种方式稍微复杂一些。当你本地创建了一个工作目录，你可以进入这个目录，使用<code>git init</code>命令创建一个git版本管理库。这时候如果需要将工程放到远程服务器上，可以在远程服务器上创建一个目录，并把可访问的URL记录下来，此时就可以使用<code>git remote add</code>命令来增加一个远程服务器版本了。例如：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git remote add origin git://github.com/someone/another_project.git</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>上面的命令就会增加该URL地址且名称为<code>origin</code>的远程服务器。以后提交的代码只需要使用<code>origin</code>这个别名即可。</p>
+
+<h2 id="section-1">2.1分支操作</h2>
+<p>查看本地分支:<code>git branch</code></p>
+
+<p>查看远程分支:<code>git branch -r</code></p>
+
+<p>查看所有的分支:<code>git branch -a</code></p>
+
+<p>创建本地分支:<code>git branch name</code> 注意新分支创建后不会自动切换为当前分支</p>
+
+<p>切换分支:<code>git checkout name</code></p>
+
+<p>这里需要注意的一点就是，如果是要同步远程的分支（比如同事建立了新的分支，以保证针对某个版本的修改在该分支下），请不要在本地新建一个跟远端同名的分支，也就是说不要使用<code>git branch name</code>这个命令，而是直接使用<code>git checkout name</code>命令把远端的分支拉下来即可。以避免把新的代码合并到旧的分支里。</p>
+
+<p>创建新分支并立即切换到新分支:<code>git checkout -b name</code></p>
+
+<p>删除分支:<code>git branch -d name</code>,<code>-d</code>选项只能删除已经参与了合并的分支，对于未有合并的分支是无法删除的。如果想强制删除一个分支，可以使用<code>-D</code>选项</p>
+
+<p>合并分支:<code>git merge name</code>将名称为<code>name</code>的分支与当前分支合并，是合并到当前分支，而不是合并到<code>name</code>分支。要注意的合并前先使用<code>git branch</code>查看下当前所处的分支。</p>
+
+<p>可以在后面加参数，比如我要把<code>issue340</code>分支合并到<code>dev</code>分支，可以先<code>checkout</code>到<code>dev</code>分支并使用以下命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git merge issue340 -n --ff
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>后面的参数<code>-n --ff</code>据说是为了分支合并时更快速直接？具体还有待研究。</p>
+
+<p>重命名分支：</p>
+
+<p><code>git branch –m oldname newname</code></p>
+
+<p><code>-m</code>不会覆盖已有分支名称，即如果名为newname的分支已经存在，则会提示已经存在了。</p>
+
+<p>如果改成<code>-M</code>就可以覆盖已有分支名称了，即会强制覆盖名为newname的分支，这种操作要谨慎。</p>
+
+<p>创建远程分支(本地分支push到远程):<code>git push origin name</code></p>
+
+<p>删除远程分支:<code>git push origin :heads/name</code> 或 <code>git push origin : name</code>。</p>
+
+<h4 id="ok">这里需要注意的是，在开发新功能、测试或者重构部分代码时，最好是新建一条分支来操作，测试新功能OK后再合并回主分支，以避免干扰到主分支。</h4>
+
+<h2 id="section-2">2.2合并分支</h2>
+
+<p>注意没参数的情况下merge是fast-forward的，即Git将master分支的指针直接移到dev的最前方。
+换句话说，如果顺着一个分支走下去可以到达另一个分支的话，那么Git在合并两者时，只会简单移动指针，所以这种合并成为快进式(Fast-forward)。</p>
+
+<p>介绍两个合并分支时常用的指令</p>
+
+<p>1.<code>--squash</code></p>
+
+<p>将一条分支上的若干个提交条目压合成一个提交条目，提交到另一条分支的末梢。此时，dev上的所有提交已经合并到当前工作区并暂存，但还没有作为一个提交，可以像其他提交一样，把这个改动提交到版本库中：</p>
+
+<p><code>git commit –m “something from dev”</code></p>
+
+<p><code>--squash</code>指令含义是：本地文件内容与不使用该选项的合并结果相同，但是不提交、不移动HEAD，因此需要一条额外的commit命令。其效果相当于将another分支上的多个commit合并成一个，放在当前分支上，原来的commit历史则没有拿过来。</p>
+
+<p>判断是否使用<code>--squash</code>选项最根本的标准是，待合并分支上的历史是否有意义。</p>
+
+<p>如果在开发分支上提交非常随意，甚至写成微博体，那么一定要使用<code>--squash</code>选项。版本历史记录的应该是代码的发展，而不是开发者在编码时的活动。</p>
+
+<p>2.<code>—no-ff</code></p>
+
+<p><code>--no-ff</code>指的是强行关闭fast-forward方式。</p>
+
+<p>fast-forward方式就是当条件允许的时候，git直接把HEAD指针指向合并分支的头，完成合并。属于“快进方式”，不过这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit.</p>
+
+<p><code>git merge --squash branch</code> 是用来把一些不必要commit进行压缩，比如说，你的feature在开发的时候写的commit很乱，那么我们合并的时候不希望把这些历史commit带过来，于是使用–squash进行合并，此时文件已经同合并后一样了，但不移动HEAD，不提交。需要进行一次额外的commit来“总结”一下，然后完成最终的合并。</p>
+
+<p>总结：</p>
+
+<p><code>--no-ff</code>：不使用fast-forward方式合并，保留分支的commit历史
+<code>--squash</code>：使用squash方式合并，把多次分支commit历史压缩为一次</p>
+
+<p>合并分支时，加上<code>--no-ff</code>参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。示意图如下：</p>
+
+<p><img src="/images/2015/other/branch_1.png" alt="" /></p>
+
+<p><img src="/images/2015/other/branch_2.png" alt="" /></p>
+
+<h2 id="section-3">3.版本操作</h2>
+<p>查看版本:<code>git tag</code></p>
+
+<p>创建版本:<code>git tag name</code></p>
+
+<p>删除版本:<code>git tag -d name</code></p>
+
+<h2 id="section-4">4.撤销文件更改</h2>
+<p><code>git checkout</code>有两个作用，其中一个功能是在不同的<code>branch</code>之间进行切换，例如<code>git checkout another_branch</code>就会切换到<code>another_branch</code>的分支上去。</p>
+
+<p>另一个功能是还原代码的作用，例如<code>git checkout app/model/user.rb</code>就会将<code>user.rb</code>文件从上一个已提交的版本中更新回来，未提交的内容全部会回滚到改动前的状态。</p>
+
+<h2 id="git">5.查看git配置</h2>
+<p><code>git config --list</code>该指令可以查看所有关于git的配置，用户和邮箱，远程库的URL等。</p>
+
+<h2 id="section-5">6.版本回滚</h2>
+<p>git版本管理的好处就在于有无限的反悔权。<code>git reset HEAD^</code>就會回到前一版本(一個^表示是前一版)，並把其中的 changes 繼續留在 working tree 中。適合發現前一次 commit 有問題或是想要修改 commit log，可以修改後再重新 commit。</p>
+
+<p><code>git reset</code>如果加上<code>–soft</code>參數則會把 changes 直接加到 staging area（暂存区）。加上<code>–hard</code>參數表示不留 staging area 也不留 working tree(完全刪除任何修改記錄)。例如<code>git reset --hard</code>指令会清楚所有与最近一次commit不同的修改，也就是说放弃当前所有的更改。</p>
+
+<p>如果在合并（merge）过程中发生冲突了，想放弃这次合并，也可以使用<code>git reset --hard</code>来取消。</p>
+
+<p><code>git reset --hard ORIG_HEAD</code>指令会取消最近一次成功的合并以及所有你在这次合并后所做的修改。</p>
+
+<h2 id="section-6">7.修改上一次提交的信息</h2>
+
+<p>有时候手抖，在还没有输入完提交信息的时候按了回车，可以用如下指令修改提交的信息：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git commit -m"your message" --amend</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-7">8.单个文件回滚</h2>
+<p>有时候为了改了一个功能，没完全测试OK就推到服务器了，发现改的功能还不如之前的好用怎么办？
+有两种情况，第一种是，在你提交错误的代码到服务器后，队友还有没有提交过，可以使用该指令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git reset --hard commit_id</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>其中<code>commit_id</code>是提交记录的代号，可以使用指令:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git log</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>来查看所有的提交记录，找到你需要回滚的版本即可（键盘方向键可滚动查看所有记录，鼠标目测不行）。</p>
+
+<p>这里要注意的是，git会回滚到你最近一次提交的<code>commit_id</code>之后的版本，而不是<code>commit_id</code>之前的版本。在本次操作中，由于队友都没有更新，只需要找到当前提交的上一次的<code>commit_id</code>即可。比如今天是3月21日，你提交了错误的代码到服务器，服务端在之前3月20日有一次更新，那你找到3月20日的<code>commit_id</code>即可。</p>
+
+<p>第二种情况是，如果你提交了错误代码后队友也有新的提交，直接版本回退会把队友新提交的代码也搞没了，这时候如果你改动的文件不多的话，可以使用单个文件回滚的方式：</p>
+
+<p>1)执行<code>git log test.h</code>查看该文件的提交记录，找到需要回滚的commit版本，复制版本号。</p>
+
+<p>2)执行<code>git reset “commit版本号” test.h</code>。</p>
+
+<p>3)继续执行<code>git checkout test.h</code>，文件回滚成功。</p>
+
+<p>需要注意的是，如果文件在比较深的目录下，上述操作室需要输入目录结构的，比如<code>git log aaa/bbb/test.h</code>。</p>
+
+<h2 id="section-8">其他</h2>
+
+<p>1.提交代码的通常步骤<code>git status</code>查看当前状态，有改动则使用<code>git add.</code>把所有改动添加到本地仓库or暂存区(有待研究)？然后<code>git commit -m"your commit message"</code>后，先<code>git pull</code>拉下服务器的最新代码，确认没有问题后可以<code>git push</code>提交代码。</p>
+
+<p>2.<code>git pull</code>之后，或者进入其他界面，都可使用<code>:wq</code>退回到git的操作界面</p>
+
+<p>3.如果在<code>git pull</code>或者<code>git push</code>时，提示没有设置pull或者push的默认分支，按照提示的指令设置默认分支即可。</p>
+
+<h3 id="section-9">再次强调，在开发新功能、测试或者重构部分代码时，最好是新建一条分支来操作！</h3>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-03-21T11:19:25+08:00'><span class='date'>2015 年3 月21 日</span> <span class='time'>11:19 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/ji-yuOctopressda-jian-bo-ke.html" title="Previous Post: 基于Octopress搭建博客">&laquo; 基于Octopress搭建博客</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/maczhong-duan-chang-yong-ming-ling.html" title="Next Post: Mac终端常用命令">Mac终端常用命令 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-03-21 11:19:25 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

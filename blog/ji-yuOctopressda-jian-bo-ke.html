@@ -1,0 +1,584 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>基于Octopress搭建博客 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文介绍在Mac下利用Octopress和Github Pages搭建个人博客的流程 1.安装一些环境依赖
+先安装git(如果你的电脑没有git)，打开终端输入
+1
+git version
+可以查看当前git的版本号，一般说来确定本机安装了git就可以了。 然后安装ruby， &hellip;">
+  <meta name="keywords" content="Octopress github 搭建博客">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/ji-yuOctopressda-jian-bo-ke.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">基于Octopress搭建博客</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-03-09T14:52:24+08:00'><span class='date'>2015 年3 月9 日</span> <span class='time'>2:52 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2 id="macoctopressgithub-pages">本文介绍在Mac下利用Octopress和Github Pages搭建个人博客的流程</h2>
+
+<!-- more -->
+
+<h2 id="section">1.安装一些环境依赖</h2>
+<p>先安装git(如果你的电脑没有git)，打开终端输入</p>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git version</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>可以查看当前git的版本号，一般说来确定本机安装了git就可以了。</p>
+
+<p>然后安装ruby，因为Octopress是用ruby语言写的，所该该框架是必须的。
+具体过程为：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>这一步是为了安装HomeBrew，这是一个软件包管理系统，安装它是为了安装ruby作准备。
+安装好HomeBrew后先执行以下命令检查看是否安装妥当：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">brew doctor</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>如果顺利终端会显示：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">Your system is ready to brew.</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>好了，软件管理包装好了，接下来可以正式安装ruby，安装ruby有两种方式：rvm和rbenv。本文采用rvm方式，rvm其实是ruby version manager的简称。
+执行以下命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">curl -L https://get.rvm.io | bash -s stable -ruby</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后执行以下命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rvm install 2.0.0
+</span><span class="line">rvm 2.0.0
+</span><span class="line">rvm rubygems latest</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>2.0.0表示安装的ruby的版本，Octopress需要1.9.3以上，你也可以试着用其他的版本，只要大于等于1.9.3即可。安装好之后可以执行：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">ruby --version</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>查看当前ruby的版本号。</p>
+
+<h2 id="octopress">2.本地安装Octopress</h2>
+<p>这一步非常简单，一般不会有什么大的问题。
+打开终端，执行命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git clone git://github.com/imathis/octopress.git octopress</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>以上命令的作用是把Octopress克隆到本地磁盘，并生成一个名为octopress的文件夹
+然后进入该文件夹，并安装一些依赖项：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">cd octopress
+</span><span class="line">gem install bundler
+</span><span class="line">bundle install</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>其中<code>gem install bundler</code>这条指令在根目录安装也是可以的，但是<code>bundle install</code>这条指令请在octopress目录下安装，否则可能会出错。
+然后安装默认的博客主题：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake install</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>rake就是ruby make的缩写，到此Octopress在本地就安装完毕啦。</p>
+
+<p>可以执行：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake preview</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后在浏览器输入<code>http://localhost:4000/</code>可以预览刚刚搭建完成的博客，没有任何博文，但是可以看到主题风格了。</p>
+
+<p>Tips:以上步骤如果遇到权限问题，比如提示permission not enough之类，请在指令前面加上sudo和空格，重新执行一遍，sudo是指电脑的最高权限，相当于windows的管理员权限。</p>
+
+<h2 id="github-pages">3.配置Github Pages</h2>
+<p>这一步比较简单，主要是你必须要有一个github账号，并建立一个仓库用来存放你的博客。具体步骤请看<a href="http://shengmingzhiqing.com/blog/setup-octopress-with-github-pages.html/">这里</a>，这里需要注意的是，使用密钥来对github的日常操作进行加密是一个好习惯，通常又称之为ssh。
+该步骤为打开终端输入：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">ssh-keygen</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后在隐藏的.ssh/目录下会生成两个文件：<code>id_rsa和id_rsa.pub</code>。</p>
+
+<p>.pub的文件是公钥，另一个是私钥，加密用的。用文本编辑打开公钥，可复制里边的内容，然后去github上的设置栏/SSH添加一个公钥(请把.pub文件里的内容复制到内容的栏目，切勿复制到title栏目上)，以后你的同步和上传博客操作就不需要输入github的密码啦。</p>
+
+<p>另Mac下显示隐藏文件的命令为：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">defaults write com.apple.finder AppleShowAllFiles -bool true</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="github-pages-1">4.将本地的博客发布到Github Pages</h2>
+
+<p>打卡终端，执行以下命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">cd octopress
+</span><span class="line">rake setup_github_pages</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后要输入github上存放博客的仓库的位置，类似:<code>git@github.com:[your_username]/[your_username].github.io.git</code>这种。
+以上步骤成功后，接着输入：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake generate
+</span><span class="line">rake deploy</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>第一个命令用来生成静态页面，第二个命令用来把写好的博客部署到github上。上传完成后，浏览器打开：<code>http://[your_username].github.io/</code>
+你将看到跟刚才在本地预览时相同的页面。</p>
+
+<p>最后不要忘了把源文件备份到github的source分支下：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git add .
+</span><span class="line">git commit -m"你的提交内容"
+</span><span class="line">git push origin source</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>请注意，搭建该博客系统的过程中，github的仓库会有两个分支，一个是master，一个是source，我们写博客发博文的操作都在source分支下即可。source分支是存放博客源文件用的，master是存放部署好的静态页面给其他用户用浏览器访问用的。</p>
+
+<h2 id="section-1">5.发布新的博文</h2>
+<p>打开终端，输入：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">cd octopress
+</span><span class="line">rake new_post["your title"]</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>这条指令可以新建一条博文。为了使用顺利，新手请暂时不要用中文命名，等流程全部跑通后再解决中文编码的问题(不过我倒是没遇到中文编码的问题，也许是ruby版本比较高的原因罢)。
+以上命令执行后，会再<code>octopress/source/_posts</code>目录下生成一个<code>yyyy-mm-dd-your title.markdown</code>的文件，用文件编辑器可以编辑，但是不能预览效果。可以使用专用的markdown编辑器来编辑，比如<a href="http://25.io/mou/">Mou</a>。
+编辑完之后保存，使用指令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake gen_deploy</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>可以把该博文部署到github上。这条指令其实是</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake generate
+</span><span class="line">rake deploy</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>这两条指令的合体。</p>
+
+<p>最后请记得，以上指令只是把博文的内容发布到github上，也就是说博文内容在master分支下，还需要做一个操作：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git add .
+</span><span class="line">git commit -m"your message"
+</span><span class="line">git push origin source</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>以备份博文到github的source分支下。</p>
+
+<p>再次强调，source分支用来管理日常编辑和备份，master分支的内容是用来支撑其他网友访问博客用的。</p>
+
+<p>以上步骤一般可以成功搭建一个普通博客了，本人在实践中遇到了一个问题，就是在输入指令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">rake deploy</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>时发现分支同步上出现了问题，最后也得到了解决，具体解决方案是：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">cd _deploy
+</span><span class="line">git pull origin master</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>该命令其实是同步用来发布的内容，注意哦，这里同步的是master分支，因为这是发布到github上给其他用户访问的。更多详细请见我在V2EX上的<a href="http://v2ex.com/t/175120#reply13">帖子</a>。</p>
+
+<h6 id="gitmarkdownmarkdowngooglewordpressoctopresshexo">总结：搭建这个博客，需要对git版本管理比较熟悉（markdown语法不会没关系，不影响搭博客，当然以后要更黑客般的写博客肯定还是要学习markdown的），然后其他部分Google别人教程基本都可以解决。新手需要注意的是，搭博客有很多种方式，比如wordpress、octopress、hexo等等，在搜索资料的时候，请先确定使用哪一种，以避免混淆具体操作的步骤。</h6>
+
+<h2 id="section-2">6.在多台电脑上同步写博客</h2>
+<p>需要注意的是，另一台电脑也要安装git和ruby等环境，但Octorepress就不用了，因为会从github上克隆下来。具体请参考<a href="http://blog.lessfun.com/blog/2014/05/20/clone-exists-octopress-blog-to-new-mac/">这里</a>。</p>
+
+<p>主要就是，新的电脑需要重新安装一遍ruby，尽管Mac 自带ruby，但是Mac做了权限限制，所以需要重新安装一个ruby。具体步骤可参考上方。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class=""><span class="line"> 1.安装Rvm：
+</span><span class="line"> curl -L https://get.rvm.io | bash -s stable —ruby
+</span><span class="line"> 2.安装Ruby：
+</span><span class="line">  rvm install ruby-2.0.0-p353  &amp;&amp; rvm use ruby-2.0.0-p353
+</span><span class="line">  rvm rubygems latest</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上述命令如果执行出错，就多执行一次，实在不行退出终端重新进入再执行。</p>
+
+<p>之后可以把github上的工程clone在octopress目录，然后继续把在coding上的工程clone一遍到_deploy目录下，需要注意区别，octopress目录下需要在source分之，而_deploy目录下需要在coding-pages分支。两者clone的是不同的仓库。</p>
+
+<p>然后需要跟上方一样的这两步：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">gem install bundler
+</span><span class="line">bundle install</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>之后就可以使用rake命令了。比如<code>rake preview</code>等。</p>
+
+<h2 id="section-3">7.配置博客</h2>
+
+<h4 id="google">7.1 添加Google统计</h4>
+
+<p>①去<a href="http://www.google.com/analytics/">这里</a>注册Google Analytics账号，如果已有Gmail可以直接使用Gmail账号登陆。</p>
+
+<p>②按照Google的提示，可以获取一个google_analytics_tracking_id，复制此id，然后打开本地的_config.yml文件(终端下nano命令可直接打开)，找到google_analytics_tracking_id，在冒号后填入刚刚复制的内容(冒号后记得隔一个空格再填写)。</p>
+
+<p>③按照Google的提示，对该博客网站进行验证。只需要将Google提供的用于验证的代码添加到<code>source/_includes/head.html</code>文件的一对<code>&lt;head&gt;&lt;/head&gt;</code>之间即可。部署之后一段时间就能通过验证。
+之后在<a href="https://www.google.com/analytics/web/?hl=zh-CN&amp;pli=1#report/visitors-overview/a60680038w95181548p99221362/%3Foverview-graphOptions.primaryConcept%3Danalytics.pageviews/">这里</a>即可看到你博客的访问信息了，统计还蛮全面的，除了访问量这个数字其他也暂时不知道有啥用。</p>
+
+<h4 id="section-4">7.2 侧边栏添加微博秀</h4>
+<p>首先从<a href="http://app.weibo.com/tool/weiboshow">新浪微博秀</a>获取自定义的微博秀代码，调整好微博秀的颜色和样式后复制代码，然后在<code>source/_includes/asides</code>目录下新建<code>weibo.html</code>文件（用终端touch指令即可完成新建）。按照如下格式编辑该文件(nano指令):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">&lt;section&gt;
+</span><span class="line">    &lt;h1&gt;新浪微博&lt;/h1&gt;
+</span><span class="line">    &lt;ul id="weibo"&gt;
+</span><span class="line">    &lt;li&gt;
+</span><span class="line">
+</span><span class="line">   -- 在此插入获得的微博秀代码 --
+</span><span class="line">
+</span><span class="line">      &lt;/li&gt;
+</span><span class="line">    &lt;/ul&gt;
+</span><span class="line">&lt;/section&gt;</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>把刚刚复制的微博秀代码粘贴上去。
+接着用终端打开 <code>_config.yml</code> 文件，找到 <code>default_asides</code> 项，添加<code>asides/weibo.html</code>到中括号里即可。
+微博秀不一定能预览，但部署到github后稍等一下一般都可正常显示。
+另需要注意的是关于微博秀的配置信息是可以直接在复制微博秀代码的时候，进行改动的，读一下代码，可以选择粉丝显示或不显示，显示的行数等等。</p>
+
+<h4 id="section-5">7.3 导航栏添加栏目并制定跳转链接</h4>
+<p>默认的导航栏只有Blog和Archives两个选项，本博客就添加了一个我的豆瓣栏目，具体可以编辑文件<code>source/_includes/custom/navigation.html</code>，仿照加一段代码即可:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">  &lt;li&gt;&lt;a href="http://www.douban.com/people/你的豆瓣id/"&gt;我的豆瓣&lt;/a&gt;&lt;/li&gt;</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h4 id="section-6">7.4 添加多说评论系统</h4>
+<p>去<a href="http://duoshuo.com/create-site/">多说</a>注册，获取站点的short_name（其实就是多说域名中间的那一段）。
+然后在<code>_config.yml</code>文件的最后添加如下内容:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">duoshuo_comments: true
+</span><span class="line">duoshuo_short_name: yourname</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>用你的short_name替换上述的<code>yournamw</code>。</p>
+
+<p>接着在<code>source/_layouts/post.html</code>中添加多说评论模块:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">｛% if site.duoshuo_short_name and site.duoshuo_comments == true and page.comments == true %｝
+</span><span class="line">  &lt;section&gt;
+</span><span class="line">    &lt;h1&gt;Comments&lt;/h1&gt;
+</span><span class="line">    &lt;div id="comments" aria-live="polite"&gt;｛% include post/duoshuo.html %｝&lt;/div&gt;
+</span><span class="line">  &lt;/section&gt;
+</span><span class="line">｛% endif %｝</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>最后新建<code>source/_includes/post/duoshuo.html</code>文件,并填入如下内容:</p>
+
+<pre><code>&lt;!-- Duoshuo Comment BEGIN --&gt;
+&lt;div class="ds-thread"&gt;&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+  var duoshuoQuery = {short_name:"your_name"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+    || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+&lt;/script&gt;
+&lt;!-- Duoshuo Comment END --&gt;
+</code></pre>
+
+<p>将上述内容中的<code>your_name</code>用你的short_name替换。</p>
+
+<h4 id="section-7">7.5 添加社会化分享</h4>
+<p>本博客采用bshare,在<code>_config.yml</code>中增加</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">bshare: true</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>然后在<code>source/_includes/post</code>下的sharing.html中添加如下代码:</p>
+
+<pre><code>&lt;div class="bshare-custom"&gt;&lt;a title="分享到QQ空间" class="bshare-qzone"&gt;&lt;/a&gt;&lt;a title="分享到新浪微博" class="bshare-sinaminiblog"&gt;&lt;/a&gt;&lt;a title="分享到人人网" class="bshare-renren"&gt;&lt;/a&gt;&lt;a title="分享到腾讯微博" class="bshare-qqmb"&gt;&lt;/a&gt;&lt;a title="分享到网易微博" class="bshare-neteasemb"&gt;&lt;/a&gt;&lt;a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"&gt;&lt;/a&gt;&lt;span class="BSHARE_COUNT bshare-share-count"&gt;0&lt;/span&gt;&lt;/div&gt;&lt;script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;amp;uuid=&amp;amp;pophcol=2&amp;amp;lang=zh"&gt;&lt;/script&gt;&lt;script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>而且社交网站的分享位置是可以调整的，比如把微博分享的符号放在qq空间前面，直接调整上述代码顺序即可。简直爽哭了有没有！</p>
+
+<h3 id="good-luck">Good Luck!</h3>
+
+<h4 id="section-8">参考文章：</h4>
+<p>1.<a href="http://shengmingzhiqing.com/blog/setup-octopress-with-github-pages.html/">Octopress 搭建流程 – Github Pages</a></p>
+
+<p>2.<a href="http://shengmingzhiqing.com/blog/octopress-lean-modification-1.html/">Octopress 精益修改 (1)</a></p>
+
+<p>3.<a href="http://beyondvincent.com/2013/07/27/2013-07-27-107-hello-page-of-github/">你好！github页面</a></p>
+
+<p>4.<a href="http://caok1231.iteye.com/blog/1553939">像hackers一样写博客(二)：Octopress设置与增加微博的侧边栏</a></p>
+
+<p>5.<a href="http://evoupsight.com/blog/2013/10/09/octopress-add-share-discuss/">Octopress添加社会化分享和添加多说评论</a></p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-03-09T14:52:24+08:00'><span class='date'>2015 年3 月9 日</span> <span class='time'>2:52 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/gitshi-yong-zong-jie.html" title="Next Post: git使用总结">git使用总结 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-03-09 14:52:24 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

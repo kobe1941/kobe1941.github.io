@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>iOS设置启动图的两种方式和bug汇总 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="前段时间一直在折腾启动图的设置，忙到最后发现居然是 Apple 的锅。。。 先讲一下正常的设置启动图的流程，有两种方式，一种是LaunchImage的方式，另一种就是LauchScreen.storyboard的方式。见下图： 其一： 其二： 以下是遇到的问题： 1.单独使用 &hellip;">
+  <meta name="keywords" content="iOS LaunchImage LaunchScreen.storyboard 启动图">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/iosshe-zhi-qi-dong-tu-de-liang-chong-fang-shi-he-bughui-zong.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">iOS设置启动图的两种方式和bug汇总</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-06-05T18:35:31+08:00'><span class='date'>2016 年6 月5 日</span> <span class='time'>6:35 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>前段时间一直在折腾启动图的设置，忙到最后发现居然是 Apple 的锅。。。</p>
+
+<p>先讲一下正常的设置启动图的流程，有两种方式，一种是LaunchImage的方式，另一种就是LauchScreen.storyboard的方式。见下图：</p>
+
+<p>其一：</p>
+
+<p><img src="/images/2016/06/1.png" alt="" /></p>
+
+<p>其二：
+<img src="/images/2016/06/2.png" alt="" />
+<img src="/images/2016/06/3.png" alt="" /></p>
+
+<!--more-->
+
+<p>以下是遇到的问题：</p>
+
+<p>1.单独使用 LaunchImage 来设置启动图时：</p>
+
+<p>①iOS9 系统的手机，在 APP 从后台通过 openURL 拉起到前台时，不会出现启动图；</p>
+
+<p>②但 iOS7 和 iOS8 正常。</p>
+
+<p>2.单独使用 LaunchScreen.storyboard 来设置启动图时：</p>
+
+<p>①iOS7 不支持该方式；</p>
+
+<p>②iOS8 系统会导致 APP 在从后台被拉起到前台时，先出现黑屏再出现启动画面的情况，</p>
+
+<p>③iOS9 系统，如果更换过启动图， APP 在后台被拉起到前台时出现的启动图不会更新。</p>
+
+<p>3.使用 LaunImage 和 LaunchScreen.storyboard 混用的方式，问题如下：</p>
+
+<p>①iOS8 系统会导致 APP 在从后台被拉起到前台时，先出现黑屏再出现启动画面的情况；</p>
+
+<p>②iOS9 系统，如果更换过启动图， APP 在后台被拉起到前台时出现的启动图不会更新。</p>
+
+<p>补充：</p>
+
+<p>另如果某个版本使用了 LaunchScreen.storyboard 方式来设置启动图后，后续的升级版本不可再更改为 LaunchImage 的方式，如果有更改，则启动图依然会使用之前 LaunchScreen.storyboard 里的内容。见 stackoverflow 的<a href="http://stackoverflow.com/questions/33730168/how-to-change-launch-screen-file-to-launch-images-source-when-app-update/37434449#37434449">这个问题</a>。</p>
+
+<p>关于 iOS8 下 APP 从后台拉起到前台会先短时间黑屏的问题，测试发现微信和微博也同样存在。</p>
+
+<p>解决方案：
+如果可以像微信和微博一样，容忍iOS8系统下拉起时的短暂黑屏，而且确定以后不会更改启动图，也不会再转回使用LaunchImage来设置启动图的方式，那么就可以使用LaunchScreen.storyboard这种方式来设置启动图，否则还是乖乖使用LaunchImage这种方式吧，而且，如果你的应用需要支持iOS7，那么也要使用LaunchImage方式，当然你可以在应用中同时使用两种设置启动图的方式来兼容iOS7和以后的系统。</p>
+
+<p>两种启动图方式同时设置见下图：</p>
+
+<p><img src="/images/2016/06/4.png" alt="" /></p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-06-05T18:35:31+08:00'><span class='date'>2016 年6 月5 日</span> <span class='time'>6:35 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/effective-objective-c-2-dot-0.html" title="Previous Post: 《Effective Objective-C 2.0》">&laquo; 《Effective Objective-C 2.0》</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html" title="Next Post: SDWebImage使用小结与原理浅析">SDWebImage使用小结与原理浅析 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2016-06-05 18:35:31 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

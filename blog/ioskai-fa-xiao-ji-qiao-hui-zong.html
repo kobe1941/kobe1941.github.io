@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>iOS开发小技巧汇总 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文汇总了一些iOS开发中的小技巧，不定时更新。 1.让UITableView滚动到指定位置
+可使用如下方法使UITableView滚动到指定位置： 其中，UITableViewScrollPosition代表，滚动完成时，目标行indexPath在屏幕的顶部、中间还是底部。 2.iOS7.0. &hellip;">
+  <meta name="keywords" content="iOS开发 技巧 汇总">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/ioskai-fa-xiao-ji-qiao-hui-zong.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">iOS开发小技巧汇总</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-03-22T18:12:04+08:00'><span class='date'>2015 年3 月22 日</span> <span class='time'>6:12 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2 id="ios">本文汇总了一些iOS开发中的小技巧，不定时更新。</h2>
+<!--more-->
+
+<h2 id="uitableview">1.让UITableView滚动到指定位置</h2>
+<p>可使用如下方法使UITableView滚动到指定位置：</p>
+
+<p><img src="/images/2015/03/22/UITableView1.png" alt="hehe" /></p>
+
+<p><img src="/images/2015/03/22/UITableView2.png" alt="hehe" /></p>
+
+<p>其中，UITableViewScrollPosition代表，滚动完成时，目标行indexPath在屏幕的顶部、中间还是底部。</p>
+
+<h2 id="ios703">2.iOS7.0.3系统的几个坑</h2>
+<p>1）加约束的时候不能直接设置为<code>MAXFLOAT</code>：</p>
+
+<p><img src="/images/2015/03/22/Constraint1.png" alt="" /></p>
+
+<p>2）UITableViewCell的contentView的高度问题：
+iOS7.0.3系统如果不手动改变高度，有时候(非必现)会一直为44，更高的系统版本(比如iOS7.0.4及以上)则无此问题。</p>
+
+<h2 id="scrollviewuibuttonscrollview">3.让scrollView上的UIButton在选中后手指滑动依然可以滚动scrollView</h2>
+<p>在scrollView或者tableView上添加了button，选中button，不松手的情况下，手指继续滑动，这个时候scrollView是无法滑动的，因为事件被button拦截了，要想不松手的情况下继续滑动使scrollView滚动，同时button取消选中状态，可继承scrollView并作如下处理：</p>
+
+<p><img src="/images/2015/03/22/UIScrollView1.png" alt="" /></p>
+
+<h2 id="uitextviewplaceholder">4.给UITextView加上placeHolder和禁止回车键</h2>
+<p>1）加一个UILabel到UITextView上方，调整好间距。
+然后在代理方法中作如下处理即可：</p>
+
+<p><img src="/images/2015/03/22/UITextView1.png" alt="" /></p>
+
+<p>2）让UITextView禁止回车键，可在代理方法中做如下处理：</p>
+
+<p><img src="/images/2015/03/22/UITextView2.png" alt="" /></p>
+
+<p>可自行控制是否收起键盘。根据项目需要进行封装以实现代码复用。</p>
+
+<h2 id="section">5.区域截图</h2>
+
+<p>目的是在self.imageView这张大图片上截图一个区域。</p>
+
+<p>代码：</p>
+
+<p><img src="/images/2015/03/22/CutPicture1.png" alt="" /></p>
+
+<p>注意：
+self.selectView是一个控件，透明，用于显示要截取的具体区域。因其是添加到self.view上的，故截图前需要转换frame。
+opaque表示不透明度，opaque=yes表示不透明，配合alpha使用。</p>
+
+<p>理由见这里：</p>
+
+<p><img src="/images/2015/03/22/CutPicture2.jpg" alt="" /></p>
+
+<h2 id="core-graphics">6.Core Graphics绘制股票曲线方法</h2>
+
+<p><img src="/images/2015/03/22/stock1.jpg" alt="" /></p>
+
+<p>画上面这样的图，有两种方式：</p>
+
+<p>1）底部的基准线和虚线用一个UIView进行重绘，然后股票的走势曲线和填充的红色用一个UIView来绘制，再进行叠加，可以设置上面view的透明度。这样在填充的时候，可以一步到位。即直接封闭股票走势曲线，但是把不显示的曲线画到UIView的界面外边，以实现效果。</p>
+
+<p>2）直接用一个UIView进行重绘，填充部分的绘制分两个步骤，第一先画股票走势曲线，第二，再设定很小的线宽(可以设置为0)画一个封闭的图形，该封闭图形的上边界与之前画的股票走势曲线完全重合。这样所有的绘制可以在一个控件上实现。</p>
+
+<h2 id="section-1">7.模拟器的各种路径</h2>
+<p>1）模拟器路径
+Xcode6以后模拟器在Mac上的位置为：/Users/username/Library/Developer/CoreSimulator
+其中，username表示用户名，Library表示资源库，资源库文件夹默认是隐藏的。</p>
+
+<p><img src="/images/2015/03/22/Simulator1.png" alt="" /></p>
+
+<p>2）应用沙盒地址路径
+在Xcode6中，应用程序文件、Document文件夹、Library文件夹、tmp文件夹这四个文件放在了不同的目录中。应用程序文件路径：/Users/username/Library/Developer/CoreSimulator/Devices/模拟器UDID/data/Containers/Bundle/Application文件夹下；Document文件夹、Library文件夹、tmp文件夹路径：/Users/username/Library/Developer/CoreSimulator/Devices/模拟器UDID/data/Containers/Data/Application文件下。但是不幸的是，这两个路径打开后的文件名，还是经过编码过的，而且，同一个应用中的应用程序文件和D、L、t文件夹所在的文件夹的文件名是不同的。只能自己找。</p>
+
+<p>3）NSUserDefault的文件存储位置路径
+在Xcode6中，程序对使用NSUserDefault方式创建的plist文件的位置进行了更换，具体路径为：/Users/username/Library/Developer/CoreSimulator/Devices/模拟器UDID/data/Library/Preferences文件夹下。</p>
+
+<p>这里特别说一下，如果按照在Finder里打开的路劲来看，并不是这样的，但通过 Finder，前往文件夹，通过该路径查找是可以查到的。上述的路径地址是通过查看Preferences文件夹的显示简介获得的。
+        通过上述的路径可以看出，通过NSUserDefault创建的plist文件夹还是在Library文件下，但不同的是，真正存放的位置变了，成了在模拟器的资料库文件夹下，这样的改变所产生的变化就是，当我们在删除模拟器中的应用程序后，plist文件还是会保留，并不会删除。但在真机中，也是会删除的。</p>
+
+<p>备注：
+打开Mac隐藏文件命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">defaults write com.apple.finder AppleShowAllFiles -bool true</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>关闭Mac隐藏文件命令：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">defaults write com.apple.finder AppleShowAllFiles -bool false</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-2">8.事件传递和响应链</h2>
+<p>1）关于事件分发和响应看<a href="http://blog.csdn.net/wzzvictory/article/details/9264335">这里</a>。</p>
+
+<p>2）关于scrollView或者tableView，滑动手势不会被其子View拦截的原因：</p>
+
+<p>UIScrollView在手势上有很复杂的运算，针对某个手势，首先判断是否应该处理，若不该自己处理，就往下传递，直到找到第一响应者。</p>
+
+<p>你所说的那个滑动，是应该UIScrollView滚动的，是你的手势对UIScrollView来说就是滚动的手势，这也满足在一个有着很多控件的UIScrollView上，你迅速在界面上扫动，就是UIScrollView的滑动，不然你一旦手势在某个控件上，滑动就被控件接受了，那样滑动UIScrollView就会很困难了。 实际上这是一个时间问题（scrollview.delayContentTouch），你在按下到滑动的时间若小于某个值，就是UIScrollView的滚动，若大于某个值，就是控件去处理，你可以试试的。</p>
+
+<p>hitTest方法是一个消息传递的试探方法，去找第一响应者，这个里面你可以来决定当前view是否处理消息，无法判断是否拖动还是单击的</p>
+
+<p>该解读来自CocoaChina，链接在<a href="http://www.cocoachina.com/bbs/read.php?tid=253004">这里</a>。</p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-03-22T18:12:04+08:00'><span class='date'>2015 年3 月22 日</span> <span class='time'>6:12 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/maczhong-duan-chang-yong-ming-ling.html" title="Previous Post: Mac终端常用命令">&laquo; Mac终端常用命令</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/gei-kong-zhi-qi-jia-sou-suo-kuang-qie-dian-ji-hou-ke-quan-ping.html" title="Next Post: 给控制器加搜索框且点击后可全屏">给控制器加搜索框且点击后可全屏 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-03-22 18:12:04 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

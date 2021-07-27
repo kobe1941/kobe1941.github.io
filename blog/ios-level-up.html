@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>iOS知识结构 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="计算机三大知识结构：数据结构和算法，网络，操作系统。 这里陈硕在知乎上有个补充：https://www.zhihu.com/question/21405835，主要是谈到了计算机体系结构，这一块涉及到各个层面知识的串联和整合。 本文不会讲的很详细，只是简单罗列一些知识点及其应用场景， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/ios-level-up.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">iOS知识结构</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-12T18:06:44+08:00'><span class='date'>2019 年5 月12 日</span> <span class='time'>6:06 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>计算机三大知识结构：数据结构和算法，网络，操作系统。</p>
+
+<p>这里陈硕在知乎上有个补充：<a href="https://www.zhihu.com/question/21405835">https://www.zhihu.com/question/21405835</a>，主要是谈到了计算机体系结构，这一块涉及到各个层面知识的串联和整合。</p>
+
+<p>本文不会讲的很详细，只是简单罗列一些知识点及其应用场景，具体怎么做不会展开。</p>
+
+<p>主要分几块的内容：iOS开发相关，计算机知识结构，软实力和职业规划。</p>
+
+<!--more-->
+
+<h1 id="ios">一、iOS相关</h1>
+
+<h3 id="ios-1">1.iOS基础知识</h3>
+
+<p>OC语法，类别（系统类与自定义类的函数覆盖），协议与多重继承的关系，继承是用什么数据结构实现的（C++和OC）</p>
+
+<p>引用计数与内存管理，ARC下什么情况需要自己管理内存</p>
+
+<p>atomic的含义与内部实现，block是否必须用copy修饰？</p>
+
+<p>数据库基础操作（sqlite）</p>
+
+<p>NSThread/NSOperation/GCD使用</p>
+
+<p>事件响应链与事件派发传递流程</p>
+
+<p>H5与OC的交互</p>
+
+<h3 id="ios-2">2.iOS进阶知识</h3>
+
+<p>UI方面：CALayer与CoreAnimation做动画，CoreGraphic绘图，TextKit/CoreText图文混排。</p>
+
+<p>正则表达式</p>
+
+<p>图层混合，离屏渲染的原因及解决方案</p>
+
+<p>UITableView卡顿及其解决方法</p>
+
+<p>OC对象模型，isa与super指向图（可以增加函数和isa混写的基础）</p>
+
+<p>KVC/KVO实现原理，ARC（<a href="http://blog.sunnyxx.com/2015/01/17/self-in-arc/">http://blog.sunnyxx.com/2015/01/17/self-in-arc/</a>），weak的实现原理，关联对象的原理，自动释放池的实现原理，（可变）数组和字典的实现原理</p>
+
+<p>method swizzle和 isa swizzle</p>
+
+<p>Block的实现原理与破解参数（方法签名），循环引用与解决方案</p>
+
+<p>runtime的应用</p>
+
+<p><a href="https://blog.ibireme.com/2015/05/18/runloop/">runloop的原理与应用</a>（对应安卓的looper以及前端的event loop），与线程的关系，子线程如何保活与销毁</p>
+
+<p>GCD原理（线程池实现原理） ——类似UITableViewCell的缓存池</p>
+
+<p>消息转发的流程，如何避免不能识别的方法崩溃</p>
+
+<p>内存泄漏的常见场景及其解决方法，如何查找内存泄漏</p>
+
+<p>Xcode如何调试EXC_BAD_ACCESS，常用LLDB调试命令有哪些</p>
+
+<p>如何保证线程安全，比如数据库/文件/变量</p>
+
+<p>NSProxy，NSHashTable与NSMapTable的应用场景</p>
+
+<h3 id="section">3.高阶</h3>
+
+<p>从HTTP请求到UIView渲染的流程和原理</p>
+
+<p>JavascriptCore的原理</p>
+
+<p>runtime的原理</p>
+
+<p>崩溃库的原理，PLCrashreporter/KSCrash</p>
+
+<p>卡顿监控和抓堆栈的原理</p>
+
+<p>崩溃日志解析流程</p>
+
+<p>APP与extension是如何共享数据的，Macport底层是用哪一种进程间通信方式来实现的</p>
+
+<h3 id="section-1">4.开源库</h3>
+
+<p>AFNetworking</p>
+
+<p>SDWebImage/FastImageCache</p>
+
+<p>YYCache</p>
+
+<p>MJExtension/YYModel</p>
+
+<p>ASDK</p>
+
+<h3 id="section-2">5.技术专项</h3>
+
+<p>安装包size</p>
+
+<p>启动时间</p>
+
+<p>流畅性/帧率</p>
+
+<p>稳定性与主线程卡顿</p>
+
+<p>内存消耗与内存泄漏</p>
+
+<p>CPU使用率</p>
+
+<p>网络优化（含弱网）</p>
+
+<p>长连接心跳策略（参考微信）</p>
+
+<h3 id="section-3">6.质量相关</h3>
+
+<p>代码规范</p>
+
+<p>持续集成</p>
+
+<p>自动化测试</p>
+
+<h3 id="section-4">7.其他</h3>
+
+<p>直播几种协议的优缺点，如何性能调优，</p>
+
+<p>直播是如何拿到第一帧开始显示的，直播的四大性能指标（直播的四大指标：画质、卡顿率、延时、秒开。画质和卡顿率要看传说的码率，码率高画质高，卡顿率也可能增大。延时跟直播协议直接相关。秒开则主要是减少GOP，即减少 I 帧在视频流的间隔。）</p>
+
+<p>逆向</p>
+
+<p>下拉刷新原理</p>
+
+<p>数据安全（沙盒，HTTPS/二次加密，单次登录token）</p>
+
+<p>代码安全（混淆加固）</p>
+
+<p>音视频处理等特定领域，OpenGL，FFmpeg</p>
+
+<p>iOS相关的推荐书籍</p>
+
+<p><a href="https://book.douban.com/subject/24284008/">Objective-C 基础教程</a></p>
+
+<p><a href="https://book.douban.com/subject/24720270/">Objective-C 高级编程</a></p>
+
+<p><a href="https://book.douban.com/subject/25829244/">Effective Objective-C 2.0</a></p>
+
+<p><a href="https://book.douban.com/subject/25976913/">iOS编程实战</a></p>
+
+<p>逆向的书主要就以下两本，建议先看第一本再看第二本</p>
+
+<p><a href="https://book.douban.com/subject/26363333/">iOS应用逆向工程 第2版</a></p>
+
+<p><a href="https://book.douban.com/subject/30239776/">iOS应用逆向与安全</a></p>
+
+<h1 id="section-5">二、计算机基础知识</h1>
+
+<h3 id="section-6">1.网络知识</h3>
+
+<p>HTTP/HTTPS（握手流程）</p>
+
+<p>DNS（劫持）</p>
+
+<p>TCP三次握手四次挥手/慢启动/滑动窗口/流量控制/拥塞控制/快速重传/延迟应答/捎带应答，Dos攻击与防护</p>
+
+<p>第三次握手或第四次挥手如果丢包会如何处理？</p>
+
+<p>UDP及其应用</p>
+
+<p>IP（IPV4与IPV6）与数据链路</p>
+
+<p>cookie与session的区别和联系</p>
+
+<p>公钥加密算法，证书信任链和数字签名</p>
+
+<p>HTTP短连接和长连接的区别和联系</p>
+
+<p>从浏览器输入一个字符串后发生了什么？</p>
+
+<p>网络相关推荐书籍</p>
+
+<p><a href="https://book.douban.com/subject/25863515/">图解HTTP</a></p>
+
+<p><a href="https://book.douban.com/subject/24737674/">图解TCP/IP</a></p>
+
+<p><a href="https://book.douban.com/subject/10746113/">HTTP权威指南</a></p>
+
+<p><a href="https://book.douban.com/subject/26960678/">计算机网络 [谢希仁] </a></p>
+
+<h3 id="section-7">2.数据结构和算法</h3>
+
+<p>数组，链表，哈希表的实现原理</p>
+
+<p>串和KMP</p>
+
+<p>二叉树，二叉排序树，AVL二叉平衡树，红黑树，B数和B+树</p>
+
+<p>队列，栈和堆及其应用</p>
+
+<p>图的最小连接路径（最小生成图），广度遍历与深度遍历</p>
+
+<p>排序和查找算法，不同排序算法的适用场景，如何选择</p>
+
+<p>递归与分治，动态规划和贪心算法</p>
+
+<p><a href="https://book.douban.com/subject/6424904/">大话数据结构</a></p>
+
+<p><a href="https://book.douban.com/subject/27008702/">剑指offer</a></p>
+
+<p>如果是准备面试的话去LeetCode刷题目吧</p>
+
+<h3 id="section-8">3.操作系统</h3>
+
+<p>进程和线程，进程间通信和线程间通信的方式</p>
+
+<p>进程的内存分布区域：代码区，常量区，数据区（已初始化和未初始化），堆和栈</p>
+
+<p>不同锁的区别，什么情况下会死锁，怎么解决</p>
+
+<p>存储管理与置换/淘汰算法</p>
+
+<p>文件系统、数据库索引和B树B+树的关联</p>
+
+<p>多处理机，多计算机和分布式系统的概念</p>
+
+<p>用户态和内核态，用户线程和内核线程的关系/如何切换/映射关系</p>
+
+<p>BSD层和Mach层</p>
+
+<p><a href="https://book.douban.com/subject/3852290/">现代操作系统</a></p>
+
+<p><a href="https://book.douban.com/subject/25870206/">深入解析Mac OS X 与 iOS操作系统</a></p>
+
+<p><a href="https://book.douban.com/subject/5333562/">深入理解计算机系统</a></p>
+
+<h3 id="section-9">4.设计模式和面向对象设计原则</h3>
+
+<p>MVC，MVVM，单例，代理，观察者，中介者，组合模式</p>
+
+<p>工厂模式/简单工厂</p>
+
+<p>单一原则，依赖倒置原则，接口隔离原则，迪米特原则（最小知识原则），</p>
+
+<p>无环依赖原则，开闭原则，里氏替换原则</p>
+
+<p>时序图，流程图，UML类图，框架图</p>
+
+<p><a href="https://book.douban.com/subject/2334288/">大话设计模式</a></p>
+
+<h1 id="section-10">三、软实力</h1>
+
+<p>沟通与表达</p>
+
+<p>总结复盘与提炼/升华</p>
+
+<p>支撑业务与个人成长/团队成长</p>
+
+<p>个人与团队影响力（技术总结，SDK，培训等给其他团队带来价值）</p>
+
+<h1 id="section-11">四、职业规划</h1>
+
+<p>技术专家 or 技术管理</p>
+
+<p>全栈 or 架构师</p>
+
+<p>目前看到的国内的现象是，技术管理并不见得核心竞争力有多强，而且换公司之后的可复用性和可落地性，比走技术深度路线似乎更难。</p>
+
+<p>另外全栈工程师的确很厉害，无论在创业公司还是大厂都很喜欢，但是全栈一定要有自己特别擅长的领域，就是说还是T型人才的路子，如果一个领域的技术都不深入，成为每个都会一点每个都不精的万金油，也很尴尬。</p>
+
+<p>架构师的价值主要体现在服务器端，客户端来说，除非产品的DAU在百万以上，否则架构设计真正在推动项目往前走所体现的价值，并没有多大，也就是说，如果业务做不起来，架构设计的再精妙再先进，都没办法创造价值。而往往架构师又是脱离一线业务的，所以你会发现基本架构师都是在大厂的基础架构组做支撑，或者在某个明星项目里成为核心主力，但是在一般的创业公司，或者中小型的公司，则不见得都设有该岗位。。</p>
+
+<p>整体上，技术方向也有风口这一说法，比如大数据在2013年那会儿就很火，千人千面的推荐算法很受欢迎，大厂招人给的溢价也高。现在则是人工智能的子分支，比如计算机视觉里的人脸识别，声音识别，或者自动驾驶等比较火爆。基本上要获得溢价，都是要在某个技术受欢迎，大厂愿意投资，而市场上人才比较紧缺的时候才行。一旦人才供需平衡了，或者技术的风口过了，溢价也容易往下掉。对于普通人来说，如果能抓住某次溢价，把身价往上走一个两个台阶，那还是很爽的，不过现在技术发展越来越成熟，往后的技术风口上的技术，门槛越来越高，像人工智能/自动驾驶这种，已经不是普通本科生能够靠自学学会的了，也不是普通智商的人能玩的转的。平常心吧~</p>
+
+<p>网上看到的一个大神</p>
+
+<p><img src="/images/2019/05/12/20.png" alt="" /></p>
+
+<p>从图中的描述里，可以看出大神的过人之处，可以以此为榜样去学习和进步~</p>
+
+<h3 id="section-12">写在最后</h3>
+
+<p>技术能力的提升不是一个线性增长的过程，当你各方面的基础知识基本过关了之后，如果之后不知道如何深入可以尝试去做一些技术专项，最好是跟自己公司的项目有关联的技术专项，既能提升自己在某一块的技术水平，也能对公司有帮助，这是一个互惠互利的过程。</p>
+
+<p>抛开音/视频，AR/VR这种特定领域的技术来说，在通用的技术栈上，如果不知道怎么继续深入了，那就去学习操作系统吧，深挖操作系统的原理和实现，会有很大的好处。目前本菜鸡也在往这个方向深入学习，希望跟大家共勉~</p>
+
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-05-12T18:06:44+08:00'><span class='date'>2019 年5 月12 日</span> <span class='time'>6:06 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/crash-anr.html" title="Previous Post: 崩溃和卡顿">&laquo; 崩溃和卡顿</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/memory.html" title="Next Post: iOS APP内存优化记录">iOS APP内存优化记录 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2019-05-12 18:06:44 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

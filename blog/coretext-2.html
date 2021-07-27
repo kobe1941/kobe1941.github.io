@@ -1,0 +1,881 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CoreText使用教程(二) - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本篇文章为CoreText系列的第二篇，在一个UIView的子控件上实现图文混排显示，支持本地图片和网络图片的显示，暂时不支持图片的点击监听功能。 CoreText从绘制纯文本到绘制图片，依然是使用NSAttributedString， &hellip;">
+  <meta name="keywords" content="CoreText">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io/blog/coretext-2.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CoreText使用教程(二)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-21T11:54:00+08:00'><span class='date'>2015 年5 月21 日</span> <span class='time'>11:54 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文章为CoreText系列的第二篇，在一个UIView的子控件上实现图文混排显示，支持本地图片和网络图片的显示，暂时不支持图片的点击监听功能。</p>
+
+<!--more-->
+
+<p>CoreText从绘制纯文本到绘制图片，依然是使用NSAttributedString，只不过图片的实现方式是用一个空白字符作为在NSAttributedString中的占位符，然后设置代理，告诉CoreText给该占位字符留出一定的宽高。最后把图片绘制到预留的位置上。</p>
+
+<p>本文实现了同时绘制本地图片和网络图片。大体思路是，网络图片还未下载时，先使用该图片的占位图片进行绘制（为了方便，占位图直接使用了另一张本地图片），然后使用SDWebImage框架提供的下载功能去下载网络图片，等下载完成时，调用UIView的setNeedDisplay方法进行重绘即可。</p>
+
+<p>需要注意的一点就是，对于本地图片，是可以直接拿到其宽高数据的，对于网络的图片，在下载完成之前不知道其宽高，我们往往会采取在其URL后边拼接上宽高信息的方式来处理。</p>
+
+<p>绘制过程见下图</p>
+
+<p>网络图片还未下载完成时的效果：</p>
+
+<p><img src="/images/2015/05/21/CoreText_1.png" alt="" /></p>
+
+<p>网络图片已下载完成时的效果：</p>
+
+<p><img src="/images/2015/05/21/CoreText_2.png" alt="" /></p>
+
+<p>以下是代码部分</p>
+
+<p>图片的代理方法：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="cp">#pragma mark 图片代理</span>
+</span><span class="line"><span class="kt">void</span> <span class="nf">RunDelegateDeallocCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">refCon</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;RunDelegate dealloc&quot;</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="n">CGFloat</span> <span class="nf">RunDelegateGetAscentCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">refCon</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">imageName</span> <span class="o">=</span> <span class="p">(</span><span class="k">__bridge</span> <span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">refCon</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="p">([</span><span class="n">imageName</span> <span class="nl">isKindOfClass</span><span class="p">:[</span><span class="bp">NSString</span> <span class="k">class</span><span class="p">]])</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="c1">// 对应本地图片</span>
+</span><span class="line">        <span class="k">return</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="n">imageName</span><span class="p">].</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 对应网络图片</span>
+</span><span class="line">    <span class="k">return</span> <span class="p">[[(</span><span class="k">__bridge</span> <span class="bp">NSDictionary</span> <span class="o">*</span><span class="p">)</span><span class="n">refCon</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;height&quot;</span><span class="p">]</span> <span class="n">floatValue</span><span class="p">];</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="n">CGFloat</span> <span class="nf">RunDelegateGetDescentCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">refCon</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="n">CGFloat</span> <span class="nf">RunDelegateGetWidthCallback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">refCon</span><span class="p">)</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">imageName</span> <span class="o">=</span> <span class="p">(</span><span class="k">__bridge</span> <span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">refCon</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="p">([</span><span class="n">imageName</span> <span class="nl">isKindOfClass</span><span class="p">:[</span><span class="bp">NSString</span> <span class="k">class</span><span class="p">]])</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="c1">// 本地图片</span>
+</span><span class="line">        <span class="k">return</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="n">imageName</span><span class="p">].</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 对应网络图片</span>
+</span><span class="line">    <span class="k">return</span> <span class="p">[[(</span><span class="k">__bridge</span> <span class="bp">NSDictionary</span> <span class="o">*</span><span class="p">)</span><span class="n">refCon</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;width&quot;</span><span class="p">]</span> <span class="n">floatValue</span><span class="p">];</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>图片的代理方法里主要是区别了本地图片和网络图片的宽高返回方式。本地图片因为在内存里可以直接读取，网络图片则是在设置代理时用服务端返回的宽高字段的。</p>
+
+<p>下载图片的方法：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">downLoadImageWithURL:</span><span class="p">(</span><span class="bp">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">url</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">__weak</span> <span class="k">typeof</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span> <span class="n">weakSelf</span> <span class="o">=</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_global_queue</span><span class="p">(</span><span class="n">DISPATCH_QUEUE_PRIORITY_DEFAULT</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">^</span><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">        <span class="n">SDWebImageOptions</span> <span class="n">options</span> <span class="o">=</span> <span class="n">SDWebImageRetryFailed</span> <span class="o">|</span> <span class="n">SDWebImageHandleCookies</span> <span class="o">|</span> <span class="n">SDWebImageContinueInBackground</span><span class="p">;</span>
+</span><span class="line">        <span class="n">options</span> <span class="o">=</span> <span class="n">SDWebImageRetryFailed</span> <span class="o">|</span> <span class="n">SDWebImageContinueInBackground</span><span class="p">;</span>
+</span><span class="line">        <span class="p">[[</span><span class="n">SDWebImageManager</span> <span class="n">sharedManager</span><span class="p">]</span> <span class="nl">downloadImageWithURL</span><span class="p">:</span><span class="n">url</span> <span class="nl">options</span><span class="p">:</span><span class="n">options</span> <span class="nl">progress</span><span class="p">:</span><span class="nb">nil</span> <span class="nl">completed</span><span class="p">:</span><span class="o">^</span><span class="p">(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span><span class="p">,</span> <span class="bp">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">,</span> <span class="n">SDImageCacheType</span> <span class="n">cacheType</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="n">finished</span><span class="p">,</span> <span class="bp">NSURL</span> <span class="o">*</span><span class="n">imageURL</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">weakSelf</span><span class="p">.</span><span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">dispatch_async</span><span class="p">(</span><span class="n">dispatch_get_main_queue</span><span class="p">(),</span> <span class="o">^</span><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="n">weakSelf</span><span class="p">.</span><span class="n">image</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="p">[</span><span class="nb">self</span> <span class="n">setNeedsDisplay</span><span class="p">];</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">            <span class="p">});</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">        <span class="p">}];</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">});</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>绘制的方法，相比于上一篇博文，主要是增加了设置图片代理和绘制图片的逻辑：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+<span class="line-number">67</span>
+<span class="line-number">68</span>
+<span class="line-number">69</span>
+<span class="line-number">70</span>
+<span class="line-number">71</span>
+<span class="line-number">72</span>
+<span class="line-number">73</span>
+<span class="line-number">74</span>
+<span class="line-number">75</span>
+<span class="line-number">76</span>
+<span class="line-number">77</span>
+<span class="line-number">78</span>
+<span class="line-number">79</span>
+<span class="line-number">80</span>
+<span class="line-number">81</span>
+<span class="line-number">82</span>
+<span class="line-number">83</span>
+<span class="line-number">84</span>
+<span class="line-number">85</span>
+<span class="line-number">86</span>
+<span class="line-number">87</span>
+<span class="line-number">88</span>
+<span class="line-number">89</span>
+<span class="line-number">90</span>
+<span class="line-number">91</span>
+<span class="line-number">92</span>
+<span class="line-number">93</span>
+<span class="line-number">94</span>
+<span class="line-number">95</span>
+<span class="line-number">96</span>
+<span class="line-number">97</span>
+<span class="line-number">98</span>
+<span class="line-number">99</span>
+<span class="line-number">100</span>
+<span class="line-number">101</span>
+<span class="line-number">102</span>
+<span class="line-number">103</span>
+<span class="line-number">104</span>
+<span class="line-number">105</span>
+<span class="line-number">106</span>
+<span class="line-number">107</span>
+<span class="line-number">108</span>
+<span class="line-number">109</span>
+<span class="line-number">110</span>
+<span class="line-number">111</span>
+<span class="line-number">112</span>
+<span class="line-number">113</span>
+<span class="line-number">114</span>
+<span class="line-number">115</span>
+<span class="line-number">116</span>
+<span class="line-number">117</span>
+<span class="line-number">118</span>
+<span class="line-number">119</span>
+<span class="line-number">120</span>
+<span class="line-number">121</span>
+<span class="line-number">122</span>
+<span class="line-number">123</span>
+<span class="line-number">124</span>
+<span class="line-number">125</span>
+<span class="line-number">126</span>
+<span class="line-number">127</span>
+<span class="line-number">128</span>
+<span class="line-number">129</span>
+<span class="line-number">130</span>
+<span class="line-number">131</span>
+<span class="line-number">132</span>
+<span class="line-number">133</span>
+<span class="line-number">134</span>
+<span class="line-number">135</span>
+<span class="line-number">136</span>
+<span class="line-number">137</span>
+<span class="line-number">138</span>
+<span class="line-number">139</span>
+<span class="line-number">140</span>
+<span class="line-number">141</span>
+<span class="line-number">142</span>
+<span class="line-number">143</span>
+<span class="line-number">144</span>
+<span class="line-number">145</span>
+<span class="line-number">146</span>
+<span class="line-number">147</span>
+<span class="line-number">148</span>
+<span class="line-number">149</span>
+<span class="line-number">150</span>
+<span class="line-number">151</span>
+<span class="line-number">152</span>
+<span class="line-number">153</span>
+<span class="line-number">154</span>
+<span class="line-number">155</span>
+<span class="line-number">156</span>
+<span class="line-number">157</span>
+<span class="line-number">158</span>
+<span class="line-number">159</span>
+<span class="line-number">160</span>
+<span class="line-number">161</span>
+<span class="line-number">162</span>
+<span class="line-number">163</span>
+<span class="line-number">164</span>
+<span class="line-number">165</span>
+<span class="line-number">166</span>
+<span class="line-number">167</span>
+<span class="line-number">168</span>
+<span class="line-number">169</span>
+<span class="line-number">170</span>
+<span class="line-number">171</span>
+<span class="line-number">172</span>
+<span class="line-number">173</span>
+<span class="line-number">174</span>
+<span class="line-number">175</span>
+<span class="line-number">176</span>
+<span class="line-number">177</span>
+<span class="line-number">178</span>
+<span class="line-number">179</span>
+<span class="line-number">180</span>
+<span class="line-number">181</span>
+<span class="line-number">182</span>
+<span class="line-number">183</span>
+<span class="line-number">184</span>
+<span class="line-number">185</span>
+<span class="line-number">186</span>
+<span class="line-number">187</span>
+<span class="line-number">188</span>
+<span class="line-number">189</span>
+<span class="line-number">190</span>
+<span class="line-number">191</span>
+<span class="line-number">192</span>
+<span class="line-number">193</span>
+<span class="line-number">194</span>
+<span class="line-number">195</span>
+<span class="line-number">196</span>
+<span class="line-number">197</span>
+<span class="line-number">198</span>
+<span class="line-number">199</span>
+<span class="line-number">200</span>
+<span class="line-number">201</span>
+<span class="line-number">202</span>
+<span class="line-number">203</span>
+<span class="line-number">204</span>
+<span class="line-number">205</span>
+<span class="line-number">206</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">drawRect:</span><span class="p">(</span><span class="bp">CGRect</span><span class="p">)</span><span class="nv">rect</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="p">[</span><span class="nb">super</span> <span class="nl">drawRect</span><span class="p">:</span><span class="n">rect</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 1.获取上下文</span>
+</span><span class="line">    <span class="n">CGContextRef</span> <span class="n">contextRef</span> <span class="o">=</span> <span class="n">UIGraphicsGetCurrentContext</span><span class="p">();</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// [a,b,c,d,tx,ty]</span>
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;转换前的坐标：%@&quot;</span><span class="p">,</span><span class="n">NSStringFromCGAffineTransform</span><span class="p">(</span><span class="n">CGContextGetCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">)));</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 2.转换坐标系</span>
+</span><span class="line">    <span class="n">CGContextSetTextMatrix</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="n">CGAffineTransformIdentity</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CGContextTranslateCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">height</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CGContextScaleCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;转换后的坐标：%@&quot;</span><span class="p">,</span><span class="n">NSStringFromCGAffineTransform</span><span class="p">(</span><span class="n">CGContextGetCTM</span><span class="p">(</span><span class="n">contextRef</span><span class="p">)));</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 3.创建绘制区域，可以对path进行个性化裁剪以改变显示区域</span>
+</span><span class="line">    <span class="n">CGMutablePathRef</span> <span class="n">path</span> <span class="o">=</span> <span class="n">CGPathCreateMutable</span><span class="p">();</span>
+</span><span class="line">    <span class="n">CGPathAddRect</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">bounds</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 4.创建需要绘制的文字</span>
+</span><span class="line">    <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">attributed</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="s">@&quot;这是我的第一个coreText demo，我是要给兵来自老白干I型那个饿哦个呢给个I类回滚igkhpwfh 评估后共和国开不开vbdkaphphohghg 的分工额好几个辽宁省更怕hi维护你不看hi好人佛【井柏然把饿哦个&quot;</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="n">NSFontAttributeName</span> <span class="nl">value</span><span class="p">:[</span><span class="bp">UIFont</span> <span class="nl">systemFontOfSize</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 两种方式皆可</span>
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="n">NSForegroundColorAttributeName</span> <span class="nl">value</span><span class="p">:[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">]</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)];</span>
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:(</span><span class="kt">id</span><span class="p">)</span><span class="n">kCTForegroundColorAttributeName</span> <span class="nl">value</span><span class="p">:[</span><span class="bp">UIColor</span> <span class="n">greenColor</span><span class="p">]</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 设置行距等样式</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">lineSpace</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// 行距一般取决于这个值</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">lineSpaceMax</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span>
+</span><span class="line">    <span class="n">CGFloat</span> <span class="n">lineSpaceMin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class="line">    <span class="k">const</span> <span class="n">CFIndex</span> <span class="n">kNumberOfSettings</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 结构体数组</span>
+</span><span class="line">    <span class="bp">CTParagraphStyleSetting</span> <span class="n">theSettings</span><span class="p">[</span><span class="n">kNumberOfSettings</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">{</span><span class="n">kCTParagraphStyleSpecifierLineSpacingAdjustment</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">CGFloat</span><span class="p">),</span><span class="o">&amp;</span><span class="n">lineSpace</span><span class="p">},</span>
+</span><span class="line">        <span class="p">{</span><span class="n">kCTParagraphStyleSpecifierMaximumLineSpacing</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">CGFloat</span><span class="p">),</span><span class="o">&amp;</span><span class="n">lineSpaceMax</span><span class="p">},</span>
+</span><span class="line">        <span class="p">{</span><span class="n">kCTParagraphStyleSpecifierMinimumLineSpacing</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">CGFloat</span><span class="p">),</span><span class="o">&amp;</span><span class="n">lineSpaceMin</span><span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">};</span>
+</span><span class="line">    <span class="n">CTParagraphStyleRef</span> <span class="n">theParagraphRef</span> <span class="o">=</span> <span class="n">CTParagraphStyleCreate</span><span class="p">(</span><span class="n">theSettings</span><span class="p">,</span> <span class="n">kNumberOfSettings</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 单个元素的形式</span>
+</span><span class="line"><span class="c1">//    CTParagraphStyleSetting theSettings = {kCTParagraphStyleSpecifierLineSpacingAdjustment,sizeof(CGFloat),&amp;lineSpace};</span>
+</span><span class="line"><span class="c1">//    CTParagraphStyleRef theParagraphRef = CTParagraphStyleCreate(&amp;theSettings, kNumberOfSettings);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 两种方式皆可</span>
+</span><span class="line"><span class="c1">//    [attributed addAttribute:(id)kCTParagraphStyleAttributeName value:(__bridge id)theParagraphRef range:NSMakeRange(0, attributed.length)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 将设置的行距应用于整段文字</span>
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="n">NSParagraphStyleAttributeName</span> <span class="nl">value</span><span class="p">:(</span><span class="k">__bridge</span> <span class="kt">id</span><span class="p">)(</span><span class="n">theParagraphRef</span><span class="p">)</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">attributed</span><span class="p">.</span><span class="n">length</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">theParagraphRef</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 插入图片部分</span>
+</span><span class="line">    <span class="c1">//为图片设置CTRunDelegate,delegate决定留给图片的空间大小</span>
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">weicaiImageName</span> <span class="o">=</span> <span class="s">@&quot;about&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="n">CTRunDelegateCallbacks</span> <span class="n">imageCallbacks</span><span class="p">;</span>
+</span><span class="line">    <span class="n">imageCallbacks</span><span class="p">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">kCTRunDelegateVersion1</span><span class="p">;</span>
+</span><span class="line">    <span class="n">imageCallbacks</span><span class="p">.</span><span class="n">dealloc</span> <span class="o">=</span> <span class="n">RunDelegateDeallocCallback</span><span class="p">;</span>
+</span><span class="line">    <span class="n">imageCallbacks</span><span class="p">.</span><span class="n">getAscent</span> <span class="o">=</span> <span class="n">RunDelegateGetAscentCallback</span><span class="p">;</span>
+</span><span class="line">    <span class="n">imageCallbacks</span><span class="p">.</span><span class="n">getDescent</span> <span class="o">=</span> <span class="n">RunDelegateGetDescentCallback</span><span class="p">;</span>
+</span><span class="line">    <span class="n">imageCallbacks</span><span class="p">.</span><span class="n">getWidth</span> <span class="o">=</span> <span class="n">RunDelegateGetWidthCallback</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// ①该方式适用于图片在本地的情况</span>
+</span><span class="line">    <span class="c1">// 设置CTRun的代理</span>
+</span><span class="line">    <span class="n">CTRunDelegateRef</span> <span class="n">runDelegate</span> <span class="o">=</span> <span class="n">CTRunDelegateCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">imageCallbacks</span><span class="p">,</span> <span class="p">(</span><span class="k">__bridge</span> <span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="n">weicaiImageName</span><span class="p">));</span>
+</span><span class="line">    <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">imageAttributedString</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="s">@&quot; &quot;</span><span class="p">];</span><span class="c1">//空格用于给图片留位置</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">[</span><span class="n">imageAttributedString</span> <span class="nl">addAttribute</span><span class="p">:(</span><span class="bp">NSString</span> <span class="o">*</span><span class="p">)</span><span class="n">kCTRunDelegateAttributeName</span> <span class="nl">value</span><span class="p">:(</span><span class="k">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">runDelegate</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)];</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">runDelegate</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">[</span><span class="n">imageAttributedString</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="s">@&quot;imageName&quot;</span> <span class="nl">value</span><span class="p">:</span><span class="n">weicaiImageName</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 在index处插入图片，可插入多张</span>
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">insertAttributedString</span><span class="p">:</span><span class="n">imageAttributedString</span> <span class="nl">atIndex</span><span class="p">:</span><span class="mi">5</span><span class="p">];</span>
+</span><span class="line"><span class="c1">//    [attributed insertAttributedString:imageAttributedString atIndex:10];</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// ②若图片资源在网络上，则需要使用0xFFFC作为占位符</span>
+</span><span class="line">    <span class="c1">// 图片信息字典</span>
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">picURL</span> <span class="o">=</span><span class="s">@&quot;http://weicai-hearsay-avatar.qiniudn.com/b4f71f05a1b7593e05e91b0175bd7c9e?imageView2/2/w/192/h/277&quot;</span><span class="p">;</span>
+</span><span class="line">    <span class="bp">NSDictionary</span> <span class="o">*</span><span class="n">imgInfoDic</span> <span class="o">=</span> <span class="l">@{</span><span class="s">@&quot;width&quot;</span><span class="o">:</span><span class="mi">@192</span><span class="p">,</span><span class="s">@&quot;height&quot;</span><span class="o">:</span><span class="mi">@277</span><span class="l">}</span><span class="p">;</span> <span class="c1">// 宽高跟具体图片有关</span>
+</span><span class="line">    <span class="c1">// 设置CTRun的代理</span>
+</span><span class="line">    <span class="n">CTRunDelegateRef</span> <span class="n">delegate</span> <span class="o">=</span> <span class="n">CTRunDelegateCreate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">imageCallbacks</span><span class="p">,</span> <span class="p">(</span><span class="k">__bridge</span> <span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">imgInfoDic</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 使用0xFFFC作为空白的占位符</span>
+</span><span class="line">    <span class="kt">unichar</span> <span class="n">objectReplacementChar</span> <span class="o">=</span> <span class="mh">0xFFFC</span><span class="p">;</span>
+</span><span class="line">    <span class="bp">NSString</span> <span class="o">*</span><span class="n">content</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSString</span> <span class="nl">stringWithCharacters</span><span class="p">:</span><span class="o">&amp;</span><span class="n">objectReplacementChar</span> <span class="nl">length</span><span class="p">:</span><span class="mi">1</span><span class="p">];</span>
+</span><span class="line">    <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">space</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="n">content</span><span class="p">];</span>
+</span><span class="line">    <span class="n">CFAttributedStringSetAttribute</span><span class="p">((</span><span class="n">CFMutableAttributedStringRef</span><span class="p">)</span><span class="n">space</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">kCTRunDelegateAttributeName</span><span class="p">,</span> <span class="n">delegate</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">delegate</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 将创建的空白AttributedString插入进当前的attrString中，位置可以随便指定，不能越界</span>
+</span><span class="line">    <span class="p">[</span><span class="n">attributed</span> <span class="nl">insertAttributedString</span><span class="p">:</span><span class="n">space</span> <span class="nl">atIndex</span><span class="p">:</span><span class="mi">10</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 5.根据NSAttributedString生成CTFramesetterRef</span>
+</span><span class="line">    <span class="n">CTFramesetterRef</span> <span class="n">framesetter</span> <span class="o">=</span> <span class="n">CTFramesetterCreateWithAttributedString</span><span class="p">((</span><span class="n">CFAttributedStringRef</span><span class="p">)</span><span class="n">attributed</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">CTFrameRef</span> <span class="n">ctFrame</span> <span class="o">=</span> <span class="n">CTFramesetterCreateFrame</span><span class="p">(</span><span class="n">framesetter</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">attributed</span><span class="p">.</span><span class="n">length</span><span class="p">),</span> <span class="n">path</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 6.绘制除图片以外的部分</span>
+</span><span class="line">    <span class="n">CTFrameDraw</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">,</span> <span class="n">contextRef</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 处理绘制图片的逻辑</span>
+</span><span class="line">    <span class="n">CFArrayRef</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">CTFrameGetLines</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">);</span>
+</span><span class="line">    <span class="bp">CGPoint</span> <span class="n">lineOrigins</span><span class="p">[</span><span class="n">CFArrayGetCount</span><span class="p">(</span><span class="n">lines</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 把ctFrame里每一行的初始坐标写到数组里</span>
+</span><span class="line">    <span class="n">CTFrameGetLineOrigins</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">lineOrigins</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 遍历CTRun找出图片所在的CTRun并进行绘制</span>
+</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">CFArrayGetCount</span><span class="p">(</span><span class="n">lines</span><span class="p">);</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="c1">// 遍历每一行CTLine</span>
+</span><span class="line">        <span class="n">CTLineRef</span> <span class="n">line</span> <span class="o">=</span> <span class="n">CFArrayGetValueAtIndex</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineAscent</span><span class="p">;</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineDescent</span><span class="p">;</span>
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineLeading</span><span class="p">;</span> <span class="c1">// 行距</span>
+</span><span class="line">        <span class="n">CTLineGetTypographicBounds</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineAscent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineDescent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lineLeading</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">CFArrayRef</span> <span class="n">runs</span> <span class="o">=</span> <span class="n">CTLineGetGlyphRuns</span><span class="p">(</span><span class="n">line</span><span class="p">);</span>
+</span><span class="line">        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">CFArrayGetCount</span><span class="p">(</span><span class="n">runs</span><span class="p">);</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="c1">// 遍历每一个CTRun</span>
+</span><span class="line">            <span class="n">CGFloat</span> <span class="n">runAscent</span><span class="p">;</span>
+</span><span class="line">            <span class="n">CGFloat</span> <span class="n">runDescent</span><span class="p">;</span>
+</span><span class="line">            <span class="bp">CGPoint</span> <span class="n">lineOrigin</span> <span class="o">=</span> <span class="n">lineOrigins</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> <span class="c1">// 获取该行的初始坐标</span>
+</span><span class="line">            <span class="n">CTRunRef</span> <span class="n">run</span> <span class="o">=</span> <span class="n">CFArrayGetValueAtIndex</span><span class="p">(</span><span class="n">runs</span><span class="p">,</span> <span class="n">j</span><span class="p">);</span> <span class="c1">// 获取当前的CTRun</span>
+</span><span class="line">            <span class="bp">NSDictionary</span><span class="o">*</span> <span class="n">attributes</span> <span class="o">=</span> <span class="p">(</span><span class="bp">NSDictionary</span><span class="o">*</span><span class="p">)</span><span class="n">CTRunGetAttributes</span><span class="p">(</span><span class="n">run</span><span class="p">);</span>
+</span><span class="line">            <span class="bp">CGRect</span> <span class="n">runRect</span><span class="p">;</span>
+</span><span class="line">            <span class="n">runRect</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">CTRunGetTypographicBounds</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">CFRangeMake</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">runAscent</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">runDescent</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// 这一段可参考Nimbus的NIAttributedLabel</span>
+</span><span class="line">            <span class="n">runRect</span> <span class="o">=</span> <span class="n">CGRectMake</span><span class="p">(</span><span class="n">lineOrigin</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">CTLineGetOffsetForStringIndex</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">CTRunGetStringRange</span><span class="p">(</span><span class="n">run</span><span class="p">).</span><span class="n">location</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">),</span> <span class="n">lineOrigin</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">runDescent</span><span class="p">,</span> <span class="n">runRect</span><span class="p">.</span><span class="n">size</span><span class="p">.</span><span class="n">width</span><span class="p">,</span> <span class="n">runAscent</span> <span class="o">+</span> <span class="n">runDescent</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="bp">NSString</span> <span class="o">*</span><span class="n">imageName</span> <span class="o">=</span> <span class="p">[</span><span class="n">attributes</span> <span class="nl">objectForKey</span><span class="p">:</span><span class="s">@&quot;imageName&quot;</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">            <span class="k">if</span> <span class="p">([</span><span class="n">imageName</span> <span class="nl">isKindOfClass</span><span class="p">:[</span><span class="bp">NSString</span> <span class="k">class</span><span class="p">]])</span>
+</span><span class="line">            <span class="p">{</span>
+</span><span class="line">                <span class="c1">// 绘制本地图片</span>
+</span><span class="line">                <span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="n">imageName</span><span class="p">];</span>
+</span><span class="line">                <span class="bp">CGRect</span> <span class="n">imageDrawRect</span><span class="p">;</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+</span><span class="line">                <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;%.2f&quot;</span><span class="p">,</span><span class="n">lineOrigin</span><span class="p">.</span><span class="n">x</span><span class="p">);</span> <span class="c1">// 该值是0,runRect已经计算过起始值</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">runRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="c1">// + lineOrigin.x;</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">lineOrigin</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+</span><span class="line">                <span class="n">CGContextDrawImage</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="n">imageDrawRect</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="bp">CGImage</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="p">}</span> <span class="k">else</span>
+</span><span class="line">            <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">                <span class="n">imageName</span> <span class="o">=</span> <span class="nb">nil</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">                <span class="n">CTRunDelegateRef</span> <span class="n">delegate</span> <span class="o">=</span> <span class="p">(</span><span class="k">__bridge</span> <span class="n">CTRunDelegateRef</span><span class="p">)[</span><span class="n">attributes</span> <span class="nl">objectForKey</span><span class="p">:(</span><span class="k">__bridge</span> <span class="kt">id</span><span class="p">)</span><span class="n">kCTRunDelegateAttributeName</span><span class="p">];</span>
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">delegate</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="k">continue</span><span class="p">;</span> <span class="c1">// 如果是非图片的CTRun则跳过</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 网络图片</span>
+</span><span class="line">                <span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">self</span><span class="p">.</span><span class="n">image</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="c1">// 图片未下载完成，使用占位图片</span>
+</span><span class="line">                    <span class="n">image</span> <span class="o">=</span> <span class="p">[</span><span class="bp">UIImage</span> <span class="nl">imageNamed</span><span class="p">:</span><span class="n">weicaiImageName</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                    <span class="c1">// 去下载图片</span>
+</span><span class="line">                    <span class="p">[</span><span class="nb">self</span> <span class="nl">downLoadImageWithURL</span><span class="p">:[</span><span class="bp">NSURL</span> <span class="nl">URLWithString</span><span class="p">:</span><span class="n">picURL</span><span class="p">]];</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">                <span class="p">}</span> <span class="k">else</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="n">image</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">image</span><span class="p">;</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">                <span class="c1">// 绘制网络图片</span>
+</span><span class="line">                <span class="bp">CGRect</span> <span class="n">imageDrawRect</span><span class="p">;</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">image</span><span class="p">.</span><span class="n">size</span><span class="p">;</span>
+</span><span class="line">                <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;%.2f&quot;</span><span class="p">,</span><span class="n">lineOrigin</span><span class="p">.</span><span class="n">x</span><span class="p">);</span> <span class="c1">// 该值是0,runRect已经计算过起始值</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">runRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">x</span><span class="p">;</span><span class="c1">// + lineOrigin.x;</span>
+</span><span class="line">                <span class="n">imageDrawRect</span><span class="p">.</span><span class="n">origin</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">lineOrigin</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+</span><span class="line">                <span class="n">CGContextDrawImage</span><span class="p">(</span><span class="n">contextRef</span><span class="p">,</span> <span class="n">imageDrawRect</span><span class="p">,</span> <span class="n">image</span><span class="p">.</span><span class="bp">CGImage</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">framesetter</span><span class="p">);</span>
+</span><span class="line">    <span class="n">CFRelease</span><span class="p">(</span><span class="n">ctFrame</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>本次代码中使用了成员变量<code>self.image</code>来保存网络图片。</p>
+
+<p>参考链接：</p>
+
+<p>1.<a href="http://www.brighttj.com/ios/use-coretext-make-typesetting-picture-and-text.html">使用CoreText实现图文混排</a></p>
+
+<p>2.<a href="https://github.com/jverkoey/nimbus/blob/master/src/attributedlabel/src/NIAttributedLabel.m">Nimbus的NIAttributedLabel实现</a></p>
+
+<p>3.<a href="http://book.douban.com/subject/26287173/">《iOS开发进阶》中的CoreText章节</a></p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-21T11:54:00+08:00'><span class='date'>2015 年5 月21 日</span> <span class='time'>11:54 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/coretext-1.html" title="Previous Post: CoreText使用教程(一)">&laquo; CoreText使用教程(一)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/coretext-3.html" title="Next Post: CoreText使用教程(三)">CoreText使用教程(三) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-05-21 11:54:00 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>
