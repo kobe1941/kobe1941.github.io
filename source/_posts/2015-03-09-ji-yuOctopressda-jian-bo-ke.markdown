@@ -137,6 +137,9 @@ git push origin source
 cd octopress
 rake new_post["your title"]
 ```
+如果遇到报错 zsh: no matches found: new_post
+则使用 rake "new_post[your title]" 进行新建文件
+
 这条指令可以新建一条博文。为了使用顺利，新手请暂时不要用中文命名，等流程全部跑通后再解决中文编码的问题(不过我倒是没遇到中文编码的问题，也许是ruby版本比较高的原因罢)。
 以上命令执行后，会再`octopress/source/_posts`目录下生成一个`yyyy-mm-dd-your title.markdown`的文件，用文件编辑器可以编辑，但是不能预览效果。可以使用专用的markdown编辑器来编辑，比如[Mou](http://25.io/mou/)。
 编辑完之后保存，使用指令：
