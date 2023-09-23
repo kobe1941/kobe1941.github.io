@@ -7,16 +7,7 @@ single: true
 <article class="hentry" role="article">
   {% include article.html %}
   <footer>
-  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
-  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({
-    google_ad_client: "ca-pub-7430330121158143",
-    enable_page_level_ads: true
-  });
-</script>
-    <p class="meta"> 
-
+    <p class="meta">
       {% include post/author.html %}
       {% include post/date.html %}{{ time }}{% if updated %} {{ updated }}{% endif %}
       {% include post/categories.html %}
@@ -50,28 +41,3 @@ single: true
   {% endif %}
 </aside>
 {% endunless %}
-
-<!-- {% if site.duoshuo_short_name and site.duoshuo_comments == true and page.comments == true %}
-  <section>
-    <h1>Comments</h1>
-    <div id="comments" aria-live="polite">{% include post/duoshuo.html %}</div>
-  </section>
-{% endif %} -->
-
-<div id="container"></div>
-<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
-<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
-<script>
-var gitment = new Gitment({
-  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
-  // id: document.location.href,
-  id: '{{ page.date }}',
-  owner: 'kobe1941',
-  repo: 'BlogComment',
-  oauth: {
-    client_id: '62a5e8671a334b627549',
-    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
-  },
-})
-gitment.render('container')
-</script>
