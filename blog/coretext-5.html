@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>CoreText使用教程(五) - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本篇文章为CoreText教程系列的第五篇，也是最后一篇。 本文实现了在纯文本排版时，监听用户的点击，并把识别到的点击内容通过NSLog打印出来。 实现的思路主要是给控件添加手势点击并进行监听，在用户点击时拿到点击的位置，并在手势识别结束后用CoreText遍历每一个CTLine， &hellip;">
+  <meta name="keywords" content="CoreText">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/coretext-5.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">CoreText使用教程(五)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-08T10:48:35+08:00'><span class='date'>2015 年6 月8 日</span> <span class='time'>10:48 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本篇文章为CoreText教程系列的第五篇，也是最后一篇。</p>
+
+<p>本文实现了在纯文本排版时，监听用户的点击，并把识别到的点击内容通过NSLog打印出来。</p>
+
+<p>实现的思路主要是给控件添加手势点击并进行监听，在用户点击时拿到点击的位置，并在手势识别结束后用CoreText遍历每一个CTLine，判断点击的位置是否在识别的特定字符串（比如人名或者连续的数字串）内，如果是则找出该字符串。使用<code>CTLineGetStringIndexForPosition</code>函数来找出点击的字符位于整个字符串的位置。</p>
+
+<p>完整的代码放在了github的<a href="https://github.com/kobe1941/HFCoreTextDemo">仓库</a>。</p>
+
+<p>运行效果为：</p>
+
+<p><img src="/images/2015/06/08/CoreText_1.png" alt="" /></p>
+
+<!--more-->
+
+<p>大部分代码与之前一致，主要增加了使用正则表达式来检测特定的字符串，以及监听用户的点击，进行遍历找出用户点击的字符。</p>
+
+<p>本文使用了正则表达式监测“@”开头空格结尾的人名和一串连续的数字。</p>
+
+<p>检测的格式为:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="bp">NSString</span> <span class="o">*</span><span class="n">kAtRegularExpression</span> <span class="o">=</span> <span class="s">@&quot;@[^</span><span class="se">\\</span><span class="s">s@]+?</span><span class="se">\\</span><span class="s">s{1}&quot;</span><span class="p">;</span>
+</span><span class="line"><span class="bp">NSString</span> <span class="o">*</span><span class="n">kNumberRegularExpression</span> <span class="o">=</span> <span class="s">@&quot;</span><span class="se">\\</span><span class="s">d+[^</span><span class="se">\\</span><span class="s">d]{1}&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>给控件添加手势监听:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="nb">self</span><span class="p">.</span><span class="n">longPressGesture</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">UILongPressGestureRecognizer</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithTarget</span><span class="p">:</span><span class="nb">self</span> <span class="nl">action</span><span class="p">:</span><span class="k">@selector</span><span class="p">(</span><span class="nl">longPressed</span><span class="p">:)];</span>
+</span><span class="line">
+</span><span class="line"><span class="nb">self</span><span class="p">.</span><span class="n">longPressGesture</span><span class="p">.</span><span class="n">minimumPressDuration</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="nb">self</span><span class="p">.</span><span class="n">longPressGesture</span><span class="p">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line"><span class="p">[</span><span class="nb">self</span> <span class="nl">addGestureRecognizer</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">longPressGesture</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>手势识别的方法为:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="cp">#pragma mark - 手势识别相关</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">longPressed:</span><span class="p">(</span><span class="bp">UIGestureRecognizer</span> <span class="o">*</span><span class="p">)</span><span class="nv">gesture</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">UIGestureRecognizerStateBegan</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">UIGestureRecognizerStateChanged</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">UIGestureRecognizerStateCancelled</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">gesture</span><span class="p">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">UIGestureRecognizerStateEnded</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">pressRange</span><span class="p">.</span><span class="n">location</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nb">self</span><span class="p">.</span><span class="n">pressRange</span><span class="p">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;识别到点击&quot;</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="bp">NSString</span> <span class="o">*</span><span class="n">clickStr</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="nl">substringWithRange</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">pressRange</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;点击了 %@&quot;</span><span class="p">,</span><span class="n">clickStr</span><span class="p">);</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>需要实现手势识别的两个代理方法</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+<span class="line-number">62</span>
+<span class="line-number">63</span>
+<span class="line-number">64</span>
+<span class="line-number">65</span>
+<span class="line-number">66</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="cp">#pragma mark - UIGestureRecognizerDelegate</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">gestureRecognizerShouldBegin:</span><span class="p">(</span><span class="bp">UIGestureRecognizer</span> <span class="o">*</span><span class="p">)</span><span class="nv">gestureRecognizer</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">gestureRecognizer</span> <span class="o">==</span> <span class="nb">self</span><span class="p">.</span><span class="n">longPressGesture</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="c1">// 点击处在特定字符串内才进行识别</span>
+</span><span class="line">        <span class="kt">BOOL</span> <span class="n">gestureShouldBegin</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="bp">CGPoint</span> <span class="n">location</span> <span class="o">=</span> <span class="p">[</span><span class="n">gestureRecognizer</span> <span class="nl">locationInView</span><span class="p">:</span><span class="nb">self</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">CGFloat</span> <span class="n">lineHeight</span> <span class="o">=</span> <span class="nb">self</span><span class="p">.</span><span class="n">font</span><span class="p">.</span><span class="n">pointSize</span> <span class="o">*</span> <span class="n">kPerLineRatio</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="kt">int</span> <span class="n">lineIndex</span> <span class="o">=</span> <span class="n">location</span><span class="p">.</span><span class="n">y</span><span class="o">/</span><span class="n">lineHeight</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;点击了第 %d 行&quot;</span><span class="p">,</span><span class="n">lineIndex</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="c1">// 把点击的坐标转换为CoreText坐标系下</span>
+</span><span class="line">        <span class="bp">CGPoint</span> <span class="n">clickPoint</span> <span class="o">=</span> <span class="n">CGPointMake</span><span class="p">(</span><span class="n">location</span><span class="p">.</span><span class="n">x</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">textHeight</span><span class="o">-</span><span class="n">location</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="n">CFArrayRef</span> <span class="n">lines</span> <span class="o">=</span> <span class="n">CTFrameGetLines</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">ctFrame</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">lineIndex</span> <span class="o">&lt;</span> <span class="n">CFArrayGetCount</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="n">CTLineRef</span> <span class="n">clickLine</span> <span class="o">=</span> <span class="n">CFArrayGetValueAtIndex</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">lineIndex</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// 点击处的字符位于总字符串的index</span>
+</span><span class="line">            <span class="n">CFIndex</span> <span class="n">strIndex</span> <span class="o">=</span> <span class="n">CTLineGetStringIndexForPosition</span><span class="p">(</span><span class="n">clickLine</span><span class="p">,</span> <span class="n">clickPoint</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;strIndex = %ld&quot;</span><span class="p">,</span><span class="n">strIndex</span><span class="p">);</span>
+</span><span class="line">
+</span><span class="line">            <span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="n">mutableAttributed</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">NSMutableAttributedString</span> <span class="n">alloc</span><span class="p">]</span> <span class="nl">initWithString</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span><span class="p">];</span>
+</span><span class="line">            <span class="bp">NSArray</span> <span class="o">*</span><span class="n">checkResults</span> <span class="o">=</span> <span class="p">[</span><span class="nb">self</span> <span class="nl">recognizeSpecialStringWithAttributed</span><span class="p">:</span><span class="n">mutableAttributed</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">            <span class="k">for</span> <span class="p">(</span><span class="bp">NSValue</span> <span class="o">*</span><span class="n">value</span> <span class="k">in</span> <span class="n">checkResults</span><span class="p">)</span>
+</span><span class="line">            <span class="p">{</span>
+</span><span class="line">                <span class="n">NSRange</span> <span class="n">range</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="n">rangeValue</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">                <span class="k">if</span> <span class="p">(</span><span class="n">strIndex</span> <span class="o">&gt;=</span> <span class="n">range</span><span class="p">.</span><span class="n">location</span> <span class="o">&amp;&amp;</span> <span class="n">strIndex</span> <span class="o">&lt;=</span> <span class="n">range</span><span class="p">.</span><span class="n">location</span> <span class="o">+</span> <span class="n">range</span><span class="p">.</span><span class="n">length</span><span class="p">)</span>
+</span><span class="line">                <span class="p">{</span>
+</span><span class="line">                    <span class="nb">self</span><span class="p">.</span><span class="n">pressRange</span> <span class="o">=</span> <span class="n">range</span><span class="p">;</span>
+</span><span class="line">                    <span class="n">gestureShouldBegin</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class="line">                    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;pressRange = %@&quot;</span><span class="p">,</span><span class="n">NSStringFromRange</span><span class="p">(</span><span class="n">range</span><span class="p">));</span>
+</span><span class="line">                <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">        <span class="k">return</span> <span class="n">gestureShouldBegin</span><span class="p">;</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="nb">YES</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">// 该方法可实现也可不实现，取决于应用场景</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">BOOL</span><span class="p">)</span><span class="nf">gestureRecognizer:</span><span class="p">(</span><span class="bp">UIGestureRecognizer</span> <span class="o">*</span><span class="p">)</span><span class="nv">gestureRecognizer</span> <span class="nf">shouldRequireFailureOfGestureRecognizer:</span><span class="p">(</span><span class="bp">UIGestureRecognizer</span> <span class="o">*</span><span class="p">)</span><span class="nv">otherGestureRecognizer</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">([</span><span class="n">otherGestureRecognizer</span> <span class="nl">isKindOfClass</span><span class="p">:[</span><span class="bp">UIPanGestureRecognizer</span> <span class="k">class</span><span class="p">]])</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">return</span> <span class="nb">YES</span><span class="p">;</span> <span class="c1">// 避免应用在UITableViewCell上时，挡住拖动tableView的手势</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="nb">NO</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>一个识别特定字符串的工具方法为：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="cp">#pragma mark - 识别特定字符串并改其颜色，返回识别到的字符串所在的range</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="bp">NSMutableArray</span> <span class="o">*</span><span class="p">)</span><span class="nf">recognizeSpecialStringWithAttributed:</span><span class="p">(</span><span class="bp">NSMutableAttributedString</span> <span class="o">*</span><span class="p">)</span><span class="nv">attributed</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">    <span class="bp">NSMutableArray</span> <span class="o">*</span><span class="n">rangeArray</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSMutableArray</span> <span class="n">array</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 识别@人名</span>
+</span><span class="line">    <span class="bp">NSRegularExpression</span> <span class="o">*</span><span class="n">atRegular</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSRegularExpression</span> <span class="nl">regularExpressionWithPattern</span><span class="p">:</span><span class="n">kAtRegularExpression</span> <span class="nl">options</span><span class="p">:</span><span class="n">NSRegularExpressionCaseInsensitive</span> <span class="nl">error</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="bp">NSArray</span> <span class="o">*</span><span class="n">atResults</span> <span class="o">=</span> <span class="p">[</span><span class="n">atRegular</span> <span class="nl">matchesInString</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="nl">options</span><span class="p">:</span><span class="n">NSMatchingWithTransparentBounds</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="n">length</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="bp">NSTextCheckingResult</span> <span class="o">*</span><span class="n">checkResult</span> <span class="k">in</span> <span class="n">atResults</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">attributed</span><span class="p">)</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="n">NSForegroundColorAttributeName</span> <span class="nl">value</span><span class="p">:[</span><span class="bp">UIColor</span> <span class="n">redColor</span><span class="p">]</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">location</span><span class="p">,</span> <span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">length</span> <span class="o">-</span><span class="mi">1</span><span class="p">)];</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">[</span><span class="n">rangeArray</span> <span class="nl">addObject</span><span class="p">:[</span><span class="bp">NSValue</span> <span class="nl">valueWithRange</span><span class="p">:</span><span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">]];</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="c1">// 识别连续的数字</span>
+</span><span class="line">    <span class="bp">NSRegularExpression</span> <span class="o">*</span><span class="n">numberRegular</span> <span class="o">=</span> <span class="p">[</span><span class="bp">NSRegularExpression</span> <span class="nl">regularExpressionWithPattern</span><span class="p">:</span><span class="n">kNumberRegularExpression</span> <span class="nl">options</span><span class="p">:</span><span class="n">NSRegularExpressionCaseInsensitive</span><span class="o">|</span><span class="n">NSRegularExpressionUseUnixLineSeparators</span> <span class="nl">error</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line">    <span class="bp">NSArray</span> <span class="o">*</span><span class="n">numberResults</span> <span class="o">=</span> <span class="p">[</span><span class="n">numberRegular</span> <span class="nl">matchesInString</span><span class="p">:</span><span class="nb">self</span><span class="p">.</span><span class="n">text</span> <span class="nl">options</span><span class="p">:</span><span class="n">NSMatchingWithTransparentBounds</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">self</span><span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="n">length</span><span class="p">)];</span>
+</span><span class="line">
+</span><span class="line">    <span class="k">for</span> <span class="p">(</span><span class="bp">NSTextCheckingResult</span> <span class="o">*</span><span class="n">checkResult</span> <span class="k">in</span> <span class="n">numberResults</span><span class="p">)</span>
+</span><span class="line">    <span class="p">{</span>
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">attributed</span><span class="p">)</span>
+</span><span class="line">        <span class="p">{</span>
+</span><span class="line">            <span class="p">[</span><span class="n">attributed</span> <span class="nl">addAttribute</span><span class="p">:</span><span class="n">NSForegroundColorAttributeName</span> <span class="nl">value</span><span class="p">:[</span><span class="bp">UIColor</span> <span class="n">blueColor</span><span class="p">]</span> <span class="nl">range</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">location</span><span class="p">,</span> <span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">length</span><span class="o">-</span><span class="mi">1</span><span class="p">)];</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">[</span><span class="n">rangeArray</span> <span class="nl">addObject</span><span class="p">:[</span><span class="bp">NSValue</span> <span class="nl">valueWithRange</span><span class="p">:</span><span class="n">NSMakeRange</span><span class="p">(</span><span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">location</span><span class="p">,</span> <span class="n">checkResult</span><span class="p">.</span><span class="n">range</span><span class="p">.</span><span class="n">length</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]];</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">    <span class="k">return</span> <span class="n">rangeArray</span><span class="p">;</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>本次教程是我在自己学习的过程中，边学边写的。一来检查自己的学习效果，而来分享学习心得也可顺便帮助其他初学者。</p>
+
+<p>CoreText学习起来并不难，只是其属于偏底层的实现，需要花费多一些的时间。</p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-06-08T10:48:35+08:00'><span class='date'>2015 年6 月8 日</span> <span class='time'>10:48 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/coretext-4.html" title="Previous Post: CoreText使用教程(四)">&laquo; CoreText使用教程(四)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/chi-xu-de-xing-fu.html" title="Next Post: 《持续的幸福》">《持续的幸福》 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-06-08 10:48:35 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

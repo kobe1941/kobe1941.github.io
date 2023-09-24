@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>SDWebImage使用小结与原理浅析 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文主要介绍一下使用SD的正确方式，并浅析其实现原理。 在一般的SD使用中重要的有以下几个类： 1
+2
+3
+SDWebImageDownloader
+SDWebImageManager
+SDImageCache 以及这两个类别： 1
+2
+UIButton+WebCache
+UIImageView+ &hellip;">
+  <meta name="keywords" content="iOS开发 Objective-C SDWebImage">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">SDWebImage使用小结与原理浅析</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-06-18T14:32:22+08:00'><span class='date'>2016 年6 月18 日</span> <span class='time'>2:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文主要介绍一下使用SD的正确方式，并浅析其实现原理。</p>
+
+<p>在一般的SD使用中重要的有以下几个类：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="n">SDWebImageDownloader</span>
+</span><span class="line"><span class="n">SDWebImageManager</span>
+</span><span class="line"><span class="n">SDImageCache</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>以及这两个类别：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="bp">UIButton</span><span class="o">+</span><span class="n">WebCache</span>
+</span><span class="line"><span class="bp">UIImageView</span><span class="o">+</span><span class="n">WebCache</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>如果对更深一些的实现细节有兴趣，还可以看下
+<code>SDWebImageDownloaderOperation</code>这个类，继承自<code>NSOperation</code>。<code>SDWebImageDecoder</code>是用来对图片进行解码操作的类，UIImage在显示到UI界面上时都会进行解码，SD的默认实现是先解码再返回UIImage给用户。详见下文。</p>
+
+<!--more-->
+
+<h3 id="uiimageviewwebcache">1.<code>UIImageView+WebCache</code>的具体实现</h3>
+
+<p>先看代码，所有的实现最终都会调用这个方法：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">sd_setImageWithURL:</span><span class="p">(</span><span class="bp">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nv">url</span> <span class="nf">placeholderImage:</span><span class="p">(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="p">)</span><span class="nv">placeholder</span> <span class="nf">options:</span><span class="p">(</span><span class="n">SDWebImageOptions</span><span class="p">)</span><span class="nv">options</span> <span class="nf">progress:</span><span class="p">(</span><span class="n">SDWebImageDownloaderProgressBlock</span><span class="p">)</span><span class="nv">progressBlock</span> <span class="nf">completed:</span><span class="p">(</span><span class="n">SDWebImageCompletionBlock</span><span class="p">)</span><span class="nv">completedBlock</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>第一步先取消该UIView之前的下载队列:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">[</span><span class="nb">self</span> <span class="n">sd_cancelCurrentImageLoad</span><span class="p">];</span>
+</span><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">sd_cancelCurrentImageLoad</span> <span class="p">{</span>
+</span><span class="line">    <span class="p">[</span><span class="nb">self</span> <span class="nl">sd_cancelImageLoadOperationWithKey</span><span class="p">:</span><span class="s">@&quot;UIImageViewImageLoad&quot;</span><span class="p">];</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p><img src="/images/2016/06/11.png" alt="" /></p>
+
+<p>SD中有一个UIView的类别<code>UIView+WebCacheOperation</code>，给每个UIView用关联对象的方式添加了一个字典属性，用来记住此UIView的图片下载的Operation，UIView每次进行下载前先取消上一次的下载Operation，从而避免同一个UIView的并行下载。
+<code>conformsToProtocol:</code>这个方法是用来判断消息接收者是否实现了某个协议。</p>
+
+<p>这里要注意的是，一个UIImageView在加载网络图片的过程分两步，首先先去内存和磁盘中根据key查找看是否已经下载缓存，如果没有则发起网络请求下载图片资源。这两步都会返回一个NSOperation，也就是说这两个步骤都是可以取消的，当列表快速滑动时，很有可能同一个UIImageView第一次的图片还未加载完就又开始去加载其他的图片了，此时就有了上面提到的第一步取消下载的操作。而能够取消的基础是因为下载图片所使用的NSOperation被保存了下来。另外需要注意的是，NSOperation的cancel方法只是把isCancelled这个标记置位而已，并不是真的取消了网络请求，一个网络请求发出去之后是不能再取消掉的，网络回调的block里要开发者自己去判断该请求是否已经被cancel标记了，如果已经cancel则不需要回调block了，直接丢弃就好：</p>
+
+<p><img src="/images/2016/06/final_1.png" alt="" />
+<img src="/images/2016/06/final_2.png" alt="" />
+<img src="/images/2016/06/final_3.png" alt="" />
+<img src="/images/2016/06/final_4.png" alt="" />
+<img src="/images/2016/06/final_5.png" alt="" /></p>
+
+<p>第二步给当前要下载的图片URL设置一个key:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="n">objc_setAssociatedObject</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">imageURLKey</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">OBJC_ASSOCIATION_RETAIN_NONATOMIC</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>这一步一般我们用不着，主要是为了下方的扩展方法用：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="bp">NSURL</span> <span class="o">*</span><span class="p">)</span><span class="nf">sd_imageURL</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">objc_getAssociatedObject</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">imageURLKey</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>接着往下，做了一层url为空的保护，如果为空则用block回调一个错误。
+ActivityIndicator一般说来用不上，可以略过。
+如果url不为空，那么进入下载图片的操作，在下载完成的block里进行回调和调用<code>setNeedsLayout</code>进行布局。
+需要注意的是如果是单独下载图片，请使用 SDWebImageManager进行下载，不要直接使用<code>SDWebImageDownloader</code>，因为它没有做缓存，把图片缓存到内存和磁盘文件是<code>SDWebImageManager</code>在维护。</p>
+
+<p><code>UIButton+WebCache</code>里边的操作是类似的，只是多一个一个状态而已。</p>
+
+<h3 id="section">2.开始分析图片下载过程</h3>
+
+<p>(1)先看下 <code>SDWebImageOptions</code>的枚举参数</p>
+
+<p><code>SDWebImageRetryFailed</code>
+系统默认一张图片下载失败后，会把该图片加入失败的黑名单里，如果不传递该option，则下次下载同样的url时直接返回失败。如果传入该option，那么即使该图片之前下载失败了，也会再次进行下载：</p>
+
+<p><img src="/images/2016/06/12.png" alt="" /></p>
+
+<p><code>SDWebImageLowPriority</code>，表示低优先级，例如当scrollView在减速时会延迟下载。</p>
+
+<p><code>SDWebImageHighPriority</code>，表示高优先级，会把该次下载操作移动到下载队列的最前面。</p>
+
+<p><code>SDWebImageCacheMemoryOnly</code>， 表示下载的图片只缓存到内存，不进行写文件，不做磁盘缓存。</p>
+
+<p><code>SDWebImageProgressiveDownload</code>， 表示渐进式的下载和显示，SD默认是把图片全部下载后再显示出来，但是传入该参数可以做到下载一部分图片后先显示这一部分，也就是边下载边显示，效果上就是通常的一个人体的照片，先看到头，再看到肩膀，最后看到腿。当然这种下载图片的方式需要服务器的支持才行。</p>
+
+<p><code>SDWebImageRefreshCached</code> 传入该option，则即使本地已经缓存了该图片，那么仍然会发起网络请求跟服务器通信，然后服务器的返回参数决定是否要再次下载该url表示的图片。同时缓存的方式改成使用NSURLCache，另如果图片命中缓存且远端图片同时有更新的话，会回调两次completionBLock。该参数主要是用于应对同一个url，但是图片会更改的情况。</p>
+
+<p>SD的源码中主要是有以下几个影响：
+命中缓存后先回调block，然后继续去下载图片，注意看这里在回调block之后并没有return，而是让代码往下走。</p>
+
+<p><img src="/images/2016/06/13.png" alt="" /></p>
+
+<p>同时如果图片命中NSURLCache的缓存，不进行回调。注意此处如果命中缓存则downloadImage肯定是空的。</p>
+
+<p><img src="/images/2016/06/14.png" alt="" /></p>
+
+<p>原理见下图以及<a href="https://github.com/ChenYilong/ParseSourceCodeStudy/blob/master/02_Parse%E7%9A%84%E7%BD%91%E7%BB%9C%E7%BC%93%E5%AD%98%E4%B8%8E%E7%A6%BB%E7%BA%BF%E5%AD%98%E5%82%A8/iOS%E7%BD%91%E7%BB%9C%E7%BC%93%E5%AD%98%E6%89%AB%E7%9B%B2%E7%AF%87.md">这篇博客</a>。</p>
+
+<p><img src="/images/2016/06/15.png" alt="" /></p>
+
+<p><code>SDWebImageContinueInBackground</code> 这个最简单了，字面意思就是APP进入后台后继续下载图片，只不过其代码实现略复杂，臣妾看的也不是太懂，故略过不表。</p>
+
+<p><code>SDWebImageHandleCookies</code> 缓存相关，HTTP的缓存不大懂，略过。</p>
+
+<p><code>SDWebImageAllowInvalidSSLCertificates</code> 跟图片下载权限和服务器认证相关，一般用不上该option，具体原理不明，略过。。。</p>
+
+<p><code>SDWebImageDelayPlaceholder</code> 这个选项一般也不用，如果设置的话，placeholder的UIImage就没效果了。</p>
+
+<p><code>SDWebImageTransformAnimatedImage</code> 字面上看跟gif动图相关？不懂略过。</p>
+
+<p><code>SDWebImageAvoidAutoSetImage</code> 这个选项没啥营养，就是给你一个机会在下载完成的时候可以对原图片做些操作，系统就不自动帮你设置了，而是直接回调block，见下图：</p>
+
+<p><img src="/images/2016/06/16.png" alt="" /></p>
+
+<p>(2)关于<code>SDWebImageDownloader</code>这个类，其实就是个实际去下载的类，它的那些Option跟<code>SDWebImageManager</code>里的Option是类似的，只不过<code>SDWebImageManager</code>是面向用户的，封装了查找缓存的一些功能，更友好一些而已。下图就是两个Option枚举之间的转换，其实意思上是差不多的：</p>
+
+<p><img src="/images/2016/06/17.png" alt="" /></p>
+
+<p>然后前面提到的同一个url所代表的图片可能会更新的问题也在这个类里有体现：</p>
+
+<p><img src="/images/2016/06/18.png" alt="" /></p>
+
+<p>这里的这个HTTP头的设置，跟下方的<code>SDWebImageDownloaderOperation</code>所拿到的response里的statusCode是有一定关系的：</p>
+
+<p><img src="/images/2016/06/19.png" alt="" /></p>
+
+<p>具体实现304 Not Modified的方案见上面的链接。</p>
+
+<h3 id="sdimagecache">3.再看下缓存部分<code>SDImageCache</code>，源码比较简单，提几个关键点即可。</h3>
+
+<p>①把图片的url当成key，然后转成一个唯一的字符串，来作为存储本地磁盘的文件名</p>
+
+<p><img src="/images/2016/06/20.png" alt="" /></p>
+
+<p>②所谓内存缓存，其实就是一个 NSCache，相当于可变字典，只不过多了cost参数而已</p>
+
+<p><img src="/images/2016/06/21.png" alt="" /></p>
+
+<p>③查找缓存的过程就是，先查内存里(NSCache)有没有，有就返回，没有就继续查磁盘文件有没有，有的话先放到内存里，然后返回。用一个单独的队列来进行磁盘读写。</p>
+
+<p><img src="/images/2016/06/22.png" alt="" /></p>
+
+<p>④缓存自动清理的时机
+无论是APP退到后台，或者APP被直接杀掉，都会进行图片的清理，见下图</p>
+
+<p><img src="/images/2016/06/23.png" alt="" /></p>
+
+<p>该方法里会检查图片的有效期，默认是7天，如果过期则删除。
+用到了 <code>NSURLContentModificationDateKey</code>这个key，表示文件的修改时间，多数情况下都是图片文件的创建时间，因为基本下载好了以后就不会去修改了。</p>
+
+<p>另如果你设置了最大的图片存储空间，那么系统也会在同一时间点做检查并清理。即使未过期，也会清理一些，按照文件创建的时间来排序做清理，更早创建的优先被清理。比较有意思的就是，清理工作会持续到图片只占你设定值的一半。</p>
+
+<p><img src="/images/2016/06/24.png" alt="" /></p>
+
+<p>⑤关于图片的解码，从磁盘中读取时，以及从网络上下载完成图片时，都会先解码再返回</p>
+
+<p><img src="/images/2016/06/25.png" alt="" /></p>
+
+<p><img src="/images/2016/06/26.png" alt="" /></p>
+
+<p>解码函数可调用多次，只有第一次有效，解码一次之后anyAlpha的值就为YES，所以解码函数调用多次也无太大影响</p>
+
+<p><img src="/images/2016/06/27.png" alt="" /></p>
+
+<p>另SD的对图片的回调有UIImage和NSData两个参数，也就是说，UIImage是解码之后的图片，但是格式为NSData的imageData却是下载下来的图片原始数据。但是由于作者对方法封装的原因，使用<code>SDWebImageManager</code>的回调确实没有imageData的:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="k">typedef</span> <span class="nf">void</span><span class="p">(</span><span class="o">^</span><span class="n">SDWebImageCompletionWithFinishedBlock</span><span class="p">)(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span><span class="p">,</span> <span class="bp">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">,</span> <span class="n">SDImageCacheType</span> <span class="n">cacheType</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="n">finished</span><span class="p">,</span> <span class="bp">NSURL</span> <span class="o">*</span><span class="n">imageURL</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而使用<code>SDWebImageDownloader</code>的回调block是有NSData的参数回调的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="k">typedef</span> <span class="nf">void</span><span class="p">(</span><span class="o">^</span><span class="n">SDWebImageDownloaderCompletedBlock</span><span class="p">)(</span><span class="bp">UIImage</span> <span class="o">*</span><span class="n">image</span><span class="p">,</span> <span class="bp">NSData</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="bp">NSError</span> <span class="o">*</span><span class="n">error</span><span class="p">,</span> <span class="kt">BOOL</span> <span class="n">finished</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>SD存磁盘其实是拿图片的NSData的数据去存储的，并没有直接把解码的UIImage图片拿去存盘，所以在读磁盘文件时才需要先解码再返回了，代码见下方：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="k">if</span> <span class="p">(</span><span class="n">downloadedImage</span> <span class="o">&amp;&amp;</span> <span class="n">finished</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">	<span class="p">[</span><span class="nb">self</span><span class="p">.</span><span class="n">imageCache</span> <span class="nl">storeImage</span><span class="p">:</span><span class="n">downloadedImage</span> <span class="nl">recalculateFromImage</span><span class="p">:</span><span class="nb">NO</span> <span class="nl">imageData</span><span class="p">:</span><span class="n">data</span> <span class="nl">forKey</span><span class="p">:</span><span class="n">key</span> <span class="nl">toDisk</span><span class="p">:</span><span class="n">cacheOnDisk</span><span class="p">];</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>注意此处的参数，中间的BOOL值是NO，所以在缓存的类<code>SDImageCache</code>里是这么处理的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="k">if</span> <span class="p">(</span><span class="n">toDisk</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">    <span class="n">dispatch_async</span><span class="p">(</span><span class="nb">self</span><span class="p">.</span><span class="n">ioQueue</span><span class="p">,</span> <span class="o">^</span><span class="p">{</span>
+</span><span class="line">        <span class="bp">NSData</span> <span class="o">*</span><span class="n">data</span> <span class="o">=</span> <span class="n">imageData</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">        <span class="k">if</span> <span class="p">(</span><span class="n">image</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">recalculate</span> <span class="o">||</span> <span class="o">!</span><span class="n">data</span><span class="p">))</span> <span class="p">{</span>
+</span><span class="line"><span class="cp">#if TARGET_OS_IPHONE</span>
+</span><span class="line">            <span class="c1">// We need to determine if the image is a PNG or a JPEG</span>
+</span><span class="line">            <span class="c1">// PNGs are easier to detect because they have a unique signature (http://www.w3.org/TR/PNG-Structure.html)</span>
+</span><span class="line">            <span class="c1">// The first eight bytes of a PNG file always contain the following (decimal) values:</span>
+</span><span class="line">            <span class="c1">// 137 80 78 71 13 10 26 10</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// If the imageData is nil (i.e. if trying to save a UIImage directly or the image was transformed on download)</span>
+</span><span class="line">            <span class="c1">// and the image has an alpha channel, we will consider it PNG to avoid losing the transparency</span>
+</span><span class="line">            <span class="kt">int</span> <span class="n">alphaInfo</span> <span class="o">=</span> <span class="n">CGImageGetAlphaInfo</span><span class="p">(</span><span class="n">image</span><span class="p">.</span><span class="bp">CGImage</span><span class="p">);</span>
+</span><span class="line">            <span class="kt">BOOL</span> <span class="n">hasAlpha</span> <span class="o">=</span> <span class="o">!</span><span class="p">(</span><span class="n">alphaInfo</span> <span class="o">==</span> <span class="n">kCGImageAlphaNone</span> <span class="o">||</span>
+</span><span class="line">                              <span class="n">alphaInfo</span> <span class="o">==</span> <span class="n">kCGImageAlphaNoneSkipFirst</span> <span class="o">||</span>
+</span><span class="line">                              <span class="n">alphaInfo</span> <span class="o">==</span> <span class="n">kCGImageAlphaNoneSkipLast</span><span class="p">);</span>
+</span><span class="line">            <span class="kt">BOOL</span> <span class="n">imageIsPng</span> <span class="o">=</span> <span class="n">hasAlpha</span><span class="p">;</span>
+</span><span class="line">
+</span><span class="line">            <span class="c1">// But if we have an image data, we will look at the preffix</span>
+</span><span class="line">            <span class="k">if</span> <span class="p">([</span><span class="n">imageData</span> <span class="n">length</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">[</span><span class="n">kPNGSignatureData</span> <span class="n">length</span><span class="p">])</span> <span class="p">{</span>
+</span><span class="line">                <span class="n">imageIsPng</span> <span class="o">=</span> <span class="n">ImageDataHasPNGPreffix</span><span class="p">(</span><span class="n">imageData</span><span class="p">);</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">            <span class="k">if</span> <span class="p">(</span><span class="n">imageIsPng</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">                <span class="n">data</span> <span class="o">=</span> <span class="n">UIImagePNGRepresentation</span><span class="p">(</span><span class="n">image</span><span class="p">);</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line">            <span class="k">else</span> <span class="p">{</span>
+</span><span class="line">                <span class="n">data</span> <span class="o">=</span> <span class="n">UIImageJPEGRepresentation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="n">CGFloat</span><span class="p">)</span><span class="mf">1.0</span><span class="p">);</span>
+</span><span class="line">            <span class="p">}</span>
+</span><span class="line"><span class="cp">#else</span>
+</span><span class="line">            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">NSBitmapImageRep</span> <span class="nl">representationOfImageRepsInArray</span><span class="p">:</span><span class="n">image</span><span class="p">.</span><span class="n">representations</span> <span class="nl">usingType</span><span class="p">:</span> <span class="n">NSJPEGFileType</span> <span class="nl">properties</span><span class="p">:</span><span class="nb">nil</span><span class="p">];</span>
+</span><span class="line"><span class="cp">#endif</span>
+</span><span class="line">        <span class="p">}</span>
+</span><span class="line">
+</span><span class="line">        <span class="p">[</span><span class="nb">self</span> <span class="nl">storeImageDataToDisk</span><span class="p">:</span><span class="n">data</span> <span class="nl">forKey</span><span class="p">:</span><span class="n">key</span><span class="p">];</span>
+</span><span class="line">    <span class="p">});</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>此处的代码由于recalculate这个值为NO，故会直接跳过中间的if语句，把data拿去执行写磁盘的操作，否则的话写磁盘的图片文件就也是解码过后的了，那么磁盘文件的大小也就不再可靠了。</p>
+
+<p>后记：</p>
+
+<p>关于SD的缓存方式，AFNetworking的作者曾经吐槽过。</p>
+
+<p>目测使用系统自带的缓存方案就很不错的样子。。。</p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-06-18T14:32:22+08:00'><span class='date'>2016 年6 月18 日</span> <span class='time'>2:32 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/iosshe-zhi-qi-dong-tu-de-liang-chong-fang-shi-he-bughui-zong.html" title="Previous Post: iOS设置启动图的两种方式和bug汇总">&laquo; iOS设置启动图的两种方式和bug汇总</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/ai-de-wu-chong-yu-yan.html" title="Next Post: 《爱的五种语言》">《爱的五种语言》 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2016-06-18 14:32:22 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>崩溃和卡顿 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文尝试分析和总结一下崩溃和主线程卡顿(ANR)的原理，以及对应的部分解决方案和案例。 一、崩溃 业界的崩溃率标准： 1.崩溃的信号类型 崩溃主要是由于 Mach 异常、Objective-C 异常（NSException）引起的，同时对于 Mach 异常，到了 BSD 层会转换为对应的 &hellip;">
+  <meta name="keywords" content="崩溃 crash 卡顿 主线程卡顿 ANR">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/crash-anr.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">崩溃和卡顿</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-12T13:20:17+08:00'><span class='date'>2019 年5 月12 日</span> <span class='time'>1:20 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文尝试分析和总结一下崩溃和主线程卡顿(ANR)的原理，以及对应的部分解决方案和案例。</p>
+
+<!--more-->
+
+<h1 id="section">一、崩溃</h1>
+
+<p>业界的崩溃率标准：</p>
+
+<p><img src="/images/2019/05/12/1.png" alt="" /></p>
+
+<p><img src="/images/2019/05/12/2.png" alt="" /></p>
+
+<h3 id="section-1">1.崩溃的信号类型</h3>
+
+<p>崩溃主要是由于 Mach 异常、Objective-C 异常（NSException）引起的，同时对于 Mach 异常，到了 BSD 层会转换为对应的 Signal 信号，那么我们也可以通过捕获信号，来捕获 Crash 事件。针对 NSException 可以通过注册 NSUncaughtExceptionHandler 捕获异常信息。</p>
+
+<p>OC层的异常通常可以通过崩溃日志去case by case解决，异常信息会很充分，对号入座即可。</p>
+
+<p>EXC_BAD_ACCESS  对应的子类型有SIGSEGV，SIGBUS，SIGILL。</p>
+
+<p>完整的描述通常为 Exception Type: EXC_BAD_ACCESS (SIGSEGV)</p>
+
+<p>SIGSEGV：一般是非法内存访问错误，比如访问了已经释放的野指针，或者C数组越界。是EXC_BAD_ACCESS的子集；</p>
+
+<p>程序无效内存中止信号，比如访问已经释放的内存，或者访问没有权限访问的内存，写入只读的内存等。</p>
+
+<p>SEGV:（Segmentation  Violation），代表无效内存地址，比如空指针，未初始化指针，栈溢出等；</p>
+
+<p>SIGABRT：重复释放同一块内存两次会导致，或者手动调用abort()函数；或者iOS内存jetsam的SIGABRT，对应的kill信号。或某些情况下的C数组越界导致的SIGABRT</p>
+
+<p>SIGBUS：非法地址，意味着指针所对应的地址是有效地址，但总线不能正常使用该指针。通常是未对齐的数据访问所致。是EXC_BAD_ACCESS的子集；</p>
+
+<p>SIGILL：非法指令。SIG是信号名的通用前缀。ILL是 illegal instruction（非法指令） 的缩写。SIGILL 是当一个进程尝试执行一个非法指令时发送给它的信号。可执行程序含有非法指令的原因，一般也就是cpu架构不对，编译时指定的march和实际执行的机器的march不同。这种情况，因为工具链一样，连接脚 本一样，所以可执行程序可以执行，不会发生exec format error。但是会包含一些不兼容的指令。还有另外一种可能，就是程序的执行权限不够，比如在用户态下运行的程序只能执行非特权指令，一旦CPU遇到特权指 令，将产生illegal instruction错误。</p>
+
+<p>有时候也会因为打印数据的时候参数类型不匹配导致SIGILL，见这个例子 <a href="https://blog.csdn.net/Cow_cz/article/details/72930343">https://blog.csdn.net/Cow_cz/article/details/72930343</a></p>
+
+<p>非法指令[EXC_BAD_INSTRUCTION // SIGILL] 该进程试图执行非法或未定义的指令。该进程可能试图通过配置错误的函数指针跳转到无效地址。</p>
+
+<p>在Intel处理器上，ud2操作码会导致EXC_BAD_INSTRUCTION异常，但通常用于捕获进程以进行调试。如果在运行时遇到意外情况，则Intel处理器上的Swift代码将以此异常类型终止。有关详细信息，请参阅<a href="https://juejin.im/post/5bdd78bc6fb9a049d2357ca2">https://juejin.im/post/5bdd78bc6fb9a049d2357ca2</a></p>
+
+<p>SIGTRAP：跟踪陷阱EXC_BREAKPOINT / SIGTRAP</p>
+
+<p>SIGTRAP 由断点指令或其它trap指令产生，由debugger使用。swift的空指针或类型转换失败也会导致此信号。</p>
+
+<p>与异常退出类似，此异常旨在为附加的调试器提供在其执行的特定点中断进程的机会。您可以使用该__builtin_trap()函数从您自己的代码中触发此异常。如果未附加调试器，则终止该过程并生成崩溃报告。</p>
+
+<p>较低级别的库（例如libdispatch）会在遇到致命错误时捕获进程。有关错误的其他信息可以在崩溃报告的“ 其他诊断信息”部分或设备的控制台中找到。</p>
+
+<p>如果在运行时遇到意外情况，则Swift代码将以此异常类型终止，例如：</p>
+
+<p>①具有nil值的非可选类型</p>
+
+<p>②强制类型转换失败</p>
+
+<p>SIGINT 程序终止(interrupt)信号, 在用户键入INTR字符(通常是Ctrl-C)时发出，用于通知前台进程组终止进程。</p>
+
+<p>SIGPIPE 管道破裂。这个信号通常在进程间通信产生，比如采用FIFO(管道)通信的两个进程，读管道没打开或者意外终止就往管道写，写进程会收到SIGPIPE信号。此外用Socket通信的两个进程，写进程在写Socket的时候，读进程已经终止。</p>
+
+<h3 id="bsdmach">2.BSD层和Mach层的含义</h3>
+
+<p><img src="/images/2019/05/12/3.png" alt="" /></p>
+
+<h3 id="section-2">3.如何拦截崩溃</h3>
+
+<p>OC的异常可以针对性做处理，比如不能识别的方法，你可以动态去添加。数组越界或者字典空值则可以method swizzle拦截掉。</p>
+
+<p>其他异常信号的拦截则参考<a href="http://www.zoomfeng.com/blog/plcrashreporter-1.html">PLC的实现</a>，从BSD层和Mach层都可以处理，不过保险起见，一般从Mach层捕获异常信号。</p>
+
+<h3 id="section-3">4.如何分析和解决崩溃</h3>
+
+<p>①SIGSEGV野指针，RN的例子；</p>
+
+<p>②SIGTRAP，swift的nats库的例子。</p>
+
+<p>③通用类型的崩溃，比如OC容器的越界和空值导致的，以及unrecognized selector sent to instance这种，可以通过<a href="https://github.com/kobe1941/FFExtension">FFExtension</a>直接拦截掉。</p>
+
+<p>例子见下方。</p>
+
+<p>野指针大全</p>
+
+<p><img src="/images/2019/05/12/4.png" alt="" /></p>
+
+<p>这里是调试一个Bad Memory Access的一些小技巧:</p>
+
+<p>如果objc_msgSend或者objc_release在回溯(Backtraces)的顶部附近，这个进程可能是尝试给一个释放的对象发送消息。你应该用Zombies instrument(调试僵尸对象的工具)来更好的理解这个崩溃。</p>
+
+<p>事实上Xcode的这几个工具还是挺有用处的：</p>
+
+<p><img src="/images/2019/05/12/5.png" alt="" /></p>
+
+<p>关于野指针的类型崩溃在objc_msgSend函数时的拓展阅读见<a href="&lt;https://blog.csdn.net/u010960265/article/details/82454436&gt;">这里</a> 。这篇文章分析了该函数的汇编实现，以及崩溃在不同汇编指令时的情况分析。</p>
+
+<h1 id="section-4">二、卡顿</h1>
+
+<h3 id="section-5">1.监控卡顿的原理</h3>
+
+<p>解主线程的卡顿，首先要能够看懂卡顿的堆栈回溯，这里需要了解一下runtime里的消息发送的流程，runloop的流程，以及自动释放池的一些函数调用。</p>
+
+<p>另外就是要理解bugly是如何监控卡顿的，这样子才能知道如何去修复卡顿的问题：</p>
+
+<p><img src="/images/2019/05/12/6.png" alt="" /></p>
+
+<p>这就是很多SDK会采用的主线程卡顿监控的原理了，只是在execssiveHandler去抓堆栈的具体实现上，可能会有一些不同。PLC则是通过暂停先主线程，然后读取寄存器状态，之后再恢复的方法来实现抓取线程堆栈信息的。不过据说这种策略耗时比较大？有知道其他更好更快策略的小伙伴麻烦告知一下~</p>
+
+<h3 id="section-6">2.避免主线程卡顿的通用策略</h3>
+
+<p>①不要在主线程做耗时操作，比如解析数据，高度计算，解压缩文件和IO操作；</p>
+
+<p>②耗时的计算结果，应该缓存起来，比如cell的高度；</p>
+
+<p>③尽量少的用同步操作，一定避免死锁；</p>
+
+<p>④能在子线程做的事情，就不要在主线程去做，比如统计打点；</p>
+
+<p>⑤大对象的销毁，可以在子线程去做，参考YYCache；</p>
+
+<p>⑥代码逻辑是否合理，比如我们项目中视频回放处的数据过滤，过滤的大班而不是小班数据；</p>
+
+<p>⑦对于TableView这样的列表，为了提高滑动时的帧率，其cell的层级和数量，应该尽可能的少，离屏渲染一定要控制住，另外就是手动计算frame要比autolayout的性能好的多。</p>
+
+<p>不同布局方式的性能差异见这里 <a href="https://lpd-ios.github.io/2017/04/05/FlexBox-Weex/">https://lpd-ios.github.io/2017/04/05/FlexBox-Weex/</a> 和 <a href="https://draveness.me/layout-performance">https://draveness.me/layout-performance</a> 。</p>
+
+<h1 id="section-7">三、技术优化的一般流程</h1>
+
+<p>通常针对一个技术点做优化的时候，都要先了解清楚这个技术点有哪些流程，优化的方向往往是减少流程的数量，以及减少每个流程的消耗。</p>
+
+<p>比如安装包size的减少，启动时间的降低，滑动帧率的提升，弱网下连接的优化（到达率），耗电量的降低。</p>
+
+<p>例外的是稳定性和主线程卡顿，这两块是从异常日志反推的。</p>
+
+<p>帧率因为Xcode提供的工具比较强大，可以监控整个渲染流程的消耗，所以一般都先用instruments去找问题，然后再去逐个解决。</p>
+
+<h1 id="anr">四、崩溃和ANR的案例及其解决</h1>
+
+<p>1.LDNetPing多线程访问property导致野指针，使用串行队列来解决，异步同步皆可；</p>
+
+<p><img src="/images/2019/05/12/7.png" alt="" /></p>
+
+<p>实际上线程安全除了串行队列之外，并行队列配合barrier也可以实现。当然通用的方案是加锁，比如互斥锁，读写锁等等。</p>
+
+<p>2.SSZAppConfig的getServerConfig函数：</p>
+
+<p>使用AFURLSessionManager要注意，manager和它内部的session循环引用了，原因是NSURLSession的sessionWithConfiguration:delegate:delegateQueue:函数，会对delegate做强引用，除非手动解除，否则就内存泄漏</p>
+
+<p><img src="/images/2019/05/12/8.png" alt="" /></p>
+
+<p>但是需要注意的一点是，sessionDidBecomeInvalidBlock的回调是在子线程，如果用户反复的切换前后台会导致getServerConfig这个函数被反复调用，同时session失效的概率也会增加，</p>
+
+<p>某些情况下，会导致session失效后，manager来不及设置为nil，从而使用了失效的session去发起网络请求，导致崩溃。后来又修改为如下：</p>
+
+<p><img src="/images/2019/05/12/9.png" alt="" /></p>
+
+<p>不过遗憾的是，因为业务的原因，我们的用户会频繁切换前后台，所以线上还是会不可避免的有崩溃，故并没有去刻意避开内存泄漏的问题，反而是让其成为一个单例，不做释放的操作。即把block里session的finishTaskAndInvalidate函数调用给注释掉了。</p>
+
+<p>3.RN野指针崩溃</p>
+
+<p>以RCTImageLoader的canHandleRequest:函数为例，videoRegex这个值的创建并不是多线程安全的，多线程野指针的问题基本都可以通过加锁来解决</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+<span class="line-number">61</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">- (BOOL)canHandleRequest:(NSURLRequest *)request
+</span><span class="line">
+</span><span class="line">{
+</span><span class="line">
+</span><span class="line">    NSURL *requestURL = request.URL;
+</span><span class="line">
+</span><span class="line">    static NSRegularExpression *videoRegex = nil;
+</span><span class="line">
+</span><span class="line">    if (!videoRegex) {
+</span><span class="line">
+</span><span class="line">      NSError *error = nil;
+</span><span class="line">
+</span><span class="line">      videoRegex = [NSRegularExpression regularExpressionWithPattern:@"(?:&amp;|^)ext=MOV(?:&amp;|$)"
+</span><span class="line">
+</span><span class="line"> 
+</span><span class="line">
+</span><span class="line">                                                             options:NSRegularExpressionCaseInsensitive
+</span><span class="line">
+</span><span class="line"> 
+</span><span class="line">
+</span><span class="line">                                                               error:&amp;error];
+</span><span class="line">
+</span><span class="line">      if (error) {
+</span><span class="line">
+</span><span class="line">        RCTLogError(@"%@", error);
+</span><span class="line">
+</span><span class="line">      }
+</span><span class="line">
+</span><span class="line">    }
+</span><span class="line">
+</span><span class="line"> 
+</span><span class="line">
+</span><span class="line">    NSString *query = requestURL.query;
+</span><span class="line">
+</span><span class="line">    if (query != nil &amp;&amp; [videoRegex firstMatchInString:query
+</span><span class="line">
+</span><span class="line">                                               options:0
+</span><span class="line">
+</span><span class="line">                                                 range:NSMakeRange(0, query.length)]) {
+</span><span class="line">
+</span><span class="line">      return NO;
+</span><span class="line">
+</span><span class="line">    }
+</span><span class="line">
+</span><span class="line"> 
+</span><span class="line">
+</span><span class="line">    for (id&lt;RCTImageURLLoader&gt; loader in _loaders) {
+</span><span class="line">
+</span><span class="line">        if (![loader conformsToProtocol:@protocol(RCTURLRequestHandler)] &amp;&amp;
+</span><span class="line">
+</span><span class="line">            [loader canLoadImageURL:requestURL]) {
+</span><span class="line">
+</span><span class="line">            return YES;
+</span><span class="line">
+</span><span class="line">        }
+</span><span class="line">
+</span><span class="line">    }
+</span><span class="line">
+</span><span class="line">    return NO;
+</span><span class="line">
+</span><span class="line">}
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">@implementation RCTImageLoader (Hook)
+</span><span class="line">
+</span><span class="line">- (BOOL)hook_canHandleRequest:(NSURLRequest *)request
+</span><span class="line">
+</span><span class="line">{
+</span><span class="line">
+</span><span class="line">    static pthread_mutex_t mutex;
+</span><span class="line">
+</span><span class="line">    static dispatch_once_t onceToken;
+</span><span class="line">
+</span><span class="line">    dispatch_once(&amp;onceToken, ^{
+</span><span class="line">
+</span><span class="line">        pthread_mutex_init(&amp;mutex, NULL);
+</span><span class="line">
+</span><span class="line">    });
+</span><span class="line">
+</span><span class="line">    pthread_mutex_lock(&amp;mutex);
+</span><span class="line">
+</span><span class="line">    BOOL result;
+</span><span class="line">
+</span><span class="line">    result = [self hook_canHandleRequest:request];
+</span><span class="line">
+</span><span class="line">    pthread_mutex_unlock(&amp;mutex);
+</span><span class="line">
+</span><span class="line"> 
+</span><span class="line">
+</span><span class="line">    return result;
+</span><span class="line">
+</span><span class="line">}
+</span><span class="line">
+</span><span class="line">@end
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><strong>其他的RN野指针崩溃可以通过类似的方式来解决，只不过有时候要用递归锁。</strong></p>
+
+<p>4.主线程卡死问题</p>
+
+<p>有时候子线程会先拿到锁，主线程反而在等待，而子线程可能会同步的丢一个block到主线程，造成死锁。</p>
+
+<p>RCTBatchedBridge+Hook.m里对线程做了加锁上的优化：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">- (id)hook_moduleForName:(NSString *)moduleName
+</span><span class="line">{
+</span><span class="line">    if (!moduleName || ![moduleName isKindOfClass:[NSString class]]) {
+</span><span class="line">        return nil;
+</span><span class="line">    }
+</span><span class="line">    ///&lt; 这个函数会递归调用
+</span><span class="line">    static NSRecursiveLock *lock;
+</span><span class="line">    static dispatch_once_t onceToken;
+</span><span class="line">    dispatch_once(&amp;onceToken, ^{
+</span><span class="line">        lock = [[NSRecursiveLock alloc] init];
+</span><span class="line">    });
+</span><span class="line"> 
+</span><span class="line">    id value = nil;
+</span><span class="line">    if (![NSThread isMainThread]) {
+</span><span class="line">        [lock lock];
+</span><span class="line">        value = [self hook_moduleForName:moduleName];
+</span><span class="line">        [lock unlock];
+</span><span class="line">    } else {
+</span><span class="line">        ///&lt; 子线程有时候会同步丢一个block到主线程，避免死锁
+</span><span class="line">        if ([lock tryLock]) {
+</span><span class="line">            value = [self hook_moduleForName:moduleName];
+</span><span class="line">            [lock unlock];
+</span><span class="line">        } else {
+</span><span class="line">            value = [self hook_moduleForName:moduleName];
+</span><span class="line">        }
+</span><span class="line">    }
+</span><span class="line">     
+</span><span class="line">    return value;
+</span><span class="line">}</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>5.页面退出后block继续执行导致的野指针问题</p>
+
+<p><img src="/images/2019/05/12/11.png" alt="" /></p>
+
+<p>如上图，第605行导致了野指针，看下方的代码，正好处于GCD的执行步骤，猜测是直播间的控制器已经销毁，self为nil导致的，GCD的queue这个值不能传nil，否则crash。</p>
+
+<p><img src="/images/2019/05/12/12.png" alt="" /></p>
+
+<p>bugly上的日志统计证实了猜测，确实是直播间退出后，block里的代码依然在执行导致崩溃。</p>
+
+<p><img src="/images/2019/05/12/13.png" alt="" /></p>
+
+<p>解决方案：在block对self进行强引用并判空。</p>
+
+<p><img src="/images/2019/05/12/14.png" alt="" /></p>
+
+<p>6.swift写的nats库的崩溃问题</p>
+
+<p><img src="/images/2019/05/12/15.png" alt="" /></p>
+
+<p>以下是源码</p>
+
+<p><img src="/images/2019/05/12/16.png" alt="" /></p>
+
+<p>因为这里的queue.async是一个异步操作，做成同步会更合适，避免时序问题导致莫名其妙对象被置nil。</p>
+
+<p>另一个问题就是swift下不允许为nil的情况，此处因为是switch-case的语法，case的条件以及后面的指针解引用是不能传nil指针的，所以当inputstream如果是nil值时会造成SIGTRAP类型的崩溃，解决方案也就是对对象做判空，如下图：</p>
+
+<p><img src="/images/2019/05/12/17.png" alt="" /></p>
+
+<p>事实上Nats的崩溃在做完上述两个操作后（其实最根本的是对inputstream判空的操作），就没有出现SIGTRAP类型的崩溃了，也就是说不会再有值被莫名其妙的置nil导致崩溃。</p>
+
+<p>7.self指针的问题</p>
+
+<p><img src="/images/2019/05/12/18.png" alt="" /></p>
+
+<p>上图提示为addSubview是野指针。</p>
+
+<p>具体崩溃代码见下图</p>
+
+<p><img src="/images/2019/05/12/19.png" alt="" /></p>
+
+<p>原因是ARC对self指针为unsafe_unretained，当上图这个函数在调用还未完成时，页面退出或用其他方式把self回收了，此后继续addSubView:的参数传入self则会野指针。</p>
+
+<p>具体原因见<a href="http://blog.sunnyxx.com/2015/01/17/self-in-arc/">sunny的这篇文章</a>。</p>
+
+<p>解决方案为，用一个局部strong指针去强引用self。</p>
+
+<p>8.ANR问题</p>
+
+<p>卓越网校的ANR问题，基本是主线程做IO操作，或者解析数据造成的，处理起来也简单，把这些操作放到子线程去做基本就没问题。尤其是对于cell的高度计算，子线程算好高度再返回，是一个通用的做法，用时间换流畅度。</p>
+
+<p>另有小部分ANR是autolayout造成的，而这些ANR分布在相对较旧性能较差的机器上，可以不用修改代码，只需要知道手动计算frame的方式比autolayout的性能要好就可以了。</p>
+
+<p>9.一个解决ANR的骚操作</p>
+
+<p>场景是某个接口数据请求回来后，先解析，然后如果数据命中某个逻辑则发通知去通知业务方做其他的操作，通知是同步的，导致函数调用栈太长执行的时间太久被bugly抓到了ANR。</p>
+
+<p>解决方案是把一个操作拆分成两个步骤，后面的步骤放到下一个runloop去做。原理是这么操作既能让出一个优先级给系统去响应用户的手势操作，还能让bugly检测ANR的代码执行过去。</p>
+
+<p>异步丢到main queue的block是在下一次runloop循环或者从休眠中唤醒后执行的，要注意到runloop的源码里，唤醒后执行操作，会去查看此次唤醒是来自source1的mach port还是来自dispatch_asyn的dispatchPort，这两个的具体执行是两个逻辑分支，是分开的而不是一起执行。对用户手势的响应是来自source1的port。</p>
+
+<p><img src="/images/2019/05/12/10.png" alt="" /></p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-05-12T13:20:17+08:00'><span class='date'>2019 年5 月12 日</span> <span class='time'>1:20 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/ios-system-deep.html" title="Previous Post: 《深入解析Mac OS X & iOS操作系统》">&laquo; 《深入解析Mac OS X & iOS操作系统》</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/ios-level-up.html" title="Next Post: iOS知识结构">iOS知识结构 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2019-05-12 13:20:17 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>iOS APP内存优化记录 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="APP在运行过程中，如果内存占用过高则会引起以下几个问题： ①被操作系统的守护进程给杀掉，无论是前台还是后台； ②耗电增大，手机发热； ③系统可能会运行卡顿（不是换入换出到磁盘，而是解压缩和重压缩内存）； 业务背景 因为我们APP的直播间要玩网页版的小游戏，比较耗内存， &hellip;">
+  <meta name="keywords" content="内存优化 memory iOS开发">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/memory.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">iOS APP内存优化记录</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-20T21:42:39+08:00'><span class='date'>2019 年5 月20 日</span> <span class='time'>9:42 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>APP在运行过程中，如果内存占用过高则会引起以下几个问题：</p>
+
+<p>①被操作系统的守护进程给杀掉，无论是前台还是后台；</p>
+
+<p>②耗电增大，手机发热；</p>
+
+<p>③系统可能会运行卡顿（不是换入换出到磁盘，而是解压缩和重压缩内存）；</p>
+
+<p>业务背景</p>
+
+<p>因为我们APP的直播间要玩网页版的小游戏，比较耗内存，除了JS游戏本身降低内存消耗之外，native也需要释放更多的内存以提供给游戏使用，避免因为内存占用过大而被操作系统杀掉进程。</p>
+
+<p>优化native本身的内存占用大体分为两部分：优化长期的内存占用和优化峰值内存占用。</p>
+
+<!--more-->
+
+<h2 id="section">理论上的技术方案</h2>
+
+<h3 id="section-1">优化长期的内存占用</h3>
+
+<p>1.内存泄漏问题；</p>
+
+<p>要做内存优化，先要分析当前占用内存较大的页面或功能。尤其是直播间。</p>
+
+<p>①开instruments来跟课，查看直播间的内存泄漏；</p>
+
+<p>——需要高端一点的机器，比如iPad才能跑起来，低端机器跑不了instruments。</p>
+
+<p>②集成MLeaksFinder库到开发的target，检测内存泄漏；</p>
+
+<p>——不过这个库只能检查UIViewcontroller和其对应的UIView是否有泄漏，可以方便开发的时候发现问题。</p>
+
+<p>③集成 <a href="https://github.com/facebook/FBMemoryProfiler">FBMemoryProfiler</a> 可视化工具，直接嵌入到 App 中，可以起到在 App 中直接查看内存使用情况，并筛选潜在泄漏OC对象的作用；</p>
+
+<p>网上说instruments的leaks工具无法检测循环引用导致的内存泄漏，验证下是否属实；</p>
+
+<p>——是真的，下图这种block和self形式的循环引用，instruments检测不出来</p>
+
+<p><img src="/images/2019/05/20/1.png" alt="" /></p>
+
+<p>2.不必要的单例；是否可以改造成懒加载，用的时候才去初始化，用完可以释放掉；这个主要是去排查代码逻辑看是否合理；</p>
+
+<p>3.RN页面的内存占用问题见<a href="[http://bbs.reactnative.cn/topic/5550/rn%E5%86%85%E5%AD%98%E9%97%AE%E9%A2%98-%E5%86%85%E5%AD%98%E6%8C%81%E7%BB%AD%E5%A2%9E%E9%95%BF-%E7%9B%B4%E5%88%B0%E8%A2%AB%E7%B3%BB%E7%BB%9F%E6%9D%80%E6%AD%BB](http://bbs.reactnative.cn/topic/5550/rn内存问题-内存持续增长-直到被系统杀死)">这里</a></p>
+
+<p>①列表的cell是否有复用，复用是否正确；</p>
+
+<p>②图片是否用了大图，能不能改成小图；</p>
+
+<p>③进入直播间时回收掉所有RN页面，在退出直播间后重新初始化RN页面。——已采用，效果显著，每个RN页面大概占用20-40M的内存。</p>
+
+<p>当然RN页面占用内存过大的问题，最彻底的解决方案还是直接用native去重写，至少一级页面用native去实现，无论是内存，滑动响应速度等等的用户体验都会好很多。只不过我们权衡之后没有这么做而已。</p>
+
+<p>4.大图片的使用方式，包括动画所用图片的初始化方式，UIImage的imageWithContentWithFile可以避免使用缓存，用完即释放，但是需要把图片放在bundle的目录下，而不是XCAssets里；</p>
+
+<p>——对于降低峰值内存有一定效果，但是imageNamed方式图片的缓存，在APP退到后台或者受到内存警告时，如果未被使用则会被系统自动清理。所以该方式可以采用，但是不要有太高的心理预期。</p>
+
+<p>5.图片下采样。大一点的图片（比如做动画用的图片），改用ImageIO的api，而不是直接imageWithNamed的方式来创建，详情见<a href="https://techblog.toutiao.com/2018/06/19/untitled-42/">这里</a> 和<a href="https://blog.csdn.net/TuGeLe/article/details/81137995">这里</a>；另实际显示的尺寸小于图片实际尺寸时可以降低采样率（下采样）；</p>
+
+<p>——下采样的方式仅针对图片尺寸比实际显示的尺寸大的情况下才会降低内存消耗。由于效果并不明显，项目中并未使用该种方式。</p>
+
+<p>对一张1500 × 2668的图片做测试发现</p>
+
+<p>①使用普通的ImageWithNamed方式，APP退到后台再拉回前台，内存会被清理；</p>
+
+<p>②使用ImageWithContentWithFile的方式，每次使用后内存被释放；——直播间可以采用</p>
+
+<p>这两种方式的内存变化见下图：</p>
+
+<p><img src="/images/2019/05/20/2.png" alt="" /></p>
+
+<p>③使用下采样的方式，峰值内存降低了，但是丢弃图片后，整体占用的内存并未下降。暂不知该图片缓存释放的时机。</p>
+
+<p><img src="/images/2019/05/20/3.png" alt="" /></p>
+
+<p>④使用按比例缩放UIGraphicsBeginImageContext()，效果跟下采样类似，图片缓存在APP退到后台依然没有释放</p>
+
+<p><img src="/images/2019/05/20/4.png" alt="" /></p>
+
+<p>6.APP监听到内存警告或APP退到后台的通知时，释放一些可重建的非必要对象。</p>
+
+<h3 id="section-2">优化峰值内存占用</h3>
+
+<p>1.在合适的地方添加AutoreleasePool来及时释放内存，比如全局IM消息的接收和解析，视频回放的消息过滤等；</p>
+
+<p>2.缓存的使用，比如系统的UIImage的imageWithNamed函数创建的对象，以及YYMemoryCache和SDImageCache来共享缓存，多个业务使用同一份内存缓存。</p>
+
+<p>3.缓存释放时机，YYMemoryCache和SDImageCache以及系统的UIImage的imageWithNamed创建的图片对象，都会在APP退到后台时，或者收到内存警告时清理全部的内存缓存。</p>
+
+<p>4.网络图片单张图片size过大监控，以及网络图片总内存大小限制；</p>
+
+<p>5.<a href="https://github.com/Tencent/OOMDetector/issues">OOM捕捉</a></p>
+
+<p>——最大的用处是用来分析短期内存增长过快的原因，同时可以获取C和C++的内存分配。需要权衡下是否引入。</p>
+
+<p>OOM暂未支持bugly集成，获取的堆栈日志暂时没地方存放。且因为都用了fishhook，会跟 <a href="https://github.com/facebook/FBRetainCycleDetector">FBRetainCycleDetector</a> 冲突，暂不引入。</p>
+
+<p>6.了解mmap，测试其在图片映射的内存降低数据；</p>
+
+<p>SDWebImage使用NSData的dataWithContentOfFile的方式来读取图片到内存；</p>
+
+<p>mmap主要是可以省略从内核空间拷贝到用户空间的这一步操作，其他省不掉。FastImage额外省略了图片解码，但是却是通过把解码后的图片写磁盘来实现的（解码后图片增大，读取的IO耗时也会增大）。另FastImage可以使图片字节对齐，避免CoreAnimation在渲染时做一次额外的拷贝操作。</p>
+
+<p>7.vmmap分析Xcode抓到的memgraph内存信息，看看有什么收获；</p>
+
+<p>——没必要，原理跟<a href="https://github.com/facebook/FBMemoryProfiler">FBMemoryProfiler</a>类似，还不如直接用<a href="https://github.com/facebook/FBMemoryProfiler">FBMemoryProfiler</a>。</p>
+
+<p>ps：Facebook三件套 <a href="https://github.com/facebook/FBRetainCycleDetector">FBRetainCycleDetector</a>，<a href="https://github.com/facebook/FBAllocationTracker">FBAllocationTracker</a>和<a href="https://github.com/facebook/FBMemoryProfiler">FBMemoryProfiler</a>。</p>
+
+<p>命令行有不少工具可以用来配合分析内存，比如vmmap，leaks和heap，见<a href="https://juejin.im/post/5b23dafee51d4558e03cbf4f">这里</a>。</p>
+
+<h2 id="section-3">在我们项目中的实际应用</h2>
+
+<h3 id="section-4">内存泄漏</h3>
+
+<p>1.Instruments 的部分捕获结果</p>
+
+<p>①AFNetworking的session</p>
+
+<p><img src="/images/2019/05/20/5.png" alt="" /></p>
+
+<p>②JSBridge的内存泄漏</p>
+
+<p><img src="/images/2019/05/20/6.png" alt="" /></p>
+
+<p><img src="/images/2019/05/20/7.png" alt="" /></p>
+
+<p>③第三方库的泄漏</p>
+
+<p><img src="/images/2019/05/20/8.png" alt="" /></p>
+
+<p>原因见下图，是第三方的库里边，create出来的CF对象没有release掉：</p>
+
+<p><img src="/images/2019/05/20/9.png" alt="" /></p>
+
+<p>2.MLeaksFinder发现的部分内存问题</p>
+
+<p>①巡堂和动画的view内存泄漏，block互相持有导致，已fixed。</p>
+
+<p><img src="/images/2019/05/20/10.png" alt="" /></p>
+
+<p><img src="/images/2019/05/20/11.png" alt="" /></p>
+
+<p>②IAP的Header内存泄漏，动画的delegate强引用导致，在开始做动画的时候设置delegate，在动画结束后的回调里把delegate置空可以解决这个问题。</p>
+
+<p><img src="/images/2019/05/20/12.png" alt="" /></p>
+
+<p><img src="/images/2019/05/20/13.png" alt="" /></p>
+
+<h3 id="section-5">内存峰值优化</h3>
+
+<p>1.视频回放的业务，拖动进度条会有大量的string被分配内存，占据了快100M</p>
+
+<p><img src="/images/2019/05/20/14.png" alt="" /></p>
+
+<p>解决方案：在拖曳进度条时会过滤消息，在过滤消息的函数里加自动释放池，及时释放局部变量的内存。</p>
+
+<p>2.另一块是由于IM群组的设计，很多用户不需要知道的别的小班的消息也会一起发过来，数据量会很大，在子线程进行高度计算时会产生大量的临时变量，此处也加一个自动释放池用来降低内存峰值。同时之前在<a href="[http://www.zoomfeng.com/blog/crash-anr.html](http://www.zoomfeng.com/blog/crash-anr.html)">另一篇文章</a>里曾经针对消息数据的过滤做过优化</p>
+
+<p><img src="/images/2019/05/20/15.png" alt="" /></p>
+
+<p><img src="/images/2019/05/20/16.png" alt="" /></p>
+
+<p>之后的instruments内存监控如下：</p>
+
+<p><img src="/images/2019/05/20/17.png" alt="" /></p>
+
+<p>第一张图里红圈的string内存占用已经不再出现。</p>
+
+<p>3.SSZPicMemoryTool优化网络图片的内存占用问题（通过SD下载的，包括native和RN），</p>
+
+<p>——主要是通过SSZPicMemoryTool接管了native通过SDWebImage使用的网络图片，以及RN页面使用的网络图片。所以可以及时在使用时监控到内存超过阈值的单张图片。只需要不同的业务页面走查一遍即可发现。除了单张图片的最大size超出监控之外，还直接把YYCache里的LRU淘汰算法拿来用，用于避免网络图片占用的峰值内存过大。</p>
+
+<p><img src="/images/2019/05/20/18.png" alt="" /></p>
+
+<p>原理见下图，SSZPicMemoryTool接管了图片内存缓存的管理，包括读取，写入和淘汰。</p>
+
+<p><img src="/images/2019/05/20/19.png" alt="" /></p>
+
+<h3 id="section-6">业务逻辑优化和时间空间置换策略</h3>
+
+<p>直播间玩H5的小游戏会比较吃内存，所以可以采用一些策略，在用户玩游戏的时候，先释放掉一些内存出来供游戏使用。我们采用的两个方案，一个是用户玩游戏时，把直播的视频画面给移除掉，仅播放音频，因为此时本身视频画面也是被游戏画面挡住的，所以没有太大必要。另一个就是由于RN页面消耗的内存比较大，采用进入直播间就释放掉外围的RN页面，等退出直播间再恢复。</p>
+
+<p>H5游戏本身也做了一轮内存的优化，优化前后降低了一半左右的内存消耗，效果还是很明显的。</p>
+
+<p>1.游戏时关闭视频，以及进入直播间后回收RN的内存优化效果</p>
+
+<p>测试环境：iPhone8P + 无其他课堂互动(消息等) + 进入直播后稳定后采集数据，直接跳转到直播间，不经过试讲和课程页</p>
+
+<p><img src="/images/2019/05/20/20.png" alt="" /></p>
+
+<p>游戏中剔除视频可以优化部分内存：剔除视频渲染后直播间整体内存可以降低25~30M（占进入直播间后增加的 40~50%），接收解码等操作因为SDK没有屏蔽接口，可能需要obs端做改造，但剩余可优化空间不足了，预计最多可优化10~20M。</p>
+
+<p>直播间外部的内存有优化空间：剔除RN后，进入首屏和进入直播间的内存降低了约 50M，RN占用的内存比较大，首屏39M也有待细化，这两部分可以跟进优化。</p>
+
+<p>——进入APP后会占用约40M的内存，经过测试，这部分无法继续降低了，一个空的工程也需要消耗掉这么多的内存。</p>
+
+<p>回收RN页面</p>
+
+<p><img src="/images/2019/05/20/21.png" alt="" /></p>
+
+<p>重新加载RN页面</p>
+
+<p><img src="/images/2019/05/20/22.png" alt="" /></p>
+
+<p>2.直播间游戏自身的内存占用优化（主要是JS做的）</p>
+
+<p>WKWebView 是运行在另一个进程里，Network Loading 以及 UI Rendering 在其它进程中执行。在 WKWebView 的进程里当总体的内存占用比较大的时候，WebContent Process 会 crash，从而出现白屏现象。</p>
+
+<p>WebContent Process 因为整机内存过大被系统kill掉的时候不可控，所以一般会在crash白屏的回调加reload的逻辑，故而出现游戏不断reload问题。</p>
+
+<p>Webview的CPU和内存优化交给前端自己做，只需要关注native本身的优化即可。WebKit进程的内存消耗可以用Instruments的Activity Monitor组件看到。</p>
+
+<p><img src="/images/2019/05/20/23.png" alt="" /></p>
+
+<p>Instrument Activity Monitor + Allocations ，忽略IM和互动其他情况，只在音视频+测评、游戏的情况分析：</p>
+
+<p><img src="/images/2019/05/20/24.png" alt="" /></p>
+
+<h2 id="section-7">关于内存统计</h2>
+
+<p>APP使用内存统计可以直接如下的函数，参考来自<a href="https://github.com/aozhimin/iOS-Monitor-Platform#memory">这里</a></p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">+ (NSInteger)getResidentMemory
+</span><span class="line">{
+</span><span class="line">    task_vm_info_data_t vmInfo;
+</span><span class="line">    mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
+</span><span class="line">    kern_return_t result = task_info(mach_task_self(), TASK_VM_INFO, (task_info_t) &amp;vmInfo, &amp;count);
+</span><span class="line">    if (result == KERN_SUCCESS) {
+</span><span class="line">        return (NSInteger)vmInfo.phys_footprint; ///&lt; 应用使用的物理内存大小
+</span><span class="line">    } else {
+</span><span class="line">        return -1;
+</span><span class="line">    }
+</span><span class="line">}</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="shared-memory">shared memory</h3>
+
+<p>共享内存可以提供跨进程访问的能力，不过如果你的App使用了别的进程创建的共享内存，那么Debug Navigator是不会将它计入你自己的内存总量的，不过vmmap会将它加入TOTAL中，所以可能会导致vmmap计算的内存量会大于Debug Navigator统计内存量。</p>
+
+<p>Debug Navigator其实就是统计了当前进程的所有虚拟内存的Dirty Size + Swapped Size，当然还要剔除掉对第三方共享内存的使用量，当我们发现Debug Navigator的内存量飙高时，不仅仅要去关注Heap上的内存用量，更要关注VM Tracker中那些大Dirty Size的VM Region，这样才能更透彻的了解你的App究竟是怎样使用内存的。</p>
+
+<h3 id="section-8">其他</h3>
+
+<p><img src="/images/2019/05/20/25.png" alt="" /></p>
+
+<h2 id="section-9">内存泄漏工具的使用</h2>
+
+<h3 id="section-10">1.介绍</h3>
+
+<p>在iOS的Dev的包里会集成腾讯的MLeaksFinder库和Facebook的FBMemoryProfiler三件套的库，作用都是用来检测内存泄漏的。</p>
+
+<p>不同点在于，MLeaksFinder只用于检查页面和页面相关的view的内存泄漏，当发现有内存泄漏时，会用一个弹窗来做出提示。比如最常见的，你退出一个页面，2秒后如果该页面的内存还未释放，则会提示内存泄漏。</p>
+
+<p>FBMemoryProfiler则可以检测所有类型的内存泄漏，原理是hook了系统的alloc和dealloc函数，跟instruments的功能类似，只不过更加轻量化，可以在APP运行时实时看到内存分配的情况，如果有对象内存泄漏，则会标红表示。</p>
+
+<h3 id="mleaksfinder">2.MLeaksFinder使用指南</h3>
+
+<p>很简单，在退出一个页面后，如果有弹出下图的弹窗，则说明该页面有内存泄漏，并且列出了具体的内存泄漏的对象。</p>
+
+<p><img src="/images/2019/05/20/26.png" alt="" /></p>
+
+<p>备注：这个列表是一个内存泄漏的链表指针，不一定每个对象都会泄漏，但至少有一个是发生了内存泄漏的，通常可能是最后一个，也可能是多个，比如上图其实XunTangTipView和LOTAnimationView都有内存泄漏。</p>
+
+<p>另外就是默认的判断时间是2秒，实际测试发现有时候会有误伤，所以可以把时间间隔调大到3秒或者更大一些。</p>
+
+<h3 id="fbmemoryprofiler">3.FBMemoryProfiler使用指南</h3>
+
+<p>在Dev的pod里集成该库后，Dev的包，顶部会有一个小浮窗显示当前的总内存，点击后可以展开大图查看更多信息，如下图所示。</p>
+
+<p><img src="/images/2019/05/20/27.png" alt="" /></p>
+
+<p>当你认为某个时刻，可能有内存泄漏，或者想看看是否有内存泄漏时，可以点击下图的Mark Gen按钮，此时会生成一个当前内存状态相比前一个generation时的快照，点击Expand按钮，会展开一个列表，把所有的对象都列出来，红色的一栏则表示该对象有内存泄漏。</p>
+
+<p><img src="/images/2019/05/20/28.png" alt="" /></p>
+
+<p>左上方有一个输入款，可以用来进行过滤。</p>
+
+<p>点击红色的那一栏，就能看到具体的内存泄漏的原因，如下图，nats库的实例跟timer互相强引用导致。</p>
+
+<p><img src="/images/2019/05/20/29.png" alt="" /></p>
+
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-05-20T21:42:39+08:00'><span class='date'>2019 年5 月20 日</span> <span class='time'>9:42 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/ios-level-up.html" title="Previous Post: iOS知识结构">&laquo; iOS知识结构</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/launch-optimize-from-wwdc2019.html" title="Next Post: WWDC2019之启动时间与Dyld3">WWDC2019之启动时间与Dyld3 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2019-05-20 21:42:39 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

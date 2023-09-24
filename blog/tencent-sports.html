@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>腾讯体育iOS客户端逆向实践 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="最终实现的结果： 可以跳过闪屏+直播间广告，如果是免费的比赛，或者你是会员的话，可以提取直播间的超清直播URL（蓝光画质是服务器鉴权），该URL可以复制到手机Safari或者电脑端播放。 实践总结： 1.所有拉流直播链接都是服务器鉴权的，即使免费的比赛，你未登录时也会给你分配一个key； 2. &hellip;">
+  <meta name="keywords" content="NBA 腾讯体育 直播 逆向 去广告">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/tencent-sports.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">腾讯体育iOS客户端逆向实践</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-11-11T19:40:58+08:00'><span class='date'>2018 年11 月11 日</span> <span class='time'>7:40 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4 id="section">最终实现的结果：</h4>
+
+<p>可以跳过闪屏+直播间广告，如果是免费的比赛，或者你是会员的话，可以提取直播间的超清直播URL（蓝光画质是服务器鉴权），该URL可以复制到手机Safari或者电脑端播放。</p>
+
+<h4 id="section-1">实践总结：</h4>
+
+<p>1.所有拉流直播链接都是服务器鉴权的，即使免费的比赛，你未登录时也会给你分配一个key；</p>
+
+<p>2.一个普通非会员账号，是可以蹭几场会员才能看的比赛的，但是因为腾讯体育的服务器对同个账号的拉流有IP数量限制和流量限制，所以一般说来，除非是免费的比赛，否则不要把链接扩散给别人，另外就是蹭了几场比赛后，你的账号拿到的拉流URL，将只能试看1分钟，之后被断流。腾讯体育支持微信和QQ登录，你也可以准备多个账号用来救急某些重要比赛，当然还是买会员支持正版比较直接啦；</p>
+
+<p>3.会员才能看的比赛，非会员也有一个方式可以看直播，清晰度一般但是勉强能看。<strong>还是买会员看蓝光画质美滋滋</strong>；</p>
+
+<p>4.直播间获取直播链接的接口前缀为：<code>http://info.zb.video.qq.com/</code>，后面会拼接很多的参数，其中一个key跟用户账号绑定，服务器用这个来做ip打击和流量控制，抓包请认准该接口，返回数据为json格式，<strong>未做二次加密</strong>。在腾讯体育APP里，这个请求是用<code>NSURLConnection</code>这个类发出去的，要hook的话也要hook这个类的网络请求，而不是<code>NSURLSession</code>；</p>
+
+<p>5.腾讯体育的直播拉流协议使用HLS，你用Charles抓包会看到ts文件不断的被下载下来播放。</p>
+
+<!--more-->
+
+<p>以下是具体操作流程，大致分为越狱，砸壳，静态分析，动态分析，写hook函数这么几个过程。</p>
+
+<p>需要准备的硬件工具：</p>
+
+<p>越狱手机，Windows电脑和Mac电脑。</p>
+
+<h2 id="ios933">iOS9.3.3系统的越狱</h2>
+
+<p>PP助手的Mac版已经没有在维护了，用Windows最新版本的pp助手可以实现一键越狱。如果手机越狱完了，重启之后Cydia会闪退，解决方案：</p>
+
+<p>手机Safari打开 <a href="http://z.25pp.com">z.25pp.com</a> 然后选择越狱版页面，点击iOS9.3.x越狱激活，按照指示的去做就OK（此步骤网络必须要OK）。之后如果出现重启手机后Cydia闪退，按照上述步骤做一次即可打开Cydia。</p>
+
+<p>注意：执行上述步骤时，请退出Mac上的pp助手。</p>
+
+<h2 id="dumpdecrypted">dumpdecrypted砸壳</h2>
+
+<p>需要注意的点是，如果砸壳失败，很有可能是dumpdecrypted出了问题，比如更新Xcode后，默认的SDK可能会有更改，重新拉代码make生成dumpdecrypted.dylib一般可以解决。</p>
+
+<p>砸壳后拷贝到电脑端的是类似QQSportsV3.decrypted这种文件，把文件后缀直接去掉，然后chmod 777修改文件的权限为可读可写可执行，然后就可以进行class-dump和拷贝到APP包里替换掉原来的二进制文件了。</p>
+
+<h2 id="section-2">静态分析</h2>
+
+<p>①使用class-dump把砸壳后的二进制导出头文件；</p>
+
+<p>②利用monkeyDev把目标APP用Xcode跑起来，在你想要的页面用Xcode查看这个页面的view所属的类，然后通过nextResponder去找响应链可以找到对应页面的控制器或跟这个view相关联的类；</p>
+
+<p>③用sublime打开所有头文件，找到你想要分析的类，观察其属性的函数接口，如果函数很多的话，找到目标函数需要花的时间跟运气直接相关，一般也可以通过一些搜索匹配关键字来过滤；</p>
+
+<p>④hooper或者IDA静态分析二进制文件，搜索定位到对应的类和函数，看其内部实现。</p>
+
+<h4 id="ocblock">恢复符号表（OC+Block）</h4>
+
+<p>因为你已经知道一些基本的类和函数名了，Xcode跑起来后可以设置一些符号断点，进行调试和观察。此时需要先恢复符号表，才能看到断点后具体的堆栈调用回溯。</p>
+
+<p>恢复符号表可以参考这篇文章 <a href="http://blog.imjun.net/posts/restore-symbol-of-iOS-app/">http://blog.imjun.net/posts/restore-symbol-of-iOS-app/</a></p>
+
+<p>如果用monkeyDeb创建的工程，OC的符号表恢复可以通过targets→beuild settings 的最下面的User-define里设置MONKEYDEV_RESTORE_SYMBOL为YES，但是block符号需要手动去恢复。</p>
+
+<p>需要注意的就是，在用Xcode查看调用堆栈是，Xcode左侧边栏可能仅显示1个或2个调用，NSThread的callStackSymbols函数可能会打印出一些字符串很奇怪的函数调用堆栈，这并不代表block符号恢复失败，这个情况，通常要用LLDB的bt指令去检查看下是否OK。</p>
+
+<h2 id="section-3">动态挂载分析</h2>
+
+<p>可以参考这里提供的函数调用打印<a href="http://bbs.iosre.com/t/app-ios/12157">http://bbs.iosre.com/t/app-ios/12157</a> 辅助分析。其实就是使用了一个叫做HookZz的库。</p>
+
+<p>动态分析主要是指不通过Xcode，而是通过终端来调试别人的APP，如果是自己的APP，或者自己证书签名的APP，则可以用monkeyDev直接在Xcode里跑起来；</p>
+
+<p>动态分析主要用到了debugserver和LLDB，通常在这一步前先做静态分析，才能知道要打的断点的位置，动态分析通过打断点和读取、修改寄存器值的方式来调试APP，观察APP的行为。</p>
+
+<p>具体过程可以直接参考《iOS应用逆向工程》书里的步骤，需要注意的一点就是，使用WiFi来连接实在是有点慢，所以用iproxy通过USB来调试是比较合适的。</p>
+
+<p><code>brew install usbmuxd</code> 安装好后即可以使用iproxy，</p>
+
+<p>要启动debugserver，需要先ssh到越狱手机上，然后执行：</p>
+
+<p><code>debugserver  *:1234 -a WeChat</code></p>
+
+<p>这个指令的意思是让手机的1234端口待命，准备接受LLDB的指令，-a表示启动后面微信的process ，同时这个APP会被卡住暂停执行，所以也不会响应用户的手势；</p>
+
+<p>在电脑上执行<code> iproxy 1234 1234</code>实现端口转发；</p>
+
+<p>在电脑端直接执行lldb会打开lldb调试器，然后执行</p>
+
+<p><code>process connect connect://localhost:1234</code></p>
+
+<p>可以连接到手机上。如果不使用iproxy来做转发，则需要把localhost替换为手机的ip，同时手机要跟电脑处于同一个网段；</p>
+
+<p>之后等待，当终端出现 <code>Process 867 stopped</code> 类似这种就说明连接成功了，执行c即可让APP继续运行。</p>
+
+<p>连接过程中可能会出现类似<code>ImportError: cannot import name _remove_dead_weakref</code>的错误：</p>
+
+<p><img src="/images/2018/11/1.png" alt="" /></p>
+
+<p>基本上不用理会，继续等就好了，使用USB来调试，大概等个十来秒就可以连接上，如果用WiFi，可能要等挺久的。</p>
+
+<p>如果出现 <code>error: failed to get reply to handshake packet</code>  这个错误提示，可以尝试拔掉USB线重新连接，或者重启手机来解决，当然也有另一种尝试的方案，就是先连接下自己的证书签名的APP，然后再去连接App Store下载的APP。</p>
+
+<p>使用LLDB的指令 ` b adress ` 或  <code>br s -a address</code>  可以对地址入口打个断点。</p>
+
+<h2 id="section-4">去除启动闪屏+直播间90秒广告</h2>
+
+<p>1.hook <code>TADSplashManager</code> 的<code>splashItemForItem</code>函数返回nil，可以去掉闪屏广告；</p>
+
+<p>2.hook <code>TADVideoViewController</code>的<code>viewDidAppear</code>函数，调用其<code>skipAdPlay</code>函数可以跳过直播间90秒广告。</p>
+
+<p>这里讲一下去掉闪屏的分析方式：</p>
+
+<p>①直接法，通过Xcode启动APP，从UI入手，找到对应的view和控制器（nextResponder响应链），然后hook相关的函数来实现修改其逻辑。 这个方式在《iOS应用逆向工程》里讲的很清楚；</p>
+
+<p>②间接法，所有的闪屏基本都是APP打开后先发请求去获取闪屏配置信息，然后下载闪屏内容，之后等到下次启动，检查本地有闪屏则显示，无闪屏则直接进入主页面的逻辑，而闪屏的英文是splash，所以用这个关键字在class-dump出来的头文件去搜索，会得到很多很直接的信息，我就是这么试了一下就成功的；</p>
+
+<p>③闪屏信息通过一个接口来获取，可以block掉这个接口。</p>
+
+<p>另外关于闪屏的设计，其实发现腾讯体育和腾讯视频基本是一模一样，连类名和接口名都没变，可能是一个团队做的？</p>
+
+<h2 id="section-5">破解会员才能看直播的限制</h2>
+
+<p>客户端会根据当前登录用户的状态来判断是否可以试看，服务器的接口会返回一个直播的链接和链接可以播放的时效（300秒），可以测试下这个链接是否一直有效：</p>
+
+<p>——接口会返回一个带鉴权key的直播URL，这个链接拉流时间收到服务器限制。</p>
+
+<p>步骤</p>
+
+<p>①把链接地址抓出来看看是否能在Safari上播放；——可以播放</p>
+
+<p>②hook一下客户端对播放时间的限制，去除该限制，看看是否可以一直播放下去。——不行，服务器鉴权。</p>
+
+<p>首页普通全屏视频播放的响应链为：</p>
+
+<p>QSFullScreenMediaPlayerViewController  ——  QSMPVideoLayersViewController。。。</p>
+
+<p>如果不是全屏则从QSMediaPlayerViewController。。。 开始，而且是把这个控制器的view添加到了tableView上面去</p>
+
+<p>直播间播放器的响应链反推直播间的控制器到播放器的关系为（仅代表响应链，不带表持有关系）：</p>
+
+<p>QSMatchDetailViewController  ——  QSMatchDetailTopViewController  ——   QSMediaPlayerViewController  ——  QSMPVideoLayersViewController ——</p>
+
+<p>QSPlayerViewController  ——  QSRootPlayerViewController  ——  KKMediaRootView  ——  QLVideoView ——  QQPlayerView  ——  QLAVPlayer/QQPlayer。</p>
+
+<p>其中QLVideoView持有两个QQPlayerView，分别为view0和view1，（也许跟试看有关？比如正常播放用一个，试看用另一个？）；</p>
+
+<p>QQPlayerView持有QQPlayer和QQSelfPlayerVideoView（这个只是用来做openGL相关的一个view，没有其他联系）;</p>
+
+<p>QQPlayer持有两个类名为QQPlayerItem的数据源，同时持有QQSelfPlayer和AVPlayer；</p>
+
+<p>QLAVPlayer继承自QQplayer；</p>
+
+<p>QQPlayer的item是QLAVPlayerItem，其继承自QQPlayerItem。</p>
+
+<h4 id="section-6">获取直播链接</h4>
+
+<p>获取直播url的请求为 <code>info.zb.video.qq.com</code></p>
+
+<p>hook <code>NSURLConnection</code>的<code>initWithRequest:delegate:</code>函数之后，发现调用栈为：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">0</span><span class="o">:</span> <span class="mh">0x0000000102fa4b18</span> <span class="n">libTencentSportsDylib</span><span class="p">.</span><span class="n">dylib</span><span class="err">`$</span><span class="n">NSURLConnection_initWithRequest</span><span class="err">$</span><span class="n">delegate</span><span class="err">$</span><span class="n">_method</span><span class="p">(</span><span class="nb">self</span><span class="o">=</span><span class="mh">0x000000014fc53cb0</span><span class="p">,</span> <span class="n">_cmd</span><span class="o">=</span><span class="s">&quot;initWithRequest:delegate:&quot;</span><span class="p">,</span> <span class="n">arg1</span><span class="o">=</span><span class="mh">0x000000014fc55b80</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="mh">0x000000014fc56550</span><span class="p">)</span> <span class="n">at</span> <span class="n">TencentSportsDylib</span><span class="p">.</span><span class="nl">m</span><span class="p">:</span><span class="mi">189</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">1</span><span class="o">:</span> <span class="mh">0x0000000100ac95e0</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">TTRequestLoader</span> <span class="nl">connectToURL</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">312</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">2</span><span class="o">:</span> <span class="mh">0x0000000100acfbf0</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">TTURLRequestQueue</span> <span class="nl">sendRequest</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">672</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">3</span><span class="o">:</span> <span class="mh">0x00000001009852c0</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">MakeJsonData</span> <span class="nl">createDataByRequestURL</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">1032</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">4</span><span class="o">:</span> <span class="mh">0x0000000100a3598c</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">KKMediaPlayPreparer</span> <span class="nl">makeLiveProgInfo</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">1428</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">5</span><span class="o">:</span> <span class="mh">0x00000001009af3fc</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">KKMediaRootViewController</span> <span class="n">startPrepareMediaToPlay</span><span class="p">]</span> <span class="o">+</span> <span class="mi">720</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">6</span><span class="o">:</span> <span class="mh">0x00000001009b12cc</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">KKMediaRootViewController</span> <span class="n">startMediaPlayToPlay</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2176</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">7</span><span class="o">:</span> <span class="mh">0x00000001009788dc</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">TVKMediaPlayer</span> <span class="nl">openMediaPlayerWithChannelID</span><span class="p">:</span><span class="nl">andPID</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">516</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">8</span><span class="o">:</span> <span class="mh">0x00000001005ebcec</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSPlayerViewController</span> <span class="n">startMediaPlayer</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1408</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">9</span><span class="o">:</span> <span class="mh">0x00000001005eac1c</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSPlayerViewController</span> <span class="nl">viewDidAppear</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">64</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>两个获取直播URL的方法：</p>
+
+<p>①可以hook这个请求，匹配到URL的域名后，多发一次请求，然后解析返回的参数就可以获取直播的URL（已采用）；</p>
+
+<p>②可以hook一下<code>-[QQMediaPlayerController prepareToPlayAsset:withMediaUrl:withIsAsset:withKeys:withCacheOrder:withMediaQuence:]</code>这个函数，第1个参数AVURLAsset里包含有直播的完整url。</p>
+
+<p>对试看view的弹出逻辑探索：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">0</span><span class="o">:</span> <span class="mh">0x0000000188c14acc</span> <span class="n">UIKit</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="bp">UIViewController</span> <span class="n">viewDidLoad</span><span class="p">]</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">1</span><span class="o">:</span> <span class="mh">0x00000001002bdad8</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSViewController</span> <span class="n">viewDidLoad</span><span class="p">]</span> <span class="o">+</span> <span class="mi">48</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">2</span><span class="o">:</span> <span class="mh">0x00000001003a504c</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSWindowController</span> <span class="n">viewDidLoad</span><span class="p">]</span> <span class="o">+</span> <span class="mi">60</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">3</span><span class="o">:</span> <span class="mh">0x0000000100662030</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSMPAuthenticationResultViewController</span> <span class="n">viewDidLoad</span><span class="p">]</span> <span class="o">+</span> <span class="mi">64</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">4</span><span class="o">:</span> <span class="mh">0x0000000188b94b40</span> <span class="n">UIKit</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="bp">UIViewController</span> <span class="n">loadViewIfRequired</span><span class="p">]</span> <span class="o">+</span> <span class="mi">996</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">5</span><span class="o">:</span> <span class="mh">0x0000000188b94744</span> <span class="n">UIKit</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="bp">UIViewController</span> <span class="n">view</span><span class="p">]</span> <span class="o">+</span> <span class="mi">28</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">6</span><span class="o">:</span> <span class="mh">0x00000001003a5b64</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSWindowController</span> <span class="nl">setRootViewController</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">256</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">7</span><span class="o">:</span> <span class="mh">0x00000001003a5ee8</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSWindowController</span> <span class="nl">setRootViewController</span><span class="p">:</span><span class="nl">animationType</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">636</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">8</span><span class="o">:</span> <span class="mh">0x0000000100654b50</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSMediaPlayerViewController</span> <span class="nl">setRootViewController</span><span class="p">:</span><span class="nl">animationType</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">76</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">9</span><span class="o">:</span> <span class="mh">0x0000000100654c10</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSMediaPlayerViewController</span> <span class="nl">setRootViewController</span><span class="p">:</span><span class="nl">animated</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">52</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">10</span><span class="o">:</span> <span class="mh">0x0000000100658948</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSMediaPlayerViewController</span> <span class="nl">setPlayerState</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">1280</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">11</span><span class="o">:</span> <span class="mh">0x0000000100659bec</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSMediaPlayerViewController</span> <span class="nl">didConsumeEventFromBus</span><span class="p">:]</span> <span class="o">+</span> <span class="mi">3824</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">12</span><span class="o">:</span> <span class="mh">0x0000000100893120</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">-</span><span class="p">[</span><span class="n">QSBusSystem</span> <span class="nl">triggerOtherEvent</span><span class="p">:]</span><span class="n">_block_block</span> <span class="o">+</span> <span class="mi">44</span>
+</span><span class="line"><span class="n">frame</span> <span class="err">#</span><span class="mi">13</span><span class="o">:</span> <span class="mh">0x000000010085c858</span> <span class="n">QQSportsV3</span><span class="err">`</span><span class="o">+</span><span class="p">[</span><span class="n">QSSystemUtil</span> <span class="nl">performBlock</span><span class="p">:</span><span class="nl">onRunLoop</span><span class="p">:]</span><span class="n">_block</span> <span class="o">+</span> <span class="mi">40</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>上述堆栈里设置rootVC的时候，传入的就是QSMPAuthenticationViewController，所以是否应该弹出试看的view，应该就在这个函数  ` -[QSMediaPlayerViewController setPlayerState:]`。</p>
+
+<p>用IDA打开这个函数可以看到，state有9个值分别对应不同的<code>switch-case</code>分支：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">0</span><span class="o">/</span><span class="mi">1</span>   <span class="n">QSMPPreviewViewController</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">2</span>     <span class="n">QSMPWWANConfirmViewController</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">3</span>     <span class="n">QSMPAuthenticationViewController</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">4</span>     <span class="n">QSMPAuthenticationResultViewController</span>  <span class="err">会弹出限制只能试看的逻辑</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">5</span>     <span class="n">QSMPAuthenticationResultViewController</span>  <span class="err">会弹出限制只能试看的逻辑</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">6</span>     <span class="n">QSMPADViewController</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">7</span>     <span class="p">[</span><span class="nb">self</span> <span class="n">playerViewControllerWithCurrentPlayerMode</span><span class="p">]</span>
+</span><span class="line"><span class="n">state</span><span class="o">=</span><span class="mi">8</span>     <span class="n">QSProjectionControlViewController</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>以勇士某一场比赛为例，需要会员才能看。</p>
+
+<p>进来后state先设置为3，然后请求了一些数据后，设置state为4，弹出了试看限制的view</p>
+
+<p>如果是不需要会员的比赛，则先设置state为6，把广告弹出来，然后广告完了后设置state为7，进行播放比赛。</p>
+
+<p>如果是需要会员才能播放的比赛，则在state=7之后，发送 <code>info.zb.video.qq.com</code>  网络请求去获取直播URL，之后state一直为7.</p>
+
+<p>可以通过hook这个函数，然后对state进行监听，当state=4时，修改其值为6，避开试看逻辑的限制：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="n">CHMethod</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kt">void</span><span class="p">,</span> <span class="n">QSMediaPlayerViewController</span><span class="p">,</span> <span class="n">setPlayerState</span><span class="p">,</span> <span class="kt">int</span><span class="p">,</span> <span class="n">arg1</span><span class="p">){</span>
+</span><span class="line">    <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;hook到 %@ 函数啦%@，参数 arg1 = %ld&quot;</span><span class="p">,</span> <span class="nb">self</span><span class="p">,</span> <span class="n">NSStringFromSelector</span><span class="p">(</span><span class="n">_cmd</span><span class="p">),</span> <span class="n">arg1</span><span class="p">);</span>
+</span><span class="line">    <span class="bp">NSObject</span> <span class="o">*</span><span class="n">object</span> <span class="o">=</span> <span class="nb">self</span><span class="p">;</span>
+</span><span class="line">    <span class="kt">int</span> <span class="n">state</span> <span class="o">=</span> <span class="n">arg1</span><span class="p">;</span>
+</span><span class="line">    <span class="k">if</span> <span class="p">(</span><span class="n">arg1</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+</span><span class="line">        <span class="n">state</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+</span><span class="line">        <span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;修改state为6&quot;</span><span class="p">);</span>
+</span><span class="line">    <span class="p">}</span>
+</span><span class="line">    <span class="k">return</span> <span class="n">CHSuper</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">QSMediaPlayerViewController</span><span class="p">,</span> <span class="n">setPlayerState</span><span class="p">,</span> <span class="n">state</span><span class="p">);</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>因为广告会自动跳过，所以理论上以上修改后就可以正常播放了，但是实践发现试看的URL拉流时被服务器限制了，试看时间过后就断流。</p>
+
+<p>补充一些其他信息 ：</p>
+
+<p>1.闪屏广告的接口：<code>http://news.l.qq.com/app</code>；</p>
+
+<p>2.直播间广告内容的接口案例：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="nl">http</span><span class="p">:</span><span class="c1">//lives.l.qq.com/livemsg?unicomtype=2&amp;newnettype=1&amp;ty=web&amp;defn=hd&amp;ad_type=WL_WK&amp;from=3&amp;vid=100209800&amp;dtype=3&amp;sdtfrom=v3004&amp;live=1&amp;pf=iphone&amp;offline=0&amp;guid=E2CF48156FC246B6A3AB28CFD5115335&amp;pu=1&amp;adaptor=1&amp;v=TADIOSPlayerV1.0&amp;openudid=9da01dcc0f93fea12757814c91074ce440526128&amp;appversion=180911&amp;chid=-1&amp;data=Aejy45%2BNeSZwbpL4wK7%2BCY%2B8ZB%2BzakBg6yuDN6tgzCGupUBraVX4YLCLoIFolnAuCgIePnV34J%2FjX09dPQdSGx2xrnB1tknG92ewRhyw2TpdVNffdS2tgVntHcg%2FcDSmDjrvKiEGRPEOE9KItwzX%2F0xyeJnU2Ap0LZnZKnP7CpNbww77jnM2DC3tvD6X9mCn89P3avg%2FyDbRTsJdWYwIAQsFH%2BaGBIpUTl5ixVCCDHYpDBBFYzTNd10bzeZUiaXfD5T6ZDevRiC0TZryNwN%2FWQVh5ME8lt4fy9UmFAR5UYPHAbI9UWuxAk7kNVeLOe8QaLBM2VslgcTVoGL2vVlXxcxiEqapbM6ZiYjssAlW1sk43zagNNW0K8CtgdBAGBrh5tJ7Y61e9HparuJ0YampHjaLCEnnc9vQ7lEVdQWTFScHyPR9Vfew3F%2FTWg5pJ05j%2BNk%2BsuvjtQ4ikHOt5hpB12JbhGeEghJeUxirpFc5NxEeXvVFV8mI5AO4zg4Bs0i4R52Lx5VvsH%2FODH0wGJAX5P%2B5VJNO4KeE2Qb%2F0bGeaDZ4Qk%2FFEAsRTzDp6E64uBDJgwx%2BHtC3ntqGJ5%2FH3dM6mhh8pPngMHr9J0vTeRAjldnEOG%2BMIQZ99OKqN2lXelrlBRbRXJ%2BxHhZx%2BGKoDdZOJ8T45WF9ZW5x%2Bd6Sgt13SE5jbcofbP3BRTCCbop%2BwEISByPLMpw6i1Lpp4DsC4J7Jg1f0t%2BIcWUNL4QZBXun%2Fu7v7Qoogh%2F%2BmXNniJg0sDXWYuVOjy11HjRCbSCHhZqejORcOISjHekJnnrCSeCrjWpRGrVIsPIGRi7Uz7QM7AG6Rhv3NfVdXdVFl2VPEG1WcYAyiwPFeU4SdNFrFGh3cYPe</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>XML数据格式。有广告的视频连接，包含视频广告内容本身和点击跳转的链接，内容很长，全是广告，去广告也可以考虑hook一下这个接口；</p>
+
+<p>3.NBA比赛的直播链接里，默认的域名前缀通常是<code>http://vzb.tc.qq.com</code>，通常接口会返回4个播放地址，一个是域名，另外几个是IP地址开头对应不同服务器吧。</p>
+
+<p>其中一个直播 链接为：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="nl">http</span><span class="p">:</span><span class="c1">//183.61.13.200:8080/zijian.hls.video.qq.com/45E618DD0290B2A1DCB53C6314D7F0C2047F57A531962422E845E8AD9434D7142A3D50B07F5A37E9C67F86926A772DD94486064D5D7B2EB64B44B5740D0749DF9040E406818BAACCBD29D0108A6B28D8B6180AA8BE3BFC52/100209402.m3u8?cdncode=%2f18907E7BE0798990%2f&amp;time=1540006787&amp;cdn=zijian&amp;sdtfrom=v20431&amp;platform=40403&amp;butype=2&amp;scheduleflag=1&amp;buname=qqlive&amp;useblockid=1&amp;vkey=45E618DD0290B2A1DCB53C6314D7F0C2047F57A531962422E845E8AD9434D7142A3D50B07F5A37E9C67F86926A772DD94486064D5D7B2EB64B44B5740D0749DF9040E406818BAACCBD29D0108A6B28D8B6180AA8BE3BFC52</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>前面的没有用域名，而是IP地址，没啥好处理的。其中的一个关键是中间的URL<code>zijian.hls.video.qq.com</code>，抓数据的时候用这个关键字。</p>
+
+<p>上述链接中<code>vkey</code>是必不可少，且跟你当前登录账号绑定。</p>
+
+<p>清晰度不一样主要是通过xxxx.m3u8这个来区分的，往往蓝光的id比超清的数字多1而已，其他清晰度一次递减。比如标清是1001.m3u8，高清是1002.m3u8，超清是1003.m3u8，蓝光则为 1004.m3u8。</p>
+
+<h4 id="section-7">问题备注：</h4>
+
+<p>1.pp助手客服见这里<a href="https://pro.25pp.com/faq_detail/pc5/20305608">https://pro.25pp.com/faq_detail/pc5/20305608</a>，有不懂的可以问客服，包括新版软件怎么下载，有哪些功能等等；</p>
+
+<p>2.最新版的手机pp助手，可以下载腾讯体育的历史版本，但是最新版的pp助手APP，要连着Windows的pp助手才能下载，应用内直接更新是不行的；</p>
+
+<p>3.IPA包安装到手机上后，bundle里有原版所有文件，用一台越狱的手机，可以直接scp全部拷贝到电脑上用，当然越狱版IPA的可执行文件就是砸壳的，正版的就是加密的，可以自己砸壳生成QQSportsV3.decrypted文件，去掉后缀，再chmod 777改下文件权限就OK了；</p>
+
+<p>4.使用LLDB的bt指令来代替Xcode左边栏的可视化堆栈和NSThread的callStackSymbols函数，bt指令比这两者要准确靠谱得多；</p>
+
+<p>5.普通视频播放和直播的方式不太一样，直播可以直接拿到URL到PC播放，视频的应该是腾讯体育有自定义一个协议，只有播放器内部能播，复制到浏览器无法播放，例如:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="objective-c"><span class="line"><span class="nl">streaming</span><span class="p">:</span><span class="c1">//127.0.0.1:16697/playmp4?data_id=e22ee22fd2992c4674950&amp;clip_id=1&amp;guid=3F30E560A8A3459DBA410FFEBA7EFAC3</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>6.LLDB打断点的时候可以考虑对<code>-[UIViewController viewDidLoad]</code>打个断点，这样子可以捕获所有的控制器被初始化；如果想知道某个UI页面的按钮被点击后做了啥，也可以对应去打断点；</p>
+
+<p>7.HookZz可以hook <code>objc_msgSend</code>函数，打印所有的函数调用，但是新版的ZzReplace接口需要额外研究下怎么用（知道的麻烦告知一下），而且log太多了需要过滤处理；</p>
+
+<p>8.不要修改腾讯体育的包名，否则播放器无法播放视频和看直播，其他功能正常；</p>
+
+<p>9.HTTPS的握手失败是因为手机没有安装Charles的证书，同一台手机连接不同电脑时，都需要安装这台电脑所对应的Charles证书。</p>
+
+<h4 id="section-8">参考</h4>
+
+<p>1.<a href="https://book.douban.com/subject/26363333/">《iOS应用逆向工程》</a>；</p>
+
+<p>2.<a href="https://book.douban.com/subject/30239776/">《iOS应用逆向与安全》</a>；</p>
+
+<p>3.<a href="http://bbs.iosre.com/t/app-ios/12157">逆向世界杯直播</a><a href="http://bbs.iosre.com/t/app-ios/12157">App</a> <a href="http://bbs.iosre.com/t/app-ios/12157">央视影音</a><a href="http://bbs.iosre.com/t/app-ios/12157">-iOS</a><a href="http://bbs.iosre.com/t/app-ios/12157">客户端</a> 。</p>
+
+<h4 id="nba">声明：本篇文章仅作为学习和研究逆向技术用途，请勿用于商业行为。腾讯体育给球迷们带来了良好的观看NBA比赛的体验，在此表示感谢~</h4>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-11-11T19:40:58+08:00'><span class='date'>2018 年11 月11 日</span> <span class='time'>7:40 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/ffextension.html" title="Previous Post: FFExtension">&laquo; FFExtension</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/plcrashreporter-1.html" title="Next Post: PLCrashreporter源码分析其一">PLCrashreporter源码分析其一 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2018-11-11 19:40:58 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

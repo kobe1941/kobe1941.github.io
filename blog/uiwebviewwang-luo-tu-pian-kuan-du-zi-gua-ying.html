@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>UIWebView网络图片宽度自适应 - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文介绍UIWebView在加载图片时，如何使图片宽度自适应屏幕。 该方案适用于纯图片介绍商品详情，让图片自适应屏幕宽度。 1.首先设置网页宽度自适应屏幕，并避免其滚动： 1
+2
+3 _webView.scalesPageToFit = YES; // 宽度自适应 _webView. &hellip;">
+  <meta name="keywords" content="UIWebView 图片 宽度自适应">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/uiwebviewwang-luo-tu-pian-kuan-du-zi-gua-ying.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">UIWebView网络图片宽度自适应</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-03-29T21:42:36+08:00'><span class='date'>2015 年3 月29 日</span> <span class='time'>9:42 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3 id="uiwebview">本文介绍UIWebView在加载图片时，如何使图片宽度自适应屏幕。</h3>
+
+<!--more-->
+
+<p>该方案适用于纯图片介绍商品详情，让图片自适应屏幕宽度。</p>
+
+<h3 id="section">1.首先设置网页宽度自适应屏幕，并避免其滚动：</h3>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="Objective-c"><span class="line">   <span class="n">_webView</span><span class="p">.</span><span class="n">scalesPageToFit</span> <span class="o">=</span> <span class="nb">YES</span><span class="p">;</span> <span class="c1">// 宽度自适应</span>
+</span><span class="line">   <span class="n">_webView</span><span class="p">.</span><span class="n">scrollView</span><span class="p">.</span><span class="n">scrollEnabled</span> <span class="o">=</span> <span class="nb">NO</span><span class="p">;</span> <span class="c1">// 禁止滚动</span>
+</span><span class="line">
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="htmlhtml">2.其次，拿到html字符串之后，拼接一串处理的html代码即可：</h3>
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="Objective-c"><span class="line"><span class="bp">NSString</span> <span class="o">*</span><span class="k">const</span> <span class="n">RESIZE_PICTURE_STRING</span> <span class="o">=</span> <span class="s">@&quot;&lt;script&gt;&quot;</span>
+</span><span class="line"><span class="s">&quot;var imgs = document.getElementsByTagName(&#39;img&#39;);&quot;</span>
+</span><span class="line"><span class="s">&quot;for(var i = 0; i &lt; imgs.length; i++){&quot;</span>
+</span><span class="line"><span class="s">&quot;imgs[i].setAttribute(</span><span class="se">\&quot;</span><span class="s">width</span><span class="se">\&quot;</span><span class="s">,</span><span class="se">\&quot;</span><span class="s">100%</span><span class="se">\&quot;</span><span class="s">);&quot;</span>
+</span><span class="line"><span class="s">&quot;imgs[i].removeAttribute(</span><span class="se">\&quot;</span><span class="s">height</span><span class="se">\&quot;</span><span class="s">);&quot;</span>
+</span><span class="line"><span class="s">&quot;imgs[i].removeAttribute(</span><span class="se">\&quot;</span><span class="s">style</span><span class="se">\&quot;</span><span class="s">);&quot;</span>
+</span><span class="line"><span class="s">&quot;}&quot;</span>
+</span><span class="line"><span class="s">&quot;&lt;/script&gt;&quot;</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="Objective-c"><span class="line"><span class="p">[</span><span class="n">_htmlString</span> <span class="nl">appendString</span><span class="p">:</span><span class="n">RESIZE_PICTURE_STRING</span><span class="p">];</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h4 id="section-1">注：网上也有另一种方式来处理，但是纯图片的显示效果不佳。</h4>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+</pre></td><td class="code"><pre><code class="Objective-c"><span class="line"><span class="p">-</span> <span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="nf">webViewDidFinishLoad:</span><span class="p">(</span><span class="bp">UIWebView</span> <span class="o">*</span><span class="p">)</span><span class="nv">webView</span>
+</span><span class="line"><span class="p">{</span>
+</span><span class="line">	<span class="n">NSLog</span><span class="p">(</span><span class="s">@&quot;网页加载完成&quot;</span><span class="p">);</span>
+</span><span class="line">	
+</span><span class="line">	
+</span><span class="line">	<span class="p">[</span><span class="n">webView</span> <span class="nl">stringByEvaluatingJavaScriptFromString</span><span class="p">:</span>
+</span><span class="line">	<span class="s">@&quot;var script = document.createElement(&#39;script&#39;);&quot;</span>
+</span><span class="line">	<span class="s">&quot;script.type = &#39;text/javascript&#39;;&quot;</span>
+</span><span class="line">	<span class="s">&quot;script.text = </span><span class="se">\&quot;</span><span class="s">function ResizeImages() { &quot;</span>
+</span><span class="line">	<span class="s">&quot;var myimg,oldwidth;&quot;</span>
+</span><span class="line">	<span class="s">&quot;var maxwidth = 980;&quot;</span> <span class="c1">//缩放系数</span>
+</span><span class="line">	<span class="s">&quot;for(i = 0;i &lt; document.images.length;i++){&quot;</span>
+</span><span class="line">	<span class="s">&quot;myimg = document.images[i];&quot;</span>
+</span><span class="line">	<span class="s">&quot;if(myimg.width != maxwidth){&quot;</span> <span class="c1">// 注意改这个符号，小于或者大于</span>
+</span><span class="line">	<span class="s">&quot;oldwidth = myimg.width;&quot;</span>
+</span><span class="line">	<span class="s">&quot;myimg.width = maxwidth;&quot;</span>
+</span><span class="line">	<span class="c1">// &quot;myimg.height *= (maxwidth/oldwidth);&quot;</span>
+</span><span class="line">	<span class="s">&quot;}&quot;</span>
+</span><span class="line">	<span class="s">&quot;}&quot;</span>
+</span><span class="line">	<span class="s">&quot;}</span><span class="se">\&quot;</span><span class="s">;&quot;</span>
+</span><span class="line">	<span class="s">&quot;document.getElementsByTagName(&#39;head&#39;)[0].appendChild(script);&quot;</span><span class="p">];</span>
+</span><span class="line">	
+</span><span class="line">	<span class="p">[</span><span class="n">webView</span> <span class="nl">stringByEvaluatingJavaScriptFromString</span><span class="p">:</span><span class="s">@&quot;ResizeImages();&quot;</span><span class="p">];</span>
+</span><span class="line">	<span class="c1">// 高度微调</span>
+</span><span class="line">	<span class="p">[[</span><span class="n">webView</span> <span class="nl">stringByEvaluatingJavaScriptFromString</span><span class="p">:</span><span class="s">@&quot;document.documentElement.scrollHeight&quot;</span><span class="p">]</span> <span class="n">intValue</span><span class="p">];</span>
+</span><span class="line">	
+</span><span class="line">	<span class="p">[</span><span class="n">webView</span> <span class="n">sizeToFit</span><span class="p">];</span>
+</span><span class="line">
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-03-29T21:42:36+08:00'><span class='date'>2015 年3 月29 日</span> <span class='time'>9:42 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/gei-kong-zhi-qi-jia-sou-suo-kuang-qie-dian-ji-hou-ke-quan-ping.html" title="Previous Post: 给控制器加搜索框且点击后可全屏">&laquo; 给控制器加搜索框且点击后可全屏</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/an-shi-jian.html" title="Next Post: 《暗时间》">《暗时间》 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-03-29 21:42:36 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>

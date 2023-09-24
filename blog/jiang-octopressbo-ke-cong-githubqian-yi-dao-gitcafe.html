@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>将Octopress博客从Github迁移到Gitcafe或coding - 第七章</title>
+  <meta name="author" content="第七章">
+
+  
+  <meta name="description" content="本文记录了将基于octopress 和github pages搭建的博客迁移到国内代码托管服务商gitcafe的过程。
+搭建博客的过程在前文有介绍。 将博客放在github上虽然很方便，也很有Geek的格调，但是很不爽的就是，github这个网站访问很慢，导致我们的博客访问也很慢， &hellip;">
+  <meta name="keywords" content="Octopress github gitcafe coding">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://kobe1941.github.io//blog/jiang-octopressbo-ke-cong-githubqian-yi-dao-gitcafe.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60680038-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">第七章</a></h1>
+  
+    <h2>去年今日此门中，人面桃花相映红。人面不知何处去，桃花依旧笑春风。</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">文章列表</a></li>
+  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
+  <li><a href="https://github.com/kobe1941">Github</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">将Octopress博客从Github迁移到Gitcafe或coding</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-04-27T21:31:02+08:00'><span class='date'>2015 年4 月27 日</span> <span class='time'>9:31 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>本文记录了将基于octopress 和github pages搭建的博客迁移到国内代码托管服务商gitcafe的过程。
+搭建博客的过程在<a href="http://www.zoomfeng.com/blog/ji-yuOctopressda-jian-bo-ke.html">前文</a>有介绍。</p>
+
+<p>将博客放在github上虽然很方便，也很有Geek的格调，但是很不爽的就是，github这个网站访问很慢，导致我们的博客访问也很慢，我测试的时候发现开机后第一次加载的话花个30秒是正常的，第二次以后访问会好一些，但相比国内的网站还是很慢。故有了这次博客迁移之旅。</p>
+
+<p>本博客迁移的过程并不轻松，经过跟gitcafe工程师十几封邮件后的沟通后才算完全搞掂。</p>
+
+<p>补充：由于gitcafe即将关闭服务，所以又把博客迁移到了coding.net。具体迁移方式跟迁移到gitcafe大致一致，下文有标注。</p>
+
+<!--more-->
+
+<h2 id="section">迁移原理</h2>
+<p>我们并非完全放弃github，只是把博客多备份一个副本到gitcafe上而已，然后在自己域名的管理网站上，把自己的域名指向gitcafe备份的那一份博客，从而加快访问速度。</p>
+
+<p>另由于octopress有两个分支，soure和master，通常的写博客在source分支下，master分支的内容是用来存放网页供他人访问的。我们在备份到gitcafe后一切操作跟备份之前一样。</p>
+
+<p>在本次迁移之前，我去<a href="www.godaddy.com">GoDaddy</a>上面买了个域名，三年不到￥200，感觉还是蛮便宜的。</p>
+
+<p>备注：GoDaddy支持支付宝付款，买域名很方便，买的时候，那些附加的东西可以统统不要勾选。</p>
+
+<h2 id="section-1">详细步骤</h2>
+
+<p>1.注册<a href="www.gitcafe.com">gitcafe</a>账号，这个必须的。</p>
+
+<p>2.在刚才的账号下，添加SSH公钥。这一步跟github上的添加公钥几乎一致。</p>
+
+<p>3.创建一个与你的gitcafe用户名<code>相同名称</code>的项目。记住，如果你需要通过gitcafe的pages功能，请保证这个项目的名称与你的用户名完全一致，否则gitcafe识别不了！本人就犯过这个错误，导致长时间博客无法访问！</p>
+
+<p>4.打开octopress下的<code>_deploy</code>目录，添加一个gitcafe的远程仓库：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">git remote add gitcafe git@gitcafe.com:username/username.git</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>将上述的username用你的gitcafe用户名替换掉。</p>
+
+<p>补充：迁移到coding也是类似的方式，不过之前的remote指向gitcafe，删掉再重新添加remote到coding即可，具体coding的pages功能页有教程。添加公钥什么的也是类似。</p>
+
+<p>5.修改Rakefile，以实现发布到github的时候，也顺便备份一次到gitcafe的服务器。
+只需要在第269行增加如下代码：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">system "git remote add gitcafe git@gitcafe.com:username/username.git &gt;&gt; /dev/null 2&gt;&amp;1"
+</span><span class="line">system "git push -u gitcafe master:gitcafe-pages"</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>将上述的username用你的用户名替换掉。</p>
+
+<p>补充：如果是博客迁移到coding的，就按照下面的方式来更改，其实是一样的。需要注意的一点是，按照coding上的教程，新建了一个coding-pages 的分支用来做为博客的备份分支。注意该分支也是在_deploy目录下的git仓库建立的啊，不要傻傻的跑去octopress目录下的那个仓库。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">system "git remote add git@git.coding.net:username/username.git &gt;&gt; /dev/nul$
+</span><span class="line">system "git push -u origin coding-pages"</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>具体添加的位置请看<a href="http://blog.devtang.com/blog/2014/06/02/use-gitcafe-to-host-blog/">这里</a>;</p>
+
+<p>另外如果你想加些提示信息，也可以在上述代码插入的前一行或后一行，添加一些说明。
+添加的说明的格式在Rakefile里可以看到，大概是这样子：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class=""><span class="line">puts "\n## add your message"</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>到这里，配置博客部分就完成了，<code>rake gen_deploy</code>操作可以推送博客内容到gitcafe和github两个地方了。</p>
+
+<p>补充：以上改好以后，<code>rake gen_deploy</code> 就可以推送博客内容到coding和github两个地方了。</p>
+
+<p>6.修改域名指向。</p>
+
+<p>补充：coding的pages服务，也是要先去pages服务的栏目添加域名绑定，然后去godaddy将域名指向为<code>pages.coding.me</code> 即可。</p>
+
+<p>如果你之前只是使用<code>username.github.io</code>这样的域名来访问博客的话，这一步可以跳过，直接去测试<code>username.gitcafe.io</code>即可。</p>
+
+<p>如果使用了自己的域名来配置过github的博客，请继续往下。</p>
+
+<p>第一步，找到你在gitcafe的项目，点击项目设置-》pages服务，添加你的域名。</p>
+
+<p>第二步去修改域名配置。由于之前把博客配置在github时，使用了CNAME来作为域名跳转，而gitcafe的方式跟github不大一样，故需要做如下改动：</p>
+
+<p>①删掉octopress目录下的CNAME文件</p>
+
+<p>②去GoDaddy网站（或者你的其他域名管理网站）修改域名指向。
+如下图所示：</p>
+
+<p><img src="/images/2015/04/27/01.png" alt="" /></p>
+
+<p>添加一个A记录指向gitcafe的服务器即可，没必要把所有的A记录都删掉只剩下gitcafe的，我的A记录就有两个，尽管另一个我也不知道是干嘛用的。</p>
+
+<p>备注：本来按照gitcafe的文档提示，只需要添加CNAME或者A记录其中一项即可，但我在迁移过程中，发现需要两个一起配置才行，gitcafe工程师解释的原因如图：</p>
+
+<p><img src="/images/2015/04/27/03.png" alt="" /></p>
+
+<p><img src="/images/2015/04/27/02.png" alt="" /></p>
+
+<p>我的博客是有<code>www</code>这个前缀的，所以我乖乖的添加了一条CNAME。</p>
+
+<p>这两次搭建和迁移博客给了我比较大的体会就是，遇到有问题时，是可以找网站技术人员寻求支持的。我之前在搭建博客时，也遇到过问题，通过给github发邮件，问题得到了解决，这次也一样，跟gitcafe邮件沟通后问题也得到了解决。</p>
+
+<p>祝大家顺利。</p>
+
+<p>参考链接：</p>
+
+<p>1.<a href="http://blog.leichunfeng.com/blog/2014/11/15/migrate-octopress-blog-from-github-to-gitcafe/">将 Octopress 博客从 GitHub 迁移到 GitCafe</a>.</p>
+
+<p>2.<a href="http://git.devzeng.com/blog/change-blog-host-to-gitcafe.html">将博客从GitHub迁移到GitCafe</a>.</p>
+
+<p>3.<a href="http://blog.devtang.com/blog/2014/06/02/use-gitcafe-to-host-blog/">将博客从GitHub迁移到GitCafe</a>.</p>
+
+<p>4.<a href="https://gitcafe.com/GitCafe/Help/wiki/Pages-%E7%9B%B8%E5%85%B3%E5%B8%AE%E5%8A%A9#wiki">gitcafe官方帮助文档</a>.</p>
+</div>
+
+
+  <footer>
+  <div align="center"><img src="/images/qrcode_pay.png" align="middle" width="300" height="300" alt="支付二维码" title="打赏作者" /></div>
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-7430330121158143",
+    enable_page_level_ads: true
+  });
+</script>
+    <p class="meta"> 
+
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">第七章</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-04-27T21:31:02+08:00'><span class='date'>2015 年4 月27 日</span> <span class='time'>9:31 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ioskai-fa/'>ios开发</a>
+  
+</span>
+
+
+    </p>
+    
+      <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1265.21">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    span.s1 {text-decoration: underline ; color: #0000ee}
+  </style>
+</head>
+<body>
+<p class="p1">  </p>
+</body>
+<div class="bshare-custom"><a title="分享到新浪微博" class="bshare-sinaminiblog"></a><a title="分享到QQ空间" class="bshare-qzone"></a><a title="分享到人人网" class="bshare-renren"></a><a title="分享到腾讯微博" class="bshare-qqmb"></a><a title="分享到网易微博" class="bshare-neteasemb"></a><a title="更多平台" class="bshare-more bshare-more-icon more-style-addthis"></a><span class="BSHARE_COUNT bshare-share-count">0</span></div><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/buttonLite.js#style=-1&amp;uuid=&amp;pophcol=2&amp;lang=zh"></script><script type="text/javascript" charset="utf-8" src="http://static.bshare.cn/b/bshareC0.js"></script>
+</html>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/xing-fu-de-fang-fa.html" title="Previous Post: 《幸福的方法》">&laquo; 《幸福的方法》</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/internet-one-year.html" title="Next Post: 写在切入互联网一周年">写在切入互联网一周年 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Categories</h1>
+  <ul id="categories">
+    <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
+<li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
+<li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+
+  </ul>
+</section>
+<section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/compo.html">《涛动周期论》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+    <h1>新浪微博</h1>
+    <ul id="weibo">
+    <li>
+
+	<iframe width="100%" height="550" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=1&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=1&isFans=1&uid=1247589445&verifier=42c93d86&dpc=1"></iframe>
+
+      </li>
+    </ul>
+</section>
+
+
+
+
+  
+</aside>
+
+
+<!--  -->
+
+<div id="container"></div>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+var gitment = new Gitment({
+  // id: '<%= page.date %>', // document.location.href, // 可选。默认为 location.href
+  // id: document.location.href,
+  id: '2015-04-27 21:31:02 +0800',
+  owner: 'kobe1941',
+  repo: 'BlogComment',
+  oauth: {
+    client_id: '62a5e8671a334b627549',
+    client_secret: 'b0832843f78bb177338384a045a24886cb577b9d',
+  },
+})
+gitment.render('container')
+</script>
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 - 第七章 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</footer>
+  
+
+
+
+
+
+
+#
+
+
+
+
+</body>
+</html>
