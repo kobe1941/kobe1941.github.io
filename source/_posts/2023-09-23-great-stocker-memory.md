@@ -1,6 +1,6 @@
 ---
 layout: post
-title: great_stocker_memory
+title: 《股票大作手回忆录》
 date: 2023-09-23 22:03:49 +0800
 comments: true
 categories: 读书笔记
