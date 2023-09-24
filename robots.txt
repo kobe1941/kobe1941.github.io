@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://kobe1941.github.io//sitemap.xml 
+Sitemap: http://kobe1941.github.io/sitemap.xml 

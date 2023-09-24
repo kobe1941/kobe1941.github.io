@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[类别：其他 | 第七章]]></title>
-  <link href="http://kobe1941.github.io//blog/categories/qi-ta/atom.xml" rel="self"/>
-  <link href="http://kobe1941.github.io//"/>
-  <updated>2021-07-28T08:21:35+08:00</updated>
-  <id>http://kobe1941.github.io//</id>
+  <link href="http://kobe1941.github.io/blog/categories/qi-ta/atom.xml" rel="self"/>
+  <link href="http://kobe1941.github.io/"/>
+  <updated>2023-09-24T09:07:07+08:00</updated>
+  <id>http://kobe1941.github.io/</id>
   <author>
     <name><![CDATA[第七章]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[巴菲特致股东的信]]></title>
-    <link href="http://kobe1941.github.io//blog/letter-by-buffett.html"/>
+    <link href="http://kobe1941.github.io/blog/letter-by-buffett.html"/>
     <updated>2020-04-11T20:41:32+08:00</updated>
-    <id>http://kobe1941.github.io//blog/letter-by-buffett</id>
+    <id>http://kobe1941.github.io/blog/letter-by-buffett</id>
     <content type="html"><![CDATA[<p>摘自巴菲特写给股东的信，截止到2020年，1973年到1976年的信因为没有译文没看所以未记录。</p>
 
 <p>按巴菲特的说法，与教科书中的组织行为规则相反，为一家特定的公司环境指定一条抽象的命令链收效甚微。要紧的是选择能干、诚实而且勤勉的人。在团队中拥有一流的成员，远比设计等级制度、明确谁向谁汇报什么以及在什么时候汇报重要得多。</p>
@@ -286,9 +286,9 @@
   
   <entry>
     <title type="html"><![CDATA[跳伞初体验]]></title>
-    <link href="http://kobe1941.github.io//blog/jumping.html"/>
+    <link href="http://kobe1941.github.io/blog/jumping.html"/>
     <updated>2018-03-24T21:29:44+08:00</updated>
-    <id>http://kobe1941.github.io//blog/jumping</id>
+    <id>http://kobe1941.github.io/blog/jumping</id>
     <content type="html"><![CDATA[<p>之前一直对跳伞充满期待，看了一些关于跳伞的游记和知乎回答，照片都拍的很美，抬高了我对这项运动的心理预期。整体体验下来，跳伞其实算还不错的运动，只是没有心理想象的那么刺激，所以心理落差还是会有一点的。不过这也提醒了我，保持平常心，才能知足常乐呀~
 <!--more--></p>
 

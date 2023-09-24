@@ -9,8 +9,8 @@
   <meta name="author" content="第七章">
 
   
-  <meta name="description" content="博客描述信息写在这里">
-  <meta name="keywords" content="ios Octopress github">
+  <meta name="description" content="本次CoreText教程为一个系列，大概总共分4-5篇博文来叙述，内容分布为： 第一篇介绍CoreText的一些基础知识和绘制流程，仅绘制纯文本内容，且不去讲究排版的细节，先画出来为主。 第二篇进行图文混排，有本地图片和网络图片两种形式，文本部分保持跟第一篇博文一致。 第三篇仔细探究纯文本的排版， &hellip;">
+  
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -18,16 +18,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://kobe1941.github.io//posts/6/index.html">
+  <link rel="canonical" href="http://kobe1941.github.io/posts/6/index.html">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="第七章" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
   <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
   
   <script type="text/javascript">
@@ -61,16 +62,14 @@
   
 <form action="https://www.google.com/search" method="get">
   <fieldset role="search">
-    <input type="hidden" name="sitesearch" value="kobe1941.github.io/">
+    <input type="hidden" name="sitesearch" value="kobe1941.github.io">
     <input class="search" type="text" name="q" results="0" placeholder="Search"/>
   </fieldset>
 </form>
   
 <ul class="main-navigation">
-  <li><a href="/">首页</a></li>
-  <li><a href="/blog/archives">文章列表</a></li>
-  <li><a href="http://www.douban.com/people/47916859/">我的豆瓣</a></li>
-  <li><a href="https://github.com/kobe1941">Github</a></li>
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
 </ul>
 
 </nav>
@@ -78,6 +77,54 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/coretext-1.html">CoreText使用教程(一)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-20T15:13:28+08:00'><span class='date'>2015 年5 月20 日</span> <span class='time'>3:13 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本次CoreText教程为一个系列，大概总共分4-5篇博文来叙述，内容分布为：</p>
+
+<p>第一篇介绍CoreText的一些基础知识和绘制流程，仅绘制纯文本内容，且不去讲究排版的细节，先画出来为主。</p>
+
+<p>第二篇进行图文混排，有本地图片和网络图片两种形式，文本部分保持跟第一篇博文一致。</p>
+
+<p>第三篇仔细探究纯文本的排版，包括中文，英文，数字和表情。对齐与不对齐的文本排版区别。</p>
+
+<p>第四篇讨论文本字符行数超过可以显示的行数时，在最后加省略号的问题。</p>
+
+<p>第五篇介绍使用正则表达式识别人名、电话，对用户点击人名、电话做出响应。</p>
+
+<p>对图片点击的识别，其实原理差不多，《iOS开发进阶》里边讲的更清楚。</p>
+
+<p>本篇教程为第一篇，仅实现在一个UIView的子控件上绘制纯文本。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/coretext-1.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -412,47 +459,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/jin-hua-xin-li-xue.html">《进化心理学》</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-04-19T22:33:31+08:00'><span class='date'>2015 年4 月19 日</span> <span class='time'>10:33 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本书研究人在进化过程中所形成的心理和其背后的形成机制。从人类起源开始，到一个人在一生的成长过程中所面临的生存与成长，择偶，亲代抚育和亲属关系，群居问题，都从进化的角度分别进行了探讨，虽然存在不足，比如忽略个人感情的作用以及部分章节违反生物学知识，但进化的视角的确很独特新颖，读的时候有种醍醐灌顶的感觉，是本值得一看的好书。</p>
-
-<p>本书大体上是总-分-总的结构。围绕着人类的适应性问题以及人类已经进化的解决这些问题的心理机制而组织起来。</p>
-
-<p>首先介绍理论，包括达尔文的自然选择理论、性选择理论，汉密尔顿的内含适应性理论，trivers的三篇论文：非亲属间的互惠式交换、亲代投资理论、亲代-子代冲突理论。</p>
-
-<p>然后分别用事例和数据来支持上述理论，并一一展开详细描述。使用先提出假设，再证明或证伪假设的方式。</p>
-
-<p>最后进行总结，所有的心理学分支都可以统一到进化心理学，都跟进化心理学息息相关。
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/jin-hua-xin-li-xue.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/7">&larr; Older</a>
@@ -471,13 +477,17 @@
     <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
 <li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
 <li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
-<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (37)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (38)</a></li>
 
   </ul>
 </section>
 <section>
-  <h1>最新文章</h1>
+  <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/great-stocker-memory.html">《股票大作手回忆录》</a>
+      </li>
     
       <li class="post">
         <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
@@ -493,10 +503,6 @@
     
       <li class="post">
         <a href="/blog/charles-munger.html">《穷查理宝典》</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/invest-most-important-thing.html">《投资最重要的事》</a>
       </li>
     
   </ul>
@@ -521,19 +527,9 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2021 - 第七章 -
+  Copyright &copy; 2023 - 第七章 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
-<script>
-var _hmt = _hmt || [];
-(function() {
-  var hm = document.createElement("script");
-  hm.src = "//hm.baidu.com/hm.js?630713a9e9ac69afe7cd8376c786157b";
-  var s = document.getElementsByTagName("script")[0]; 
-  s.parentNode.insertBefore(hm, s);
-})();
-</script>
-
 
 </footer>
   
@@ -543,7 +539,7 @@ var _hmt = _hmt || [];
 
 
 
-#
+
 
 
 
