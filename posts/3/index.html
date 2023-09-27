@@ -9,8 +9,7 @@
   <meta name="author" content="第七章">
 
   
-  <meta name="description" content="之前一直对跳伞充满期待，看了一些关于跳伞的游记和知乎回答，照片都拍的很美，抬高了我对这项运动的心理预期。整体体验下来，跳伞其实算还不错的运动，只是没有心理想象的那么刺激，所以心理落差还是会有一点的。不过这也提醒了我，保持平常心，才能知足常乐呀~
-">
+  <meta name="description" content="写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的GitHub地址， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -78,6 +77,90 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/ffextension.html">FFExtension</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-10-15T22:20:23+08:00'><span class='date'>2018 年10 月15 日</span> <span class='time'>10:20 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的<a href="https://github.com/kobe1941/FFExtension">GitHub地址</a>，使用过程中遇到任何问题欢迎issue。</p>
+
+<p>主要原理就是用Method Swizzle去hook系统类包括私有类的函数， 对常见的容器类，数组字典字符串这些有做保护，顺带新增了 NSSet，NSCache，NSUserDefaults，NSData ，NSAttributedString等几个类的保护，支持拦截 <code>unrecognized selector sent to instance</code> 异常，设置好要拦截的类即可。</p>
+
+<p>一些使用代码规范就能解决的崩溃，比如 NSTimer，通知和 KVO 等等，本项目并未做额外处理，这种低级的失误，还是用代码规范来限制比较好。</p>
+
+<p>已经在自己的项目用上了，目前工作稳定，iOS8.x 到 iOS12 都测试通过。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/ffextension.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/launch-time.html">iOS启动时间优化</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-07-22T15:49:44+08:00'><span class='date'>2018 年7 月22 日</span> <span class='time'>3:49 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="section">背景</h2>
+
+<p>一个项目做的时间长了，启动流程往往容易杂乱，库也用的越来越多，APP的启动时间也会慢慢变长。本次将针对iOS APP的启动时间优化一波。</p>
+
+<p>通常针对一个技术点做优化的时候，都要先了解清楚这个技术点有哪些流程，优化的方向往往是减少流程的数量，以及减少每个流程的消耗。</p>
+
+<p>本次优化从结果上来看，main阶段的优化效果最显著，尤其是启动时的一些IO操作处理，对启动时间的减少有很大作用。多线程启动的设计和验证最有意思，但是在实践上由于我们业务本身的原因，只开了额外一个子线程来并行启动，且仅在子线程做了少量的独立操作，这个要根据不同的业务去具体分析了。</p>
+
+<p>一般说来，pre-main阶段的定义为APP开始启动到系统调用main函数这一段时间；main阶段则代表从main函数入口到主UI框架的viewDidAppear函数调用的这一段时间。（本文后续main阶段的时间统计都用<code>viewDidAppear</code>作为基准而非的<code>applicationWillFinishLaunching</code>）</p>
+
+<p>本文前半部分讲原理（内容基本是从网上借鉴/摘录），后半部分讲实践，pre-main阶段的原理比较难理解，不过实践倒是根据结论直接做就好了。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/launch-time.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -380,80 +463,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/hfrefresh.html">下拉刷新框架HFRefresh介绍</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-09-27T08:10:17+08:00'><span class='date'>2016 年9 月27 日</span> <span class='time'>8:10 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>代码在github上的仓库<a href="https://github.com/kobe1941/HFRefresh">HFRefresh</a>。</p>
-
-<p>先上本文的思维导图：</p>
-
-<p><img src="/images/2016/09/HFRefresh.png" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/hfrefresh.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/record-20160920.html">二沙岛卖唱指南</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-09-21T21:20:10+08:00'><span class='date'>2016 年9 月21 日</span> <span class='time'>9:20 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>三年前来到广州，因缘际会住在广州大桥附近，房东人挺好房子也住的挺舒服，阳台直面广州塔，旁边是领事馆很安静绿化也不错，无聊的时候常在阳台发呆。。。江边风景挺不错，有一段时间常去江边跑步，心情不好时也可以去散步，在这里度过了一段值得回忆的经历。。。</p>
-
-<p><img src="/images/2016/09/13.jpg" alt="阳台风景" title="阳台风景" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/record-20160920.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -472,13 +481,21 @@
     <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
 <li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
 <li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
-<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (38)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (40)</a></li>
 
   </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/see-world-by-president-li.html">《李光耀观天下》</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/human-history-simple.html">《人类简史》</a>
+      </li>
     
       <li class="post">
         <a href="/blog/great-stocker-memory.html">《股票大作手回忆录》</a>
@@ -490,14 +507,6 @@
     
       <li class="post">
         <a href="/blog/compo.html">《涛动周期论》</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/the-intelligent-investor.html">《聪明的投资者》</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/charles-munger.html">《穷查理宝典》</a>
       </li>
     
   </ul>
