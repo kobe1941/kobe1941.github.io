@@ -9,7 +9,7 @@
   <meta name="author" content="第七章">
 
   
-  <meta name="description" content="写这个库的初衷是为了防止一些常见的崩溃，扫了一圈github上已有的库，都不太合适，像avoidCrash虽然能用，但是我不喜欢它用try-catch来做防崩溃的方式，它GitHub上的issue页也有很多问题是不好去定位和解决的。所以决定自己来是实现一遍。仓库的GitHub地址， &hellip;">
+  <meta name="description" content="整体上还算不错，对内核，Mach和BSD的介绍，包括一些函数和调用等，以及对异常处理的描述，对于理解PLC这个崩溃日志生成的库还是很有帮助的。同时一些内核线程、用户线程的概念也算是填补部分知识空白。引导过程虽然讲的很详细，不过兴趣不大。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,194 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/ios-system-deep.html">《深入解析Mac OS X & iOS操作系统》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-04-14T21:14:53+08:00'><span class='date'>2019 年4 月14 日</span> <span class='time'>9:14 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>整体上还算不错，对内核，Mach和BSD的介绍，包括一些函数和调用等，以及对异常处理的描述，对于理解PLC这个崩溃日志生成的库还是很有帮助的。同时一些内核线程、用户线程的概念也算是填补部分知识空白。引导过程虽然讲的很详细，不过兴趣不大。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/ios-system-deep.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/modern-operate-system.html">《现代操作系统》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-02-11T22:17:58+08:00'><span class='date'>2019 年2 月11 日</span> <span class='time'>10:17 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>非常棒的一本书，可以把很多知识点给串起来，对于操作系统的历史发展和基本运行规则有比较清晰的描述。对非计算机科班的孩纸特别友好。个人认为第二章进程和线程，第三章存储管理，第六章死锁，第十章Linux实例研究都是非常值得读的章节，对实际理解操作系统也非常有用。当然如果涉及到视频，第七章的多媒体也不错。</p>
+
+<p>存储管理这一章有一个小节介绍了很多种页面置换算法，在实际应用中，iOS很多第三方的框架有用到，比如YYCache用的LRU算法。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/modern-operate-system.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/plcrashreporter-2.html">PLCrashreporter源码分析其二</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-01-25T23:26:26+08:00'><span class='date'>2019 年1 月25 日</span> <span class='time'>11:26 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本篇文章主要对PLC内部用到的一些当时看源码时不太理解的底层函数进行分析，以及对一些为了理解PLC的原理需要了解的概念进行汇总。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/plcrashreporter-2.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/plcrashreporter-1.html">PLCrashreporter源码分析其一</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-01-19T22:53:32+08:00'><span class='date'>2019 年1 月19 日</span> <span class='time'>10:53 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>大概总共会分三篇文章来分析PLC，第一篇讲整体的工作流程，第二篇梳理PLC内部使用到的一些特殊函数的含义，第三篇会尝试做一个实践。</p>
+
+<p>不定期更新，我想明白PLC的某个细节可能就会来更新一下。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/plcrashreporter-1.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/tencent-sports.html">腾讯体育iOS客户端逆向实践</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-11-11T19:40:58+08:00'><span class='date'>2018 年11 月11 日</span> <span class='time'>7:40 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4 id="section">最终实现的结果：</h4>
+
+<p>可以跳过闪屏+直播间广告，如果是免费的比赛，或者你是会员的话，可以提取直播间的超清直播URL（蓝光画质是服务器鉴权），该URL可以复制到手机Safari或者电脑端播放。</p>
+
+<h4 id="section-1">实践总结：</h4>
+
+<p>1.所有拉流直播链接都是服务器鉴权的，即使免费的比赛，你未登录时也会给你分配一个key；</p>
+
+<p>2.一个普通非会员账号，是可以蹭几场会员才能看的比赛的，但是因为腾讯体育的服务器对同个账号的拉流有IP数量限制和流量限制，所以一般说来，除非是免费的比赛，否则不要把链接扩散给别人，另外就是蹭了几场比赛后，你的账号拿到的拉流URL，将只能试看1分钟，之后被断流。腾讯体育支持微信和QQ登录，你也可以准备多个账号用来救急某些重要比赛，当然还是买会员支持正版比较直接啦；</p>
+
+<p>3.会员才能看的比赛，非会员也有一个方式可以看直播，清晰度一般但是勉强能看。<strong>还是买会员看蓝光画质美滋滋</strong>；</p>
+
+<p>4.直播间获取直播链接的接口前缀为：<code>http://info.zb.video.qq.com/</code>，后面会拼接很多的参数，其中一个key跟用户账号绑定，服务器用这个来做ip打击和流量控制，抓包请认准该接口，返回数据为json格式，<strong>未做二次加密</strong>。在腾讯体育APP里，这个请求是用<code>NSURLConnection</code>这个类发出去的，要hook的话也要hook这个类的网络请求，而不是<code>NSURLSession</code>；</p>
+
+<p>5.腾讯体育的直播拉流协议使用HLS，你用Charles抓包会看到ts文件不断的被下载下来播放。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/tencent-sports.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -269,200 +457,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/summary-2016.html">2016</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-01-01T21:24:18+08:00'><span class='date'>2017 年1 月1 日</span> <span class='time'>9:24 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>去年的年度计划大概执行了70%-80%，整体上还可以，本来我也没啥高大上的追求。。</p>
-
-<h2 id="section">1.工作</h2>
-
-<p>不是在公司工作，就是在去公司的路上。。。</p>
-
-<p>所以没有什么工作和生活的平衡，略过。</p>
-
-<h2 id="section-1">2.生活</h2>
-
-<p>4月去听过音乐会；</p>
-
-<p>5月去广美看过毕业展；</p>
-
-<p>7月随团队到湖南东江湖飘过流；</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/summary-2016.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/art-woman.html">《文艺女青年这种病，生个孩子就好了》</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-12-15T21:30:41+08:00'><span class='date'>2016 年12 月15 日</span> <span class='time'>9:30 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>全书共四章，除了第三章外内容都有一些吸引我的地方。内容围绕生孩子和带孩子展开，主要是作者的吐槽，且伴随着一些家常过日子的杂碎争端和淡淡的幸福。本书男女适用，尤其适合没结婚或者没生小孩的男男女女。男生认真看看生产过程和照顾孩子几部分张姐的内容，站在女方的角度感受一下，说不定有所裨益。</p>
-
-<p><img src="/images/2016/12/15/1.png" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/art-woman.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/wastelife.html">《把生命浪费在美好的事情上》</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-12-05T22:02:15+08:00'><span class='date'>2016 年12 月5 日</span> <span class='time'>10:02 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>一本散文集，基本选自吴晓波之前的专栏或者公众号的文章，只是在这里做一个聚合，编成一本书。</p>
-
-<p>内容涉及的范围比较发散，不过也都是跟财经和个人财富有关的，质量上还算可以。当然，这本书最好的部分其实是书名。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/wastelife.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/alibaba-one-year.html">写在阿里一周年</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-12-01T21:22:00+08:00'><span class='date'>2016 年12 月1 日</span> <span class='time'>9:22 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>从去年入职到今天，整整满一年。这一年经历过很多事情，发生了很多的变化。很幸运当初选择了互联网行业，整体感觉还不错~</p>
-
-<p><img src="/images/2016/12/01/1.jpg" alt="" /></p>
-
-<p>看着这张图，突然想起来，这是我毕业后待的时间最长的一家公司o(╯□╰)o</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/alibaba-one-year.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/ipa-size-thin.html">iOS安装包瘦身指南</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-10-12T07:52:41+08:00'><span class='date'>2016 年10 月12 日</span> <span class='time'>7:52 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>先看下Apple对安装包大小的限制：</p>
-
-<p><img src="/images/2016/10/12/1.png" alt="" /></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/ipa-size-thin.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -481,7 +475,7 @@
     <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
 <li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
 <li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
-<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (40)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (45)</a></li>
 
   </ul>
 </section>
@@ -490,23 +484,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/see-world-by-president-li.html">《李光耀观天下》</a>
+        <a href="/blog/financial-secret-code.html">《中央帝国的财政密码》</a>
       </li>
     
       <li class="post">
-        <a href="/blog/human-history-simple.html">《人类简史》</a>
+        <a href="/blog/dog-money.html">《小狗钱钱》</a>
       </li>
     
       <li class="post">
-        <a href="/blog/great-stocker-memory.html">《股票大作手回忆录》</a>
+        <a href="/blog/yilei.html">《异类》</a>
       </li>
     
       <li class="post">
-        <a href="/blog/peter-lynch-successful-investment.html">《彼得林奇的成功投资》</a>
+        <a href="/blog/financial-logic.html">《金融的逻辑》</a>
       </li>
     
       <li class="post">
-        <a href="/blog/compo.html">《涛动周期论》</a>
+        <a href="/blog/wanli-15years.html">《万历十五年》</a>
       </li>
     
   </ul>
