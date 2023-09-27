@@ -9,7 +9,15 @@
   <meta name="author" content="第七章">
 
   
-  <meta name="description" content="前段时间一直在折腾启动图的设置，忙到最后发现居然是 Apple 的锅。。。 先讲一下正常的设置启动图的流程，有两种方式，一种是LaunchImage的方式，另一种就是LauchScreen.storyboard的方式。见下图： 其一： 其二： ">
+  <meta name="description" content="本文主要介绍一下使用SD的正确方式，并浅析其实现原理。 在一般的SD使用中重要的有以下几个类： 1
+2
+3
+SDWebImageDownloader
+SDWebImageManager
+SDImageCache 以及这两个类别： 1
+2
+UIButton+WebCache
+UIImageView+ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +85,59 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html">SDWebImage使用小结与原理浅析</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-06-18T14:32:22+08:00'><span class='date'>2016 年6 月18 日</span> <span class='time'>2:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文主要介绍一下使用SD的正确方式，并浅析其实现原理。</p>
+
+<p>在一般的SD使用中重要的有以下几个类：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="n">SDWebImageDownloader</span>
+</span><span class="line"><span class="n">SDWebImageManager</span>
+</span><span class="line"><span class="n">SDImageCache</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>以及这两个类别：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="bp">UIButton</span><span class="o">+</span><span class="n">WebCache</span>
+</span><span class="line"><span class="bp">UIImageView</span><span class="o">+</span><span class="n">WebCache</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>如果对更深一些的实现细节有兴趣，还可以看下
+<code>SDWebImageDownloaderOperation</code>这个类，继承自<code>NSOperation</code>。<code>SDWebImageDecoder</code>是用来对图片进行解码操作的类，UIImage在显示到UI界面上时都会进行解码，SD的默认实现是先解码再返回UIImage给用户。详见下文。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -474,50 +535,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/xing-fu-chao-yue-wan-mei.html">《幸福超越完美》</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-07-04T14:21:37+08:00'><span class='date'>2015 年7 月4 日</span> <span class='time'>2:21 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本书系统的讲述了完美主义的危害，以及将完美主义转化成最优主义的好处和方法。</p>
-
-<p>本书分为理论、应用、冥想三个部分。第一部分主要提出了完美主义的理论，并依次说明了接受失败、悦纳情绪、享受成功、直面现实的重要性，以及具体的改善完美主义的方法。第二部分提出了如何将第一部分的理论应用在教育孩子、工作和爱情中，并说明了最优主义如何在这三个方面使我们受益。第三部分包括十个冥想的练习，每一个都是针对完美主义的某个方面设计的。</p>
-
-<p>书中提到了很多心理学方面的知识，还顺带提到了知识管理、亲密关系等方面的知识。比如，第一部分四个理论里的完美主义者的各种心理活动和思考方式，第五章最佳的教育里提到的成长思维和固定思维，称赞努力而不是称赞聪明，第六章最棒的工作还提到了时间管理的知识和2/8原则理论，第七章最美的爱情提到了亲密关系和两性相处、维持长期关系的一些知识和基本理论。</p>
-
-<p>整体上，本书包含的对我有用的新的知识还是蛮多的，可以跟马丁塞利格曼的<a href="http://www.zoomfeng.com/blog/ren-shi-zi-ji-,jie-na-zi-ji.html">《认识自己，接纳自己》</a>这本书所带来的新知识量相媲美。另外书中引用了大量的其他心理学家的理论和研究成果，部分引用的句子还写的蛮有文艺气息。</p>
-
-<p>书中第三章对人生不同阶段对时间的分配和不同事情重要性的权衡的讨论，让我对未来有孩子的婚姻生活多了一些了解和恐惧，也提高了丁克对我的吸引力。</p>
-
-<p>当然有时候也会觉得本书部分文字太鸡汤。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/xing-fu-chao-yue-wan-mei.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/6">&larr; Older</a>
@@ -536,13 +553,17 @@
     <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
 <li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
 <li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
-<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (45)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (46)</a></li>
 
   </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/zhishenshinei.html">《置身事内》</a>
+      </li>
     
       <li class="post">
         <a href="/blog/financial-secret-code.html">《中央帝国的财政密码》</a>
@@ -558,10 +579,6 @@
     
       <li class="post">
         <a href="/blog/financial-logic.html">《金融的逻辑》</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/wanli-15years.html">《万历十五年》</a>
       </li>
     
   </ul>

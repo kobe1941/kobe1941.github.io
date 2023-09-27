@@ -9,7 +9,7 @@
   <meta name="author" content="第七章">
 
   
-  <meta name="description" content="去年的年度计划大概执行了70%-80%，整体上还可以，本来我也没啥高大上的追求。。 1.工作 不是在公司工作，就是在去公司的路上。。。 所以没有什么工作和生活的平衡，略过。 2.生活 4月去听过音乐会； 5月去广美看过毕业展； 7月随团队到湖南东江湖飘过流； ">
+  <meta name="description" content="本书既不是旅行攻略而不是介绍各个旅行景点的风光的书，本书用不同的人在不同城市的旅行或生活的经历，来描述那个城市的细节，比如城市的生活环境、风景、人文历史、生活习惯等等。本书艺术一节（普罗旺斯）的向导是梵高，好奇心（马德里）则是洪堡，对异国情调（阿姆斯特丹）的介绍则是福楼拜作为向导。说是向导， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -77,6 +77,42 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/art-of-travel.html">《旅行的艺术》</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-23T23:39:10+08:00'><span class='date'>2017 年1 月23 日</span> <span class='time'>11:39 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本书既不是旅行攻略而不是介绍各个旅行景点的风光的书，本书用不同的人在不同城市的旅行或生活的经历，来描述那个城市的细节，比如城市的生活环境、风景、人文历史、生活习惯等等。本书艺术一节（普罗旺斯）的向导是梵高，好奇心（马德里）则是洪堡，对异国情调（阿姆斯特丹）的介绍则是福楼拜作为向导。说是向导，其实就是以那个人在当地的经历作为线索来展开叙述。</p>
+
+<p>本书有一点跟我之前的想法类似，那就是旅行可以接触到陌生的人，欣赏陌生的风景，在一个陌生的环境里，你可以重新审视自己和身边的一切，改变一些你不喜欢的东西，甚至重塑自己，成为一个更好的自己。这也是我喜欢旅行的原因，走出舒适区，就意味着有机会去做出改变。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/art-of-travel.html">阅读全文</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -458,59 +494,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html">SDWebImage使用小结与原理浅析</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-06-18T14:32:22+08:00'><span class='date'>2016 年6 月18 日</span> <span class='time'>2:32 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文主要介绍一下使用SD的正确方式，并浅析其实现原理。</p>
-
-<p>在一般的SD使用中重要的有以下几个类：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="n">SDWebImageDownloader</span>
-</span><span class="line"><span class="n">SDWebImageManager</span>
-</span><span class="line"><span class="n">SDImageCache</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>以及这两个类别：</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-</pre></td><td class="code"><pre><code class="Objective-C"><span class="line"><span class="bp">UIButton</span><span class="o">+</span><span class="n">WebCache</span>
-</span><span class="line"><span class="bp">UIImageView</span><span class="o">+</span><span class="n">WebCache</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>如果对更深一些的实现细节有兴趣，还可以看下
-<code>SDWebImageDownloaderOperation</code>这个类，继承自<code>NSOperation</code>。<code>SDWebImageDecoder</code>是用来对图片进行解码操作的类，UIImage在显示到UI界面上时都会进行解码，SD的默认实现是先解码再返回UIImage给用户。详见下文。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/sdwebimageshi-yong-xiao-jie-yu-yuan-li-qian-xi.html">阅读全文</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/5">&larr; Older</a>
@@ -529,13 +512,17 @@
     <li class='category'><a href='/blog/categories/ioskai-fa/'>ios开发 (29)</a></li>
 <li class='category'><a href='/blog/categories/ge-ren-zong-jie/'>个人总结 (6)</a></li>
 <li class='category'><a href='/blog/categories/qi-ta/'>其他 (2)</a></li>
-<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (45)</a></li>
+<li class='category'><a href='/blog/categories/du-shu-bi-ji/'>读书笔记 (46)</a></li>
 
   </ul>
 </section>
 <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/zhishenshinei.html">《置身事内》</a>
+      </li>
     
       <li class="post">
         <a href="/blog/financial-secret-code.html">《中央帝国的财政密码》</a>
@@ -551,10 +538,6 @@
     
       <li class="post">
         <a href="/blog/financial-logic.html">《金融的逻辑》</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/wanli-15years.html">《万历十五年》</a>
       </li>
     
   </ul>
